@@ -1,15 +1,9 @@
 package moe.shizuku.manager.core.data.preferences
 
-import android.content.SharedPreferences
 import moe.shizuku.manager.core.models.preferences.*
 
 object PreferencesRepository {
     private val prefs = PreferencesDataSource
-
-    // Extension function to recast Preference<IntEnum> as Preference<Int>
-    private fun <E> Preference<E>.asIntPreference(): Preference<Int>
-        where E : Enum<E>, E : IntEnum =
-        Preference<Int>(key, default.value)
 
     // -------------------------
     // GETTERS
@@ -44,14 +38,6 @@ object PreferencesRepository {
     fun getLegacyPairing(): Boolean = prefs.get(Preferences.LEGACY_PAIRING)
 
     fun getAuthToken(): String? = prefs.get(Preferences.AUTH_TOKEN)
-
-    // Extension function to perform reverse lookup on IntEnum preference
-    private inline fun <reified E> getEnum(
-        pref: Preference<E>
-    ): E where E : Enum<E>, E : IntEnum {
-        val stored = prefs.get(pref.asIntPreference())
-        return enumValues<E>().firstOrNull { it.value == stored } ?: pref.default
-    }
 
     // -------------------------
     // SETTERS
@@ -146,6 +132,23 @@ object PreferencesRepository {
             Preferences.AUTH_TOKEN,
             value,
         )
+
+    // -------------------------
+    // INTENUM HELPERS
+    // -------------------------
+
+    // Extension function to recast Preference<IntEnum> as Preference<Int>
+    private fun <E> Preference<E>.asIntPreference(): Preference<Int>
+        where E : Enum<E>, E : IntEnum =
+        Preference<Int>(key, default.value)
+
+    // Extension function to perform reverse lookup on IntEnum preference
+    private inline fun <reified E> getEnum(
+        pref: Preference<E>
+    ): E where E : Enum<E>, E : IntEnum {
+        val stored = prefs.get(pref.asIntPreference())
+        return enumValues<E>().firstOrNull { it.value == stored } ?: pref.default
+    }
 
     // Extension function to store IntEnum preference as Int
     private fun <E> PreferencesDataSource.set(
