@@ -4,12 +4,13 @@ import android.content.pm.PackageInfo;
 
 import java.util.List;
 
+import moe.shizuku.manager.permission.ui.authorizedapps.components.AppViewHolder;
+import moe.shizuku.manager.permission.ui.authorizedapps.components.EmptyViewHolder;
+import moe.shizuku.manager.permission.ui.authorizedapps.components.ToggleAllViewHolder;
 import rikka.recyclerview.BaseRecyclerViewAdapter;
 import rikka.recyclerview.ClassCreatorPool;
 
 public class AppsAdapter extends BaseRecyclerViewAdapter<ClassCreatorPool> {
-
-    public static final class HeaderMarker {}
 
     public AppsAdapter() {
         super();
@@ -39,5 +40,8 @@ public class AppsAdapter extends BaseRecyclerViewAdapter<ClassCreatorPool> {
             getItems().addAll(data);
         }
         notifyDataSetChanged();
+    }
+
+    public static final class HeaderMarker {
     }
 }

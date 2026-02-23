@@ -1,48 +1,28 @@
 package moe.shizuku.manager;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.text.TextUtils;
+
 import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+
 import java.lang.annotation.Retention;
 import java.util.Locale;
-import moe.shizuku.manager.service.WatchdogService;
-import moe.shizuku.manager.receiver.BootCompleteReceiver;
-import moe.shizuku.manager.utils.Token;
-import moe.shizuku.manager.utils.EnvironmentUtils;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import moe.shizuku.manager.core.android.receivers.BootCompleteReceiver;
+import moe.shizuku.manager.core.utils.EnvironmentUtils;
+import moe.shizuku.manager.core.utils.Token;
+import moe.shizuku.manager.watchdog.services.WatchdogService;
 
 public class ShizukuSettings {
 
     public static final String NAME = "settings";
-    public static class Keys {
-        public static final String KEY_START_ON_BOOT = "start_on_boot";
-        public static final String KEY_WATCHDOG = "watchdog";
-        public static final String KEY_TCP_MODE = "tcp_mode";
-        public static final String KEY_TCP_PORT = "tcp_port";
-        public static final String KEY_AUTO_DISABLE_USB_DEBUGGING = "auto_disable_usb_debugging";
-        public static final String KEY_LANGUAGE = "language";
-        public static final String KEY_THEME = "theme";
-        public static final String KEY_AMOLED_BLACK = "amoled_black";
-        public static final String KEY_DYNAMIC_COLOR = "dynamic_color";
-        public static final String KEY_CHECK_FOR_UPDATES = "check_for_updates";
-        public static final String KEY_UPDATE_CHANNEL = "update_channel";
-        public static final String KEY_LEGACY_PAIRING = "legacy_pairing";
-        public static final String KEY_CATEGORY_ADVANCED = "category_advanced";
-    }
-
-    public static class UpdateMode {
-        public static final int STABLE = 0;
-        public static final int BETA = 1;
-    }
-
     private static SharedPreferences sPreferences;
 
     public static SharedPreferences getPreferences() {
@@ -53,18 +33,6 @@ public class ShizukuSettings {
         if (sPreferences == null) {
             sPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
         }
-    }
-
-    @IntDef({
-        LaunchMethod.UNKNOWN,
-        LaunchMethod.ROOT,
-        LaunchMethod.ADB,
-    })
-    @Retention(SOURCE)
-    public @interface LaunchMethod {
-        int UNKNOWN = -1;
-        int ROOT = 0;
-        int ADB = 1;
     }
 
     @LaunchMethod
@@ -79,7 +47,7 @@ public class ShizukuSettings {
     public static boolean getAutoDisableUsbDebugging() {
         return getPreferences().getBoolean(Keys.KEY_AUTO_DISABLE_USB_DEBUGGING, false);
     }
-    
+
     public static String getLastPromptedVersion() {
         return getPreferences().getString("lastPromptedVersion", "");
     }
@@ -111,13 +79,13 @@ public class ShizukuSettings {
     public static void setStartOnBoot(Context context, boolean enable) {
         ComponentName bootCompleteReceiver = new ComponentName(context.getPackageName(), BootCompleteReceiver.class.getName());
         context.getPackageManager().setComponentEnabledSetting(
-            bootCompleteReceiver,
-            enable ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
+                bootCompleteReceiver,
+                enable ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP
         );
         getPreferences().edit().putBoolean(Keys.KEY_START_ON_BOOT, enable).apply();
     }
-    
+
     public static boolean getWatchdog() {
         return getPreferences().getBoolean(Keys.KEY_WATCHDOG, false);
     }
@@ -158,7 +126,7 @@ public class ShizukuSettings {
         } else {
             getPreferences().edit().remove(Keys.KEY_TCP_PORT).apply();
         }
-        
+
     }
 
     public static boolean getLegacyPairing() {
@@ -188,5 +156,38 @@ public class ShizukuSettings {
 
     public static int getUpdateChannel() {
         return getPreferences().getInt(Keys.KEY_UPDATE_CHANNEL, UpdateMode.STABLE);
+    }
+
+    @IntDef({
+            LaunchMethod.UNKNOWN,
+            LaunchMethod.ROOT,
+            LaunchMethod.ADB,
+    })
+    @Retention(SOURCE)
+    public @interface LaunchMethod {
+        int UNKNOWN = -1;
+        int ROOT = 0;
+        int ADB = 1;
+    }
+
+    public static class Keys {
+        public static final String KEY_START_ON_BOOT = "start_on_boot";
+        public static final String KEY_WATCHDOG = "watchdog";
+        public static final String KEY_TCP_MODE = "tcp_mode";
+        public static final String KEY_TCP_PORT = "tcp_port";
+        public static final String KEY_AUTO_DISABLE_USB_DEBUGGING = "auto_disable_usb_debugging";
+        public static final String KEY_LANGUAGE = "language";
+        public static final String KEY_THEME = "theme";
+        public static final String KEY_AMOLED_BLACK = "amoled_black";
+        public static final String KEY_DYNAMIC_COLOR = "dynamic_color";
+        public static final String KEY_CHECK_FOR_UPDATES = "check_for_updates";
+        public static final String KEY_UPDATE_CHANNEL = "update_channel";
+        public static final String KEY_LEGACY_PAIRING = "legacy_pairing";
+        public static final String KEY_CATEGORY_ADVANCED = "category_advanced";
+    }
+
+    public static class UpdateMode {
+        public static final int STABLE = 0;
+        public static final int BETA = 1;
     }
 }

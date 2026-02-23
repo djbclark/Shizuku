@@ -1,4 +1,4 @@
-package moe.shizuku.manager.home.cards
+package moe.shizuku.manager.home.components.cards
 
 import android.content.Context
 import android.util.AttributeSet
@@ -35,9 +35,9 @@ abstract class BaseCard
 
         protected fun setSummary(text: String) {
             if (text.isEmpty()) {
-                binding.summary.visibility = View.GONE
+                binding.summary.visibility = GONE
             } else {
-                binding.summary.visibility = View.VISIBLE
+                binding.summary.visibility = VISIBLE
                 binding.summary.text = text
             }
         }

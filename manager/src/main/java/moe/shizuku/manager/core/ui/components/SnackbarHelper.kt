@@ -3,8 +3,7 @@ package moe.shizuku.manager.app
 import android.content.Context
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
-import moe.shizuku.manager.app.ThemeHelper
-import moe.shizuku.manager.R
+import moe.shizuku.manager.core.ui.ThemeHelper
 
 object SnackbarHelper {
 

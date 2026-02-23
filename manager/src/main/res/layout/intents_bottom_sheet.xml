@@ -1,6 +1,7 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:orientation="vertical"
     android:padding="24dp"
@@ -32,9 +33,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:textAppearance="?textAppearanceBodyMedium"
             android:text="@string/intents_device_restriction"
-            android:visibility="gone" />
+            android:textAppearance="?textAppearanceBodyMedium"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/buttonGroup"

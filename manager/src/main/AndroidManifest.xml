@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
@@ -61,7 +63,6 @@
     <application
         android:name=".ShizukuApplication"
         android:allowBackup="true"
-        android:autoRevokePermissions="allowed"
         android:banner="@drawable/ic_launcher"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -76,46 +77,27 @@
         tools:targetApi="33">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".core.ui.MainActivity"
             android:banner="@mipmap/banner"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".management.ApplicationManagementActivity"
-            android:label="@string/authorized_apps" />
-        <activity
-            android:name=".adb.AdbPairingTutorialActivity"
-            android:label="@string/pair" />
-        <activity
-            android:name=".shell.ShellTutorialActivity"
-            android:label="@string/terminal_apps" />
-        <activity
-            android:name=".stealth.StealthTutorialActivity"
-            android:label="@string/stealth_mode"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".settings.SettingsActivity"
-            android:exported="false"
-            android:label="@string/settings">
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".starter.StarterActivity"
-            android:label="@string/start" />
-        <activity
             android:name=".settings.BugReportDialogActivity"
-            android:theme="@style/Theme.App.DialogHost"
-            android:taskAffinity=""
             android:excludeFromRecents="true"
+            android:exported="false"
             android:launchMode="singleTask"
-            android:exported="false" />
+            android:taskAffinity=""
+            android:theme="@style/Theme.App.DialogHost" />
         <activity
             android:name=".authorization.RequestPermissionActivity"
             android:excludeFromRecents="true"
@@ -129,7 +111,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".shell.legacy.ShellBinderRequestActivity"
+            android:name=".shell.receivers.legacy.ShellBinderRequestActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:theme="@style/GrantPermissions">
@@ -148,8 +130,9 @@
 
         <service
             android:name=".adb.AdbPairingAccessibilityService"
+            android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            tools:ignore="AccessibilityPolicy">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -159,7 +142,7 @@
         </service>
 
         <service
-            android:name=".service.WatchdogService"
+            android:name=".watchdog.services.WatchdogService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
@@ -173,16 +156,17 @@
         </service>
 
         <receiver
-            android:name=".shell.ShellBinderRequestReceiver"
+            android:name=".shell.receivers.ShellBinderRequestReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="rikka.shizuku.intent.action.REQUEST_BINDER" />
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".receiver.BootCompleteReceiver"
+            android:name=".core.android.receivers.BootCompleteReceiver"
             android:enabled="false"
             android:exported="true">
             <intent-filter>
@@ -193,7 +177,8 @@
         <receiver
             android:name=".receiver.ManualStartReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.START" />
             </intent-filter>
@@ -202,15 +187,16 @@
         <receiver
             android:name=".receiver.ManualStopReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.STOP" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receiver.NotifAttemptReceiver" />
-        <receiver android:name=".receiver.NotifCancelReceiver" />
-        <receiver android:name=".receiver.NotifRestoreReceiver" />
+        <receiver android:name=".core.android.receivers.NotifAttemptReceiver" />
+        <receiver android:name=".core.android.receivers.NotifCancelReceiver" />
+        <receiver android:name=".core.android.receivers.NotifRestoreReceiver" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -7,6 +7,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
@@ -52,7 +53,6 @@
 
     <style name="StaticCopyTextInput" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="android:textColorHint">?colorOnSurfaceVariant</item>
-        <item name="boxStrokeColor">@color/text_input_static_box_stroke_color</item>
         <item name="boxStrokeWidth">0dp</item>
         <item name="boxStrokeWidthFocused">0dp</item>
         <item name="endIconMode">custom</item>

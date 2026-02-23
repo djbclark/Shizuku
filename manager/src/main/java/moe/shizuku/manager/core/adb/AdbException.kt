@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 open class AdbException : Exception {
 

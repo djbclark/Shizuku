@@ -1,4 +1,4 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.extensions
 
 import android.text.SpannableString
 import android.text.Spanned
@@ -8,7 +8,23 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
 import android.widget.TextView
-import moe.shizuku.manager.utils.CustomTabsHelper
+import moe.shizuku.manager.core.android.browser.CustomTabsHelper
+
+fun String.appendRandomSuffix(n: Int = 5): String {
+    require(n > 0) { "The length of the random suffix (n) must be greater than 0." }
+
+    val letters = ('a'..'z')
+    val chars = letters + ('0'..'9')
+
+    val first = letters.random()
+    val rest = if (n > 1) {
+        (2..n).map { chars.random() }
+    } else emptyList()
+
+    val randomSuffix = (listOf(first) + rest).joinToString("")
+
+    return "$this.$randomSuffix"
+}
 
 fun String.asLink(url: String): CharSequence {
     return SpannableString(this).apply {

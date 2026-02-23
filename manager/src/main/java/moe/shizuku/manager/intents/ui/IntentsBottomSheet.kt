@@ -1,9 +1,7 @@
 package moe.shizuku.manager.intents.ui
 
 import android.content.Context
-import android.os.Build
 import android.view.LayoutInflater
-import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -13,16 +11,15 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.core.extensions.*
 import moe.shizuku.manager.databinding.IntentsBottomSheetBinding
-import moe.shizuku.manager.utils.EnvironmentUtils
 
 class IntentsBottomSheet(
     private val context: Context,
 ) {
     private data class Field(
-            val layout: TextInputLayout,
-            val input: TextInputEditText,
-            val initText: String,
-        )
+        val layout: TextInputLayout,
+        val input: TextInputEditText,
+        val initText: String,
+    )
 
     fun show() {
         val authToken = ShizukuSettings.getAuthToken()

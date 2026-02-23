@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 import android.content.Context
 import android.net.nsd.NsdManager
@@ -84,7 +84,11 @@ class AdbMdns(
             handler.postDelayed({
                 if (registered) nsdManager.stopServiceDiscovery(listener)
                 handler.postDelayed({
-                    if (!registered) nsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, listener)
+                    if (!registered) nsdManager.discoverServices(
+                        serviceType,
+                        NsdManager.PROTOCOL_DNS_SD,
+                        listener
+                    )
                     restartScheduled = false
                 }, 100L)
             }, delay)
@@ -149,7 +153,8 @@ class AdbMdns(
         override fun onResolveFailed(
             nsdServiceInfo: NsdServiceInfo,
             i: Int,
-        ) {}
+        ) {
+        }
 
         override fun onServiceResolved(nsdServiceInfo: NsdServiceInfo) {
             adbMdns.onServiceResolved(nsdServiceInfo)

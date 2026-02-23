@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 const val A_SYNC = 0x434e5953
 const val A_CNXN = 0x4e584e43

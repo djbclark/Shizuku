@@ -1,4 +1,4 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -17,7 +17,8 @@ import kotlin.coroutines.CoroutineContext
 
 object AppIconCache : CoroutineScope {
 
-    private class AppIconLruCache constructor(maxSize: Int) : LruCache<Triple<String, Int, Int>, Bitmap>(maxSize) {
+    private class AppIconLruCache constructor(maxSize: Int) :
+        LruCache<Triple<String, Int, Int>, Bitmap>(maxSize) {
 
         override fun sizeOf(key: Triple<String, Int, Int>, bitmap: Bitmap): Int {
             return bitmap.byteCount / 1024
@@ -76,7 +77,8 @@ object AppIconCache : CoroutineScope {
         var loader = appIconLoaders[size]
         if (loader == null) {
             val atLeast30 = Build.VERSION.SDK_INT >= 30
-            val shrinkNonAdaptiveIcons = atLeast30 && context.applicationInfo.loadIcon(context.packageManager) is AdaptiveIconDrawable
+            val shrinkNonAdaptiveIcons =
+                atLeast30 && context.applicationInfo.loadIcon(context.packageManager) is AdaptiveIconDrawable
             loader = AppIconLoader(size, shrinkNonAdaptiveIcons, context)
             appIconLoaders[size] = loader
         }
@@ -86,11 +88,15 @@ object AppIconCache : CoroutineScope {
     }
 
     @JvmStatic
-    fun loadIconBitmapAsync(context: Context,
-                            info: ApplicationInfo, userId: Int,
-                            view: ImageView): Job {
+    fun loadIconBitmapAsync(
+        context: Context,
+        info: ApplicationInfo, userId: Int,
+        view: ImageView
+    ): Job {
         return launch {
-            val size = view.measuredWidth.let { if (it > 0) it else context.resources.getDimensionPixelSize(R.dimen.default_app_icon_size) }
+            val size = view.measuredWidth.let {
+                if (it > 0) it else context.resources.getDimensionPixelSize(R.dimen.default_app_icon_size)
+            }
             val cachedBitmap = get(info.packageName, userId, size)
             if (cachedBitmap != null) {
                 view.setImageBitmap(cachedBitmap)

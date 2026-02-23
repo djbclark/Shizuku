@@ -1,6 +1,5 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.android.settings
 
-import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,8 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.util.Log
-import moe.shizuku.manager.adb.AdbPairingAccessibilityService
-import moe.shizuku.manager.service.WatchdogService
+import moe.shizuku.manager.watchdog.services.WatchdogService
 
 sealed class SettingsPage(
     private val action: String,
@@ -80,9 +78,9 @@ sealed class SettingsPage(
 
     protected val defaultFlags =
         Intent.FLAG_ACTIVITY_NEW_TASK or
-            Intent.FLAG_ACTIVITY_NO_HISTORY or
-            Intent.FLAG_ACTIVITY_CLEAR_TASK or
-            Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                Intent.FLAG_ACTIVITY_NO_HISTORY or
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
 
     open fun buildIntent(context: Context): Intent =
         Intent(action).apply {

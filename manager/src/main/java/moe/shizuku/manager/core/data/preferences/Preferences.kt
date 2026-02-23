@@ -1,12 +1,15 @@
 package moe.shizuku.manager.core.data.preferences
 
-import moe.shizuku.manager.core.models.preferences.*
+import moe.shizuku.manager.core.models.preferences.StartMode
+import moe.shizuku.manager.core.models.preferences.Theme
+import moe.shizuku.manager.core.models.preferences.UpdateChannel
 
 data class Preference<T>(
     val key: String,
     val default: T,
 )
 
+@Suppress("RemoveExplicitTypeArguments")
 object Preferences {
     // -------------------------
     // BEHAVIOR

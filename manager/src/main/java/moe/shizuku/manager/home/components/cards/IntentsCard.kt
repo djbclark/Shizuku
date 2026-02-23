@@ -1,4 +1,4 @@
-package moe.shizuku.manager.home.cards
+package moe.shizuku.manager.home.components.cards
 
 import android.content.Context
 import android.util.AttributeSet

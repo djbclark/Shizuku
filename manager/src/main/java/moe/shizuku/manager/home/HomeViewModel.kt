@@ -3,7 +3,6 @@ package moe.shizuku.manager.home
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.PermissionInfo
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -12,13 +11,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.ShizukuSettings
-import moe.shizuku.manager.model.ServiceStatus
-import moe.shizuku.manager.utils.EnvironmentUtils
-import moe.shizuku.manager.utils.SettingsHelper
+import moe.shizuku.manager.core.android.settings.SettingsHelper
+import moe.shizuku.manager.core.utils.EnvironmentUtils
+import moe.shizuku.manager.core.utils.ShizukuSystemApis
+import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.utils.ShizukuSystemApis
 import rikka.lifecycle.Resource
 import rikka.shizuku.Shizuku
 
@@ -29,17 +27,18 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _serviceStatus = MutableLiveData<Resource<ServiceStatus>>()
     val serviceStatus = _serviceStatus as LiveData<Resource<ServiceStatus>>
 
-    private val _shouldShowBatteryOptimizationSnackbar = MutableLiveData<Boolean>(false)
-    val shouldShowBatteryOptimizationSnackbar: LiveData<Boolean> = _shouldShowBatteryOptimizationSnackbar
+    private val _shouldShowBatteryOptimizationSnackbar = MutableLiveData(false)
+    val shouldShowBatteryOptimizationSnackbar: LiveData<Boolean> =
+        _shouldShowBatteryOptimizationSnackbar
 
-    private val _shouldShowRebootDialog = MutableLiveData<Boolean>(false)
+    private val _shouldShowRebootDialog = MutableLiveData(false)
     val shouldShowRebootDialog: LiveData<Boolean> = _shouldShowRebootDialog
 
-    private val _shouldShowUninstallDialog = MutableLiveData<Boolean>(false)
+    private val _shouldShowUninstallDialog = MutableLiveData(false)
     val shouldShowUninstallDialog: LiveData<Boolean> = _shouldShowUninstallDialog
 
-    private val shizukuPermissionGroup  = "moe.shizuku.manager.permission-group.API"
-    private val shizukuPermission = "moe.shizuku.manager.permission.API_V23";
+    private val shizukuPermissionGroup = "moe.shizuku.manager.permission-group.API"
+    private val shizukuPermission = "moe.shizuku.manager.permission.API_V23"
 
     private fun load(): ServiceStatus {
         // In certain cases when user re-installs Shizuku with different package name (e.g., when using stealth mode), the system doesn't recognize the Shizuku permission.
@@ -47,15 +46,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         // This is fixed by rebooting the device.
         // Run getPermissionGroupInfo() to trigger the exception. Then catch it and show a dialog prompting the user to reboot their device.
         try {
-            val permissionGroup = appContext.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
+            appContext.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
             val permission = appContext.packageManager.getPermissionInfo(shizukuPermission, 0)
             if (permission.packageName != appContext.packageName) {
                 _shouldShowUninstallDialog.postValue(true)
             }
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             _shouldShowRebootDialog.postValue(true)
         }
-        
+
         if (Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)) {
             // disable authorized apps
         }
@@ -89,7 +88,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val status = load()
                 _serviceStatus.postValue(Resource.success(status))
-            } catch (e: CancellationException) {
+            } catch (_: CancellationException) {
 
             } catch (e: Throwable) {
                 _serviceStatus.postValue(Resource.error(e, ServiceStatus()))

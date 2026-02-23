@@ -1,10 +1,10 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.utils
 
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.content.pm.ParceledListSlice
 import android.os.RemoteException
-import rikka.hidden.compat.PackageManagerApis
+import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.utils.UserHandleCompat
+import moe.shizuku.manager.utils.UserInfoCompat
 import rikka.hidden.compat.PermissionManagerApis
 import rikka.hidden.compat.UserManagerApis
 import rikka.hidden.compat.util.SystemServiceBinder

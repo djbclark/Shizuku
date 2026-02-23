@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/home_fragment">
+
+    <fragment
+        android:id="@+id/home_fragment"
+        android:name="moe.shizuku.manager.home.HomeFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/home_activity">
+        <action
+            android:id="@+id/navigate_to_settings"
+            app:destination="@id/settings_fragment" />
+        <action
+            android:id="@+id/navigate_to_pairing"
+            app:destination="@id/pairing_fragment" />
+        <action
+            android:id="@+id/navigate_to_start"
+            app:destination="@id/start_fragment" />
+        <action
+            android:id="@+id/navigate_to_stealth"
+            app:destination="@id/stealth_fragment" />
+        <action
+            android:id="@+id/navigate_to_authorized_apps"
+            app:destination="@id/authorized_apps_fragment" />
+        <action
+            android:id="@+id/navigate_to_terminal_apps"
+            app:destination="@id/terminal_apps_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="moe.shizuku.manager.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@xml/settings" />
+
+    <fragment
+        android:id="@+id/pairing_fragment"
+        android:name="moe.shizuku.manager.shizukuservice.ui.PairingFragment"
+        android:label="@string/pair"
+        tools:layout="@layout/pairing_fragment"
+        tools:targetApi="30" />
+
+    <fragment
+        android:id="@+id/start_fragment"
+        android:name="moe.shizuku.manager.shizukuservice.ui.StartFragment"
+        android:label="@string/start"
+        tools:layout="@layout/start_fragment" />
+
+    <fragment
+        android:id="@+id/stealth_fragment"
+        android:name="moe.shizuku.manager.stealth.ui.StealthFragment"
+        android:label="@string/stealth_mode"
+        tools:layout="@layout/stealth_fragment" />
+
+    <fragment
+        android:id="@+id/authorized_apps_fragment"
+        android:name="moe.shizuku.manager.management.AuthorizedAppsFragment"
+        android:label="@string/authorized_apps"
+        tools:layout="@layout/authorized_apps_fragment" />
+
+    <fragment
+        android:id="@+id/terminal_apps_fragment"
+        android:name="moe.shizuku.manager.shell.ui.TerminalAppsFragment"
+        android:label="@string/terminal_apps"
+        tools:layout="@layout/terminal_apps_fragment" />
+
+</navigation>

@@ -1,7 +1,6 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.utils
 
 import android.app.UiModeManager
-import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
@@ -30,7 +29,7 @@ object EnvironmentUtils {
     fun isTlsSupported(): Boolean {
         return if (isTelevision())
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            else Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        else Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
 
     fun isWifiRequired(): Boolean {

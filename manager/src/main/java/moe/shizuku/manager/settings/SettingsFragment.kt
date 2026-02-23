@@ -1,60 +1,61 @@
 package moe.shizuku.manager.settings
 
-import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
 import android.text.InputType
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.*
-import androidx.preference.Preference.SummaryProvider
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.TwoStatePreference
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuSettings
-import moe.shizuku.manager.ShizukuSettings.Keys.*
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_AMOLED_BLACK
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_CATEGORY_ADVANCED
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_DYNAMIC_COLOR
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_LANGUAGE
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_LEGACY_PAIRING
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_START_ON_BOOT
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_TCP_MODE
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_TCP_PORT
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_THEME
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_UPDATE_CHANNEL
+import moe.shizuku.manager.ShizukuSettings.Keys.KEY_WATCHDOG
 import moe.shizuku.manager.adb.AdbStarter
 import moe.shizuku.manager.app.SnackbarHelper
-import moe.shizuku.manager.app.ThemeHelper
-import moe.shizuku.manager.core.extensions.*
-import moe.shizuku.manager.receiver.BootCompleteReceiver
-import moe.shizuku.manager.receiver.NotifCancelReceiver
+import moe.shizuku.manager.core.android.receivers.NotifCancelReceiver
+import moe.shizuku.manager.core.android.settings.SettingsHelper
+import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.ThemeHelper
+import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
-import moe.shizuku.manager.utils.EnvironmentUtils
-import moe.shizuku.manager.utils.SettingsHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.core.util.ResourceUtils
 import rikka.material.app.LocaleDelegate
-import rikka.recyclerview.addEdgeSpacing
 import rikka.recyclerview.addItemSpacing
 import rikka.recyclerview.fixEdgeEffect
 import rikka.shizuku.manager.ShizukuLocales
-import java.util.*
+import java.util.Locale
 import kotlin.coroutines.resume
 
 class SettingsFragment :
@@ -140,7 +141,9 @@ class SettingsFragment :
                                 .setTitle(android.R.string.dialog_alert_title)
                                 .setMessage(R.string.settings_start_on_boot_bug)
                                 .setPositiveButton(android.R.string.ok) { _, _ -> doToggle() }
-                                .setNegativeButton(android.R.string.cancel) { _, _ -> isChecked = !newValue }
+                                .setNegativeButton(android.R.string.cancel) { _, _ ->
+                                    isChecked = !newValue
+                                }
                                 .show()
                         } else {
                             doToggle()
@@ -186,7 +189,11 @@ class SettingsFragment :
                             tcpPortPreference.isVisible = newValue
                         }
 
-                        if (!newValue && !ShizukuStateMachine.isRunning() && needsRestart(KEY_TCP_MODE, newValue)) {
+                        if (!newValue && !ShizukuStateMachine.isRunning() && needsRestart(
+                                KEY_TCP_MODE,
+                                newValue
+                            )
+                        ) {
                             promptStopTcp { applyChange() }
                         } else {
                             maybePromptRestart(KEY_TCP_MODE, newValue) { applyChange() }
@@ -222,7 +229,11 @@ class SettingsFragment :
                     }
                     maybePromptRestart(KEY_TCP_PORT, port ?: 5555) { applyChange() }
                 } else {
-                    SnackbarHelper.show(context, requireView(), context.getString(R.string.tcp_error_invalid_port))
+                    SnackbarHelper.show(
+                        context,
+                        requireView(),
+                        context.getString(R.string.tcp_error_invalid_port)
+                    )
                 }
                 false
             }
@@ -324,7 +335,7 @@ class SettingsFragment :
     ): RecyclerView {
         val recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
 
-        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { _, insets ->
             val systemBarsInsets = insets.getInsets(Type.systemBars() or Type.displayCutout())
             recyclerView.addItemSpacing(
                 left = systemBarsInsets.left.toFloat(),
@@ -441,7 +452,7 @@ class SettingsFragment :
 
         lifecycleScope.launch {
             val result =
-                suspendCancellableCoroutine<Boolean> { continuation ->
+                suspendCancellableCoroutine { continuation ->
                     batteryOptimizationContinuation = continuation
                     SnackbarHelper.show(
                         context,
@@ -449,7 +460,12 @@ class SettingsFragment :
                         msg = context.getString(R.string.settings_battery_optimization),
                         duration = 6000,
                         actionText = context.getString(R.string.fix),
-                        action = { SettingsHelper.requestIgnoreBatteryOptimizations(context, batteryOptimizationListener) },
+                        action = {
+                            SettingsHelper.requestIgnoreBatteryOptimizations(
+                                context,
+                                batteryOptimizationListener
+                            )
+                        },
                         onDismiss = { event ->
                             if (event != Snackbar.Callback.DISMISS_EVENT_ACTION && continuation.isActive) {
                                 continuation.resume(false)
@@ -480,22 +496,13 @@ class SettingsFragment :
             }
 
             val locale = Locale.forLanguageTag(displayLocale.toString())
-            val localeName =
-                if (!TextUtils.isEmpty(locale.script)) {
-                    locale.getDisplayScript(locale)
-                } else {
-                    locale.getDisplayName(locale)
-                }
 
-            val localizedLocaleName =
+            localizedLocales.add(
                 if (!TextUtils.isEmpty(locale.script)) {
                     locale.getDisplayScript(currentLocale)
                 } else {
                     locale.getDisplayName(currentLocale)
                 }
-
-            localizedLocales.add(
-                localizedLocaleName
             )
         }
 

@@ -1,4 +1,4 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.utils
 
 import java.security.SecureRandom
 
@@ -21,5 +21,5 @@ object Token {
         (1..length)
             .map { CHARS[random.nextInt(CHARS.length)] }
             .joinToString("")
-            
+
 }

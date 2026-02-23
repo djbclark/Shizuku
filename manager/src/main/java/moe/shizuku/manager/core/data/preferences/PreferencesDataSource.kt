@@ -2,6 +2,7 @@ package moe.shizuku.manager.core.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 object PreferencesDataSource {
     private lateinit var prefs: SharedPreferences
@@ -28,12 +29,12 @@ object PreferencesDataSource {
     // -------------------------
 
     fun set(pref: Preference<Boolean>, value: Boolean) =
-        prefs.edit().putBoolean(pref.key, value).apply()
+        prefs.edit { putBoolean(pref.key, value) }
 
     fun set(pref: Preference<Int>, value: Int) =
-        prefs.edit().putInt(pref.key, value).apply()
+        prefs.edit { putInt(pref.key, value) }
 
     fun set(pref: Preference<String?>, value: String?) =
-        prefs.edit().putString(pref.key, value).apply()
+        prefs.edit { putString(pref.key, value) }
 
 }

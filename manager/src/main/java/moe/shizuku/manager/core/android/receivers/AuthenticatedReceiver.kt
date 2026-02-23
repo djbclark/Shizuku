@@ -1,4 +1,4 @@
-package moe.shizuku.manager.receiver
+package moe.shizuku.manager.core.android.receivers
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,7 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import moe.shizuku.manager.MainActivity
+import moe.shizuku.manager.core.ui.MainActivity
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuSettings
 
@@ -61,8 +61,8 @@ abstract class AuthenticatedReceiver : BroadcastReceiver() {
             Intent(this, MainActivity::class.java).apply {
                 addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP,
                 )
             }
         val launchPendingIntent =

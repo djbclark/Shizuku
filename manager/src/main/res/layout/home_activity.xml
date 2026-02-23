@@ -22,11 +22,11 @@
             style="@style/SectionHeader"
             android:text="@string/home_status" />
 
-        <moe.shizuku.manager.home.cards.StatusCard
+        <moe.shizuku.manager.home.components.cards.StatusCard
             android:id="@+id/statusCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <moe.shizuku.manager.home.cards.StealthCard
+        <moe.shizuku.manager.home.components.cards.StealthCard
             android:id="@+id/stealthCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -36,15 +36,15 @@
             android:layout_marginTop="8dp"
             android:text="@string/home_integrations" />
 
-        <moe.shizuku.manager.home.cards.AuthorizedAppsCard
+        <moe.shizuku.manager.home.components.cards.AuthorizedAppsCard
             android:id="@+id/authorizedAppsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <moe.shizuku.manager.home.cards.TerminalCard
+        <moe.shizuku.manager.home.components.cards.TerminalCard
             android:id="@+id/terminalCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <moe.shizuku.manager.home.cards.IntentsCard
+        <moe.shizuku.manager.home.components.cards.IntentsCard
             android:id="@+id/intentsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

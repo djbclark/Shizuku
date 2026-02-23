@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
@@ -297,11 +297,17 @@ class AdbKey(
     private val certificate: X509Certificate
 
     init {
-        this.encryptionKey = getOrCreateEncryptionKey() ?: error("Failed to generate encryption key with AndroidKeyManager.")
+        this.encryptionKey = getOrCreateEncryptionKey()
+            ?: error("Failed to generate encryption key with AndroidKeyManager.")
 
         this.privateKey = getOrCreatePrivateKey()
         this.publicKey =
-            KeyFactory.getInstance("RSA").generatePublic(RSAPublicKeySpec(privateKey.modulus, RSAKeyGenParameterSpec.F4)) as RSAPublicKey
+            KeyFactory.getInstance("RSA").generatePublic(
+                RSAPublicKeySpec(
+                    privateKey.modulus,
+                    RSAKeyGenParameterSpec.F4
+                )
+            ) as RSAPublicKey
 
         val signer = JcaContentSignerBuilder("SHA256withRSA").build(privateKey)
         val x509Certificate =
@@ -340,7 +346,8 @@ class AdbKey(
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .setKeySize(256)
                     .build()
-            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+            val keyGenerator =
+                KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
             keyGenerator.init(parameterSpec)
             keyGenerator.generateKey()
         }
@@ -388,7 +395,8 @@ class AdbKey(
                 val plaintext = decrypt(ciphertext, aad)
 
                 val keyFactory = KeyFactory.getInstance("RSA")
-                privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(plaintext)) as RSAPrivateKey
+                privateKey =
+                    keyFactory.generatePrivate(PKCS8EncodedKeySpec(plaintext)) as RSAPrivateKey
             } catch (e: Exception) {
             }
         }
@@ -423,7 +431,10 @@ class AdbKey(
                     issuers: Array<out Principal>?,
                     socket: Socket?,
                 ): String? {
-                    Log.d(TAG, "chooseClientAlias: keyType=${keyTypes.contentToString()}, issuers=${issuers?.contentToString()}")
+                    Log.d(
+                        TAG,
+                        "chooseClientAlias: keyType=${keyTypes.contentToString()}, issuers=${issuers?.contentToString()}"
+                    )
                     for (keyType in keyTypes) {
                         if (keyType == "RSA") return alias
                     }

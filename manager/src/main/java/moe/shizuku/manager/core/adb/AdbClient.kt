@@ -1,8 +1,7 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 import android.os.Build
 import android.util.Log
-import moe.shizuku.manager.adb.*
 import moe.shizuku.manager.core.extensions.TAG
 import java.io.Closeable
 import java.io.DataInputStream

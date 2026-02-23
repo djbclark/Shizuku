@@ -9,17 +9,16 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.extensions.*
+import moe.shizuku.manager.core.android.browser.CustomTabsHelper
+import moe.shizuku.manager.core.extensions.applyTemplateArgs
+import moe.shizuku.manager.core.extensions.asLink
+import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.databinding.BugReportDialogBinding
-import moe.shizuku.manager.utils.CustomTabsHelper
-import moe.shizuku.manager.utils.applyTemplateArgs
-import moe.shizuku.manager.utils.asLink
-import moe.shizuku.manager.worker.AdbStartWorker
+import moe.shizuku.manager.shizukuservice.workers.AdbStartWorker
 
 class BugReportDialog : DialogFragment() {
     private lateinit var binding: BugReportDialogBinding
@@ -51,7 +50,10 @@ class BugReportDialog : DialogFragment() {
             .setTitle(R.string.bug_report)
             .setView(binding.root)
             .setPositiveButton("GitHub") { _, _ ->
-                CustomTabsHelper.launchUrlOrCopy(context, "https://github.com/thedjchi/Shizuku/issues/new")
+                CustomTabsHelper.launchUrlOrCopy(
+                    context,
+                    "https://github.com/thedjchi/Shizuku/issues/new"
+                )
             }.setNegativeButton(R.string.bug_report_dialog_button_email) { _, _ ->
                 val plainBody =
                     """
@@ -67,8 +69,8 @@ class BugReportDialog : DialogFragment() {
                         Intent.ACTION_SENDTO,
                         Uri.parse(
                             "mailto:" + context.getString(R.string.support_email) +
-                                "?subject=" + Uri.encode("[ISSUE TITLE]") +
-                                "&body=" + Uri.encode(plainBody),
+                                    "?subject=" + Uri.encode("[ISSUE TITLE]") +
+                                    "&body=" + Uri.encode(plainBody),
                         ),
                     )
                 try {
@@ -84,7 +86,8 @@ class BugReportDialog : DialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        val nm = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val nm =
+            requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(AdbStartWorker.NOTIFICATION_ID)
     }
 

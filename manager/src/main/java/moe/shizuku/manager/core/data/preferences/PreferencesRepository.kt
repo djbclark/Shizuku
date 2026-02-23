@@ -1,6 +1,9 @@
 package moe.shizuku.manager.core.data.preferences
 
-import moe.shizuku.manager.core.models.preferences.*
+import moe.shizuku.manager.core.models.preferences.IntEnum
+import moe.shizuku.manager.core.models.preferences.StartMode
+import moe.shizuku.manager.core.models.preferences.Theme
+import moe.shizuku.manager.core.models.preferences.UpdateChannel
 
 object PreferencesRepository {
     private val prefs = PreferencesDataSource
@@ -44,7 +47,7 @@ object PreferencesRepository {
     // -------------------------
 
     fun setStartMode(value: StartMode) =
-        prefs.set(
+        setEnum(
             Preferences.START_MODE,
             value,
         )
@@ -86,7 +89,7 @@ object PreferencesRepository {
         )
 
     fun setTheme(value: Theme) =
-        prefs.set(
+        setEnum(
             Preferences.THEME,
             value,
         )
@@ -110,7 +113,7 @@ object PreferencesRepository {
         )
 
     fun setUpdateChannel(value: UpdateChannel) =
-        prefs.set(
+        setEnum(
             Preferences.UPDATE_CHANNEL,
             value,
         )
@@ -134,13 +137,13 @@ object PreferencesRepository {
         )
 
     // -------------------------
-    // INTENUM HELPERS
+    // INT ENUM HELPERS
     // -------------------------
 
     // Extension function to recast Preference<IntEnum> as Preference<Int>
     private fun <E> Preference<E>.asIntPreference(): Preference<Int>
-        where E : Enum<E>, E : IntEnum =
-        Preference<Int>(key, default.value)
+            where E : Enum<E>, E : IntEnum =
+        Preference(key, default.value)
 
     // Extension function to perform reverse lookup on IntEnum preference
     private inline fun <reified E> getEnum(
@@ -151,9 +154,9 @@ object PreferencesRepository {
     }
 
     // Extension function to store IntEnum preference as Int
-    private fun <E> PreferencesDataSource.set(
+    private fun <E> setEnum(
         pref: Preference<E>,
         value: E,
     ) where E : Enum<E>, E : IntEnum =
-        set(pref.asIntPreference(), value.value)
+        prefs.set(pref.asIntPreference(), value.value)
 }

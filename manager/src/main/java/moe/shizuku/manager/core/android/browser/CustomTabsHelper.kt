@@ -1,19 +1,21 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.android.browser
 
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.extensions.*
+import moe.shizuku.manager.core.extensions.copyToClipboard
+import moe.shizuku.manager.core.extensions.toast
 
 object CustomTabsHelper {
     fun launchUrlOrCopy(
         context: Context,
         url: String,
     ) {
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
 
         runCatching {
             launchCustomTab(context, uri)

@@ -1,15 +1,7 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.core.utils
 
 import android.content.pm.PackageManager
 import com.android.apksig.ApkSigner
-import java.io.File
-import java.io.IOException
-import java.math.BigInteger
-import java.security.*
-import java.security.KeyStore.PrivateKeyEntry
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
-import java.util.*
 import moe.shizuku.manager.ShizukuApplication
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
@@ -17,6 +9,19 @@ import org.bouncycastle.cert.X509v3CertificateBuilder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import java.io.File
+import java.io.IOException
+import java.math.BigInteger
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.KeyStore.PrivateKeyEntry
+import java.security.PrivateKey
+import java.security.SecureRandom
+import java.security.Security
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import java.util.Date
+import java.util.Locale
 
 private val appContext = ShizukuApplication.appContext
 
@@ -58,7 +63,7 @@ object ApkSigner {
             loadKey()
         } else try {
             getSelfSigningKey()
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             if (createIfNeeded) createSigningKey()
             else throw IllegalStateException("Signing key does not exist")
         }
@@ -136,7 +141,7 @@ object ApkSigner {
         }
 
         return ks.getEntry(KEY_ALIAS, KeyStore.PasswordProtection(KEY_PASS.toCharArray()))
-            as PrivateKeyEntry
+                as PrivateKeyEntry
     }
 
     private data class PrivateKeyCertificatePair(

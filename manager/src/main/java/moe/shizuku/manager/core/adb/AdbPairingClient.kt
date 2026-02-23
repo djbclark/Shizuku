@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.core.adb
 
 import android.os.Build
 import android.util.Log
@@ -88,7 +88,8 @@ private class PairingPacketHeader(
 
     override fun toString(): String = "PairingPacketHeader(${toStringShort()})"
 
-    fun toStringShort(): String = "version=${version.toInt()}, type=${type.toInt()}, payload=$payload"
+    fun toStringShort(): String =
+        "version=${version.toInt()}, type=${type.toInt()}, payload=$payload"
 
     companion object {
         fun readFrom(buffer: ByteBuffer): PairingPacketHeader? {
@@ -97,7 +98,10 @@ private class PairingPacketHeader(
             val payload = buffer.int
 
             if (version < kMinSupportedKeyHeaderVersion || version > kMaxSupportedKeyHeaderVersion) {
-                Log.e(TAG, "PairingPacketHeader version mismatch (us=$kCurrentKeyHeaderVersion them=$version)")
+                Log.e(
+                    TAG,
+                    "PairingPacketHeader version mismatch (us=$kCurrentKeyHeaderVersion them=$version)"
+                )
                 return null
             }
             if (type != Type.SPAKE2_MSG.value && type != Type.PEER_INFO.value) {
@@ -222,7 +226,8 @@ class AdbPairingClient(
         outputStream = DataOutputStream(sslSocket.outputStream)
 
         val pairCodeBytes = pairCode.toByteArray()
-        val keyMaterial = Conscrypt.exportKeyingMaterial(sslSocket, kExportedKeyLabel, null, kExportedKeySize)
+        val keyMaterial =
+            Conscrypt.exportKeyingMaterial(sslSocket, kExportedKeyLabel, null, kExportedKeySize)
         val passwordBytes = ByteArray(pairCode.length + keyMaterial.size)
         pairCodeBytes.copyInto(passwordBytes)
         keyMaterial.copyInto(passwordBytes, pairCodeBytes.size)
@@ -288,7 +293,8 @@ class AdbPairingClient(
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
 
-        val decrypted = pairingContext.decrypt(theirMessage) ?: throw AdbInvalidPairingCodeException()
+        val decrypted =
+            pairingContext.decrypt(theirMessage) ?: throw AdbInvalidPairingCodeException()
         if (decrypted.size != kMaxPeerInfoSize) {
             Log.e(TAG, "Got size=${decrypted.size} PeerInfo.size=$kMaxPeerInfoSize")
             return false

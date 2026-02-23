@@ -8,19 +8,16 @@ import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.util.Log
-import com.reandroid.apk.AndroidFrameworks
 import com.reandroid.apk.ApkModule
 import com.reandroid.archive.ByteInputSource
+import com.reandroid.archive.FileInputSource
 import com.reandroid.arsc.chunk.TableBlock
 import com.reandroid.arsc.chunk.xml.AndroidManifestBlock
-import com.reandroid.arsc.chunk.xml.ResXmlDocument
-import com.reandroid.arsc.chunk.xml.ResXmlElement
-import com.reandroid.archive.FileInputSource
 import com.reandroid.common.Namespace
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.utils.ApkSigner
+import moe.shizuku.manager.core.utils.ApkSigner
 import java.io.File
 
 const val ORIGINAL_PACKAGE_NAME = "moe.shizuku.privileged.api"
@@ -152,7 +149,8 @@ fun Context.installPackage(
 ) {
     val installer = appContext.packageManager.packageInstaller
 
-    val sessionParams = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+    val sessionParams =
+        PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
     val sessionId = installer.createSession(sessionParams)
     val session = installer.openSession(sessionId)
 
@@ -186,7 +184,8 @@ val installerReceiver =
             context: Context,
             intent: Intent
         ) {
-            val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+            val status =
+                intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
 
             when (status) {
