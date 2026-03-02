@@ -7,18 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.databinding.TerminalAppsFragmentBinding
 import rikka.compatibility.DeviceCompatibility
-import rikka.insets.initialPaddingBottom
-import rikka.insets.initialPaddingLeft
-import rikka.insets.initialPaddingRight
-import rikka.insets.initialPaddingTop
-import rikka.insets.setInitialPadding
-import kotlin.math.roundToInt
 
 private const val SH_NAME = "rish"
 private const val DEX_NAME = "rish_shizuku.dex"
@@ -106,16 +100,7 @@ class TerminalAppsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        binding.content.apply {
-            setInitialPadding(
-                initialPaddingLeft,
-                initialPaddingTop + (resources.displayMetrics.density * 8).roundToInt(),
-                initialPaddingRight,
-                initialPaddingBottom,
-            )
-        }
+        binding.root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
         binding.apply {
             if (DeviceCompatibility.isMiui()) {

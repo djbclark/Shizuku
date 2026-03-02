@@ -3,10 +3,12 @@ package moe.shizuku.manager.home
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -16,10 +18,11 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.adb.AdbPairingService
-import moe.shizuku.manager.app.SnackbarHelper
-import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
-import moe.shizuku.manager.databinding.HomeActivityBinding
-import moe.shizuku.manager.management.AppsViewModel
+import moe.shizuku.manager.core.android.settings.PowerManagerHelper
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.ui.components.snackbar
+import moe.shizuku.manager.databinding.HomeFragmentBinding
+import moe.shizuku.manager.permission.ui.authorizedapps.AppsViewModel
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -34,7 +37,7 @@ class HomeFragment : Fragment() {
     private val homeModel: HomeViewModel by viewModels()
     private val appsModel: AppsViewModel by viewModels()
 
-    private lateinit var binding: HomeActivityBinding
+    private lateinit var binding: HomeFragmentBinding
 
     private val stateListener: (ShizukuStateMachine.State) -> Unit = {
         if (ShizukuStateMachine.isRunning()) {
@@ -50,12 +53,14 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = HomeActivityBinding.inflate(inflater, container, false)
+        binding = HomeFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
         requireActivity().addMenuProvider(
             HomeMenuProvider(this),
@@ -90,18 +95,14 @@ class HomeFragment : Fragment() {
 
         homeModel.shouldShowBatteryOptimizationSnackbar.observe(viewLifecycleOwner) { shouldShow ->
             if (shouldShow) {
-                SnackbarHelper.show(
-                    requireActivity(),
-                    binding.root,
+                snackbar(
                     msg = getString(R.string.home_battery_optimization),
                     duration = Snackbar.LENGTH_INDEFINITE,
                     actionText = getString(R.string.fix),
                     action = {
-                        SystemSettingsHelper.requestIgnoreBatteryOptimizations(
-                            requireContext(),
-                            null
-                        )
-                    },
+                        val intent = PowerManagerHelper.getBatteryOptimizationIntent()
+                        startActivity(intent)
+                    }
                 )
             }
         }
@@ -115,9 +116,7 @@ class HomeFragment : Fragment() {
 
         lifecycleScope.launch {
             if (UpdateHelper.isCheckForUpdatesEnabled() && UpdateHelper.isNewUpdateAvailable()) {
-                SnackbarHelper.show(
-                    requireActivity(),
-                    binding.root,
+                snackbar(
                     msg = getString(R.string.update_available),
                     duration = Snackbar.LENGTH_INDEFINITE,
                     actionText = getString(R.string.update),
@@ -125,7 +124,7 @@ class HomeFragment : Fragment() {
                         lifecycleScope.launch {
                             UpdateHelper.update()
                         }
-                    },
+                    }
                 )
                 UpdateHelper.updateLastPromptedVersion()
             }
@@ -134,6 +133,7 @@ class HomeFragment : Fragment() {
         ShizukuStateMachine.addListener(stateListener)
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     fun onNewIntent(intent: Intent?) {
         intent?.let {
             val showDialog = it.getBooleanExtra(EXTRA_SHOW_PAIRING_DIALOG, false)
@@ -152,11 +152,6 @@ class HomeFragment : Fragment() {
         super.onResume()
         homeModel.reload()
         appsModel.load()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        SnackbarHelper.dismiss()
     }
 
     private fun showExitDialog(

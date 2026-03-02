@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.ui.ThemeHelper
 import moe.shizuku.manager.databinding.ConfirmationDialogBinding
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import rikka.core.res.resolveColor
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_ALLOWED
 import rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_IS_ONETIME
@@ -43,11 +43,12 @@ class RequestPermissionActivity : AppCompatActivity() {
     }
 
     private fun checkSelfPermission(): Boolean {
-        val permission = Shizuku.checkRemotePermission("android.permission.GRANT_RUNTIME_PERMISSIONS") == PackageManager.PERMISSION_GRANTED
+        val permission =
+            Shizuku.checkRemotePermission("android.permission.GRANT_RUNTIME_PERMISSIONS") == PackageManager.PERMISSION_GRANTED
         if (permission) return true
 
         val icon = getDrawable(R.drawable.ic_system_icon)
-        icon?.setTint(theme.resolveColor(android.R.attr.colorAccent))
+        icon?.setTint(ThemeHelper.resolveColor(this, android.R.attr.colorAccent))
 
 
         val dialog =
@@ -60,7 +61,8 @@ class RequestPermissionActivity : AppCompatActivity() {
                 .setOnDismissListener { finish() }
                 .create()
         dialog.setOnShowListener {
-            (it as AlertDialog).findViewById<TextView>(android.R.id.message)?.movementMethod = LinkMovementMethod.getInstance()
+            (it as AlertDialog).findViewById<TextView>(android.R.id.message)?.movementMethod =
+                LinkMovementMethod.getInstance()
         }
         try {
             dialog.show()
@@ -121,11 +123,11 @@ class RequestPermissionActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 title.text =
-                        getString(
-                            R.string.permission_warning_template,
-                            label,
-                            getString(R.string.permission_group_description),
-                        )
+                    getString(
+                        R.string.permission_warning_template,
+                        label,
+                        getString(R.string.permission_group_description),
+                    )
             }
 
         dialog =

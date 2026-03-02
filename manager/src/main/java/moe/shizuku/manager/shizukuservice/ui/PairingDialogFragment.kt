@@ -29,7 +29,7 @@ import moe.shizuku.manager.core.adb.AdbPairingClient
 import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
 import moe.shizuku.manager.core.data.KeyValueDataSource
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.databinding.AdbPairDialogBinding
 import java.net.ConnectException
 

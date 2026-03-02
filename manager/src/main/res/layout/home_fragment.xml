@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@android:id/list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    app:fitsSystemWindowsInsets="bottom|start|end"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:divider="@drawable/spacing_card_vertical"
+        android:orientation="vertical"
         android:paddingHorizontal="@dimen/margin_horizontal"
         android:paddingVertical="@dimen/margin_vertical"
-        android:orientation="vertical"
-        android:showDividers="middle"
-        android:divider="@drawable/spacing_card_vertical">
+        android:showDividers="middle">
 
         <TextView
             style="@style/SectionHeader"
@@ -26,6 +24,7 @@
             android:id="@+id/statusCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
         <moe.shizuku.manager.home.components.cards.StealthCard
             android:id="@+id/stealthCard"
             android:layout_width="match_parent"
@@ -40,10 +39,12 @@
             android:id="@+id/authorizedAppsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
         <moe.shizuku.manager.home.components.cards.TerminalCard
             android:id="@+id/terminalCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
         <moe.shizuku.manager.home.components.cards.IntentsCard
             android:id="@+id/intentsCard"
             android:layout_width="match_parent"

@@ -51,7 +51,7 @@ object PreferenceKeys {
     val LANGUAGE =
         KeyValueEntry<String?>(
             key = "language",
-            default = "system",
+            default = null,
         )
 
     val THEME =

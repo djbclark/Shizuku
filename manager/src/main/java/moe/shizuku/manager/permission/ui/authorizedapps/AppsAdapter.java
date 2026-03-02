@@ -1,4 +1,4 @@
-package moe.shizuku.manager.management;
+package moe.shizuku.manager.permission.ui.authorizedapps;
 
 import android.content.pm.PackageInfo;
 

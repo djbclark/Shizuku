@@ -14,13 +14,18 @@ import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
-import rikka.core.ktx.unsafeLazy
 import java.io.ByteArrayInputStream
 import java.math.BigInteger
 import java.net.Socket
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.security.*
+import java.security.Key
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.Principal
+import java.security.PrivateKey
+import java.security.SecureRandom
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.interfaces.RSAPrivateKey
@@ -28,7 +33,8 @@ import java.security.interfaces.RSAPublicKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.RSAKeyGenParameterSpec
 import java.security.spec.RSAPublicKeySpec
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.GCMParameterSpec
@@ -328,7 +334,7 @@ class AdbKey(
         Log.d(TAG, privateKey.toString())
     }
 
-    val adbPublicKey: ByteArray by unsafeLazy {
+    val adbPublicKey: ByteArray by lazy {
         publicKey.adbEncoded(name)
     }
 
@@ -397,7 +403,7 @@ class AdbKey(
                 val keyFactory = KeyFactory.getInstance("RSA")
                 privateKey =
                     keyFactory.generatePrivate(PKCS8EncodedKeySpec(plaintext)) as RSAPrivateKey
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (privateKey == null) {
@@ -522,7 +528,7 @@ class AdbKey(
             }
 
     @delegate:RequiresApi(Build.VERSION_CODES.R)
-    val sslContext: SSLContext by unsafeLazy {
+    val sslContext: SSLContext by lazy {
         val sslContext = SSLContext.getInstance("TLSv1.3")
         sslContext.init(arrayOf(keyManager), arrayOf(trustManager), SecureRandom())
         sslContext
@@ -557,16 +563,16 @@ const val RSAPublicKey_Size = 524
 private fun BigInteger.toAdbEncoded(): IntArray {
     // little-endian integer with padding zeros in the end
 
-    val endcoded = IntArray(ANDROID_PUBKEY_MODULUS_SIZE_WORDS)
+    val encoded = IntArray(ANDROID_PUBKEY_MODULUS_SIZE_WORDS)
     val r32 = BigInteger.ZERO.setBit(32)
 
     var tmp = this.add(BigInteger.ZERO)
     for (i in 0 until ANDROID_PUBKEY_MODULUS_SIZE_WORDS) {
         val out = tmp.divideAndRemainder(r32)
         tmp = out[0]
-        endcoded[i] = out[1].toInt()
+        encoded[i] = out[1].toInt()
     }
-    return endcoded
+    return encoded
 }
 
 private fun RSAPublicKey.adbEncoded(name: String): ByteArray {

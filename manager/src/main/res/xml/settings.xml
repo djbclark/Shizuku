@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Empty preference to fix issue with Android TVs not being able to re-focus on appbar if
     category is first item -->
+    <!--suppress AndroidUnknownAttribute -->
     <Preference
         android:key="empty"
-        style="@style/Preference.Rikka.Material3.Empty" />
+        app:layout="@layout/preference_empty" />
 
     <PreferenceCategory
         android:key="category_behavior"
@@ -23,21 +23,19 @@
             android:title="@string/settings_watchdog" />
 
         <SwitchPreferenceCompat
+            android:defaultValue="true"
             android:key="tcp_mode"
-            android:title="@string/settings_tcp_mode"
-            android:defaultValue="true" />
+            android:summary="@string/settings_tcp_mode_summary"
+            android:title="@string/settings_tcp_mode" />
 
-        <EditTextPreference
+        <Preference
             android:key="tcp_port"
-            android:title="@string/settings_tcp_port"
-            android:inputType="number"
-            android:defaultValue="5555"
-            app:useSimpleSummaryProvider="true" />
+            android:title="@string/settings_tcp_port" />
 
         <SwitchPreferenceCompat
             android:key="auto_disable_usb_debugging"
-            android:title="@string/settings_auto_disable_usb_debugging"
-            android:summary="@string/settings_auto_disable_usb_debugging_summary" />
+            android:summary="@string/settings_auto_disable_usb_debugging_summary"
+            android:title="@string/settings_auto_disable_usb_debugging" />
 
     </PreferenceCategory>
 
@@ -45,17 +43,12 @@
         android:key="category_ui"
         android:title="@string/settings_user_interface">
 
-        <rikka.preference.SimpleMenuPreference
-            android:defaultValue="SYSTEM"
+        <Preference
             android:key="language"
-            android:summary="%s"
             android:title="@string/settings_language" />
 
-        <moe.shizuku.manager.settings.IntegerSimpleMenuPreference
-            android:entries="@array/theme"
-            android:entryValues="@array/theme_value"
+        <Preference
             android:key="theme"
-            android:summary="%s"
             android:title="@string/settings_theme" />
 
         <SwitchPreferenceCompat
@@ -64,8 +57,8 @@
 
         <SwitchPreferenceCompat
             android:key="dynamic_color"
-            android:title="@string/settings_dynamic_color"
-            android:summary="@string/settings_dynamic_color_summary" />
+            android:summary="@string/settings_dynamic_color_summary"
+            android:title="@string/settings_dynamic_color" />
 
     </PreferenceCategory>
 
@@ -74,15 +67,12 @@
         android:title="@string/settings_updates">
 
         <SwitchPreferenceCompat
+            android:defaultValue="true"
             android:key="check_for_updates"
-            android:title="@string/check_for_updates"
-            android:defaultValue="true" />
+            android:title="@string/check_for_updates" />
 
-        <moe.shizuku.manager.settings.IntegerSimpleMenuPreference
-            android:entries="@array/update_channel"
-            android:entryValues="@array/update_channel_value"
+        <Preference
             android:key="update_channel"
-            android:summary="%s"
             android:title="@string/settings_update_channel" />
 
     </PreferenceCategory>

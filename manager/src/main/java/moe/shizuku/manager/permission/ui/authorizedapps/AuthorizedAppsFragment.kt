@@ -1,21 +1,18 @@
-package moe.shizuku.manager.management
+package moe.shizuku.manager.permission.ui.authorizedapps
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.databinding.AuthorizedAppsFragmentBinding
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.lifecycle.Status
-import rikka.recyclerview.addEdgeSpacing
-import rikka.recyclerview.fixEdgeEffect
 import java.util.Objects
 
 class AuthorizedAppsFragment : Fragment() {
@@ -49,8 +46,6 @@ class AuthorizedAppsFragment : Fragment() {
             return
         }
 
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         viewModel.packages.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -75,8 +70,8 @@ class AuthorizedAppsFragment : Fragment() {
 
         val recyclerView = binding.list
         recyclerView.adapter = adapter
-        recyclerView.fixEdgeEffect()
-        recyclerView.addEdgeSpacing(top = 8f, bottom = 8f, unit = TypedValue.COMPLEX_UNIT_DIP)
+
+        recyclerView.applySystemBarsPadding(bottom = true)
 
         adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
             override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {

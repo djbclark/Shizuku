@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="32dp"
-    android:paddingVertical="@dimen/list_item_spacing"
     android:background="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:minHeight="56dp"
     android:orientation="horizontal"
-    app:fitsSystemWindowsInsets="start|end"
+    android:paddingHorizontal="32dp"
+    android:paddingVertical="@dimen/list_item_spacing"
     tools:ignore="UseCompoundDrawables">
 
     <ImageView
@@ -40,8 +37,8 @@
             android:id="@android:id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?textAppearanceBodyMedium"
             android:layout_marginTop="2sp"
+            android:textAppearance="?textAppearanceBodyMedium"
             android:textColor="?textColorOnSurfaceHighEmphasis"
             android:textSize="14sp"
             tools:text="moe.shizuku.manager" />
@@ -55,9 +52,9 @@
             <TextView
                 android:id="@+id/requires_root"
                 android:layout_width="wrap_content"
-                android:textAppearance="?textAppearanceBodyMedium"
                 android:layout_height="wrap_content"
-                android:text="@string/authorized_apps_requires_root" />
+                android:text="@string/authorized_apps_requires_root"
+                android:textAppearance="?textAppearanceBodyMedium" />
 
         </LinearLayout>
 

@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.adb.AdbKeyException
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.databinding.StartFragmentBinding
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.starter.Starter
@@ -36,6 +37,8 @@ class StartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
         (requireActivity() as? AppCompatActivity)?.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

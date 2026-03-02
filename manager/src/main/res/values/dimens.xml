@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="UnusedResources">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
 
     <dimen name="card_spacing">8dp</dimen>
     <dimen name="list_item_spacing">16dp</dimen>
@@ -10,6 +8,7 @@
     <dimen name="margin_vertical">8dp</dimen>
 
     <dimen name="dialog_top_padding">16dp</dimen>
+    <dimen name="dialog_horizontal_padding">24dp</dimen>
 
     <dimen name="default_app_icon_size">40dp</dimen>
 

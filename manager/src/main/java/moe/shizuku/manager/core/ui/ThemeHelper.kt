@@ -1,6 +1,7 @@
 package moe.shizuku.manager.core.ui
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
@@ -10,7 +11,6 @@ import com.google.android.material.snackbar.Snackbar
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
-import rikka.core.util.ResourceUtils
 
 object ThemeHelper {
 
@@ -24,7 +24,9 @@ object ThemeHelper {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && PreferencesRepository.getDynamicColor()
 
     fun getTheme(context: Context): String {
-        if (isBlackNightTheme() && ResourceUtils.isNightMode(context.resources.configuration)) {
+        val config = context.resources.configuration
+        val isNightMode = (config.uiMode and Configuration.UI_MODE_NIGHT_YES) > 0
+        if (isBlackNightTheme() && isNightMode) {
             return THEME_BLACK
         }
         return THEME_DEFAULT
@@ -40,15 +42,15 @@ object ThemeHelper {
     }
 
     fun applySnackbarTheme(context: Context, snackbar: Snackbar) {
-        snackbar.setBackgroundTint(context.resolveColor(R.attr.colorPrimaryContainer))
-            .setTextColor(context.resolveColor(R.attr.colorOnSurface))
-            .setActionTextColor(context.resolveColor(R.attr.colorPrimary))
+        snackbar.setBackgroundTint(resolveColor(context, R.attr.colorPrimaryContainer))
+            .setTextColor(resolveColor(context, R.attr.colorOnSurface))
+            .setActionTextColor(resolveColor(context, R.attr.colorPrimary))
     }
 
     @ColorInt
-    private fun Context.resolveColor(@AttrRes attrRes: Int): Int {
+    fun resolveColor(context: Context, @AttrRes attrRes: Int): Int {
         val typedValue = TypedValue()
-        theme.resolveAttribute(attrRes, typedValue, true)
+        context.theme.resolveAttribute(attrRes, typedValue, true)
         return typedValue.data
     }
 }

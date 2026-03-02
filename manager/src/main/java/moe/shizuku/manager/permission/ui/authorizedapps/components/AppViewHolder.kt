@@ -11,9 +11,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Job
 import moe.shizuku.manager.R
 import moe.shizuku.manager.authorization.AuthorizationManager
-import moe.shizuku.manager.databinding.AppListItemBinding
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.utils.AppIconCache
 import moe.shizuku.manager.core.utils.ShizukuSystemApis
+import moe.shizuku.manager.databinding.AppListItemBinding
 import moe.shizuku.manager.utils.UserHandleCompat
 import rikka.recyclerview.BaseViewHolder
 import rikka.shizuku.Shizuku
@@ -42,6 +43,7 @@ class AppViewHolder(
     init {
         itemView.filterTouchesWhenObscured = true
         itemView.setOnClickListener(this)
+        itemView.applySystemBarsPadding(start = true, end = true)
     }
 
     private inline val packageName get() = data.packageName

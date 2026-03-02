@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 object KeyValueDataSource {
+    const val PREFS_NAME = "settings"
+
     private lateinit var prefs: SharedPreferences
 
     fun init(context: Context) {
-        prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     // TODO remove function - used for ADB KeyStore
@@ -35,12 +37,15 @@ object KeyValueDataSource {
     // FLOWS
     // -------------------------
 
+    @JvmName("observeBoolean")
     fun observe(entry: KeyValueEntry<Boolean>): Flow<Boolean> =
         observe(entry) { get(entry) }
 
+    @JvmName("observeInt")
     fun observe(entry: KeyValueEntry<Int>): Flow<Int> =
         observe(entry) { get(entry) }
 
+    @JvmName("observeString")
     fun observe(entry: KeyValueEntry<String?>): Flow<String?> =
         observe(entry) { get(entry) }
 

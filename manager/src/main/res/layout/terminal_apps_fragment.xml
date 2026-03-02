@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    app:fitsSystemWindowsInsets="bottom|start|end"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
@@ -18,8 +16,7 @@
         android:paddingHorizontal="@dimen/margin_horizontal"
         android:paddingVertical="@dimen/margin_vertical">
 
-        <com.google.android.material.card.MaterialCardView
-            style="@style/DialogCard">
+        <com.google.android.material.card.MaterialCardView style="@style/DialogCard">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -38,8 +35,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="36dp"
                 android:duplicateParentState="true"
-                android:textColor="?colorOnSecondaryContainer"
-                android:text="@string/terminal_apps_description" />
+                android:text="@string/terminal_apps_description"
+                android:textColor="?colorOnSecondaryContainer" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -102,9 +99,9 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
                 android:padding="4dp"
-                android:layout_marginStart="8dp"
                 android:src="@drawable/ic_numeric_1_circle_outline_24"
                 android:tint="?android:textColorSecondary"
                 android:tintMode="src_in" />
@@ -146,9 +143,9 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
                 android:padding="4dp"
-                android:layout_marginStart="8dp"
                 android:src="@drawable/ic_numeric_2_circle_outline_24"
                 android:tint="?android:textColorSecondary"
                 android:tintMode="src_in" />
@@ -173,9 +170,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8sp"
-                    android:textIsSelectable="true"
-                    android:textColor="?android:textColorSecondary"
                     android:fontFamily="monospace"
+                    android:textColor="?android:textColorSecondary"
+                    android:textIsSelectable="true"
                     tools:text="@string/terminal_tutorial_3_command" />
 
                 <TextView
@@ -200,9 +197,9 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
                 android:padding="4dp"
-                android:layout_marginStart="8dp"
                 android:src="@drawable/ic_numeric_3_circle_outline_24"
                 android:tint="?android:textColorSecondary"
                 android:tintMode="src_in" />
@@ -227,9 +224,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8sp"
-                    android:textIsSelectable="true"
-                    android:textColor="?android:textColorSecondary"
                     android:fontFamily="monospace"
+                    android:textColor="?android:textColorSecondary"
+                    android:textIsSelectable="true"
                     tools:text="@string/terminal_tutorial_3_command" />
 
             </LinearLayout>

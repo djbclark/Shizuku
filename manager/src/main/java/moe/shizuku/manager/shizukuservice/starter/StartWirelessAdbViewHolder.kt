@@ -29,7 +29,6 @@ package moe.shizuku.manager.shizukuservice.starter
 // import moe.shizuku.manager.service.ui.StartFragment
 // import moe.shizuku.manager.utils.EnvironmentUtils
 // import moe.shizuku.manager.utils.ShizukuStateMachine
-// import rikka.core.content.asActivity
 // import rikka.recyclerview.BaseViewHolder
 // import rikka.recyclerview.BaseViewHolder.Creator
 

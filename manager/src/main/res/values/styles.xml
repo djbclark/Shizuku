@@ -90,8 +90,4 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="Preference.Rikka.Material3.Empty" parent="@style/Preference.Rikka.Material3">
-        <item name="layout">@layout/preference_empty</item>
-    </style>
-
 </resources>

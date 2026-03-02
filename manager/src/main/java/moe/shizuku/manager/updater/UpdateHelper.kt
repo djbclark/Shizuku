@@ -11,7 +11,7 @@ import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.KeyValueEntry
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.utils.ApkUtils.changePackageName
 import moe.shizuku.manager.utils.ApkUtils.getVersionName
 import moe.shizuku.manager.utils.ApkUtils.installPackage

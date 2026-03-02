@@ -5,18 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import moe.shizuku.manager.authorization.AuthorizationManager
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.databinding.AppListToggleAllBinding
-import moe.shizuku.manager.management.AppsAdapter.HeaderMarker
+import moe.shizuku.manager.permission.ui.authorizedapps.AppsAdapter
 import rikka.recyclerview.BaseViewHolder
 
 class ToggleAllViewHolder(private val binding: AppListToggleAllBinding) :
-    BaseViewHolder<HeaderMarker>(binding.root), View.OnClickListener {
+    BaseViewHolder<AppsAdapter.HeaderMarker>(binding.root), View.OnClickListener {
 
     companion object {
         @JvmField
-        val CREATOR = Creator<HeaderMarker> { inflater: LayoutInflater, parent: ViewGroup? ->
-            ToggleAllViewHolder(AppListToggleAllBinding.inflate(inflater, parent, false))
-        }
+        val CREATOR =
+            Creator<AppsAdapter.HeaderMarker> { inflater: LayoutInflater, parent: ViewGroup? ->
+                ToggleAllViewHolder(AppListToggleAllBinding.inflate(inflater, parent, false))
+            }
     }
 
     private val switchWidget get() = binding.switchWidget
@@ -24,6 +26,7 @@ class ToggleAllViewHolder(private val binding: AppListToggleAllBinding) :
     init {
         itemView.filterTouchesWhenObscured = true
         itemView.setOnClickListener(this)
+        itemView.applySystemBarsPadding(start = true, end = true)
     }
 
     override fun onClick(v: View) {

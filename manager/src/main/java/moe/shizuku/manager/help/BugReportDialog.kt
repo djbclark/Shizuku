@@ -17,7 +17,7 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applyTemplateArgs
 import moe.shizuku.manager.core.extensions.asLink
 import moe.shizuku.manager.core.extensions.openUrl
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.databinding.BugReportDialogBinding
 import moe.shizuku.manager.shizukuservice.workers.AdbStartWorker
 

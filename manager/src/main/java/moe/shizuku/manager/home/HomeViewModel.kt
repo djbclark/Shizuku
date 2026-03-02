@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
+import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.ShizukuSystemApis
@@ -100,7 +100,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if (EnvironmentUtils.isTelevision()) return
         if (!PreferencesRepository.getStartOnBoot() && !PreferencesRepository.getWatchdog()) return
         _shouldShowBatteryOptimizationSnackbar.postValue(
-            !SystemSettingsHelper.isIgnoringBatteryOptimizations(appContext)
+            !PowerManagerHelper.isIgnoringBatteryOptimizations()
         )
     }
 

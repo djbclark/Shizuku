@@ -9,7 +9,7 @@
         android:id="@+id/home_fragment"
         android:name="moe.shizuku.manager.home.HomeFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/home_activity">
+        tools:layout="@layout/home_fragment">
         <action
             android:id="@+id/navigate_to_settings"
             app:destination="@id/settings_fragment" />
@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/settings_fragment"
-        android:name="moe.shizuku.manager.settings.SettingsFragment"
+        android:name="moe.shizuku.manager.settings.ui.SettingsFragment"
         android:label="@string/settings"
         tools:layout="@xml/settings" />
 
@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/authorized_apps_fragment"
-        android:name="moe.shizuku.manager.management.AuthorizedAppsFragment"
+        android:name="moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsFragment"
         android:label="@string/authorized_apps"
         tools:layout="@layout/authorized_apps_fragment" />
 

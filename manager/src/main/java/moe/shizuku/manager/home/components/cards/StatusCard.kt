@@ -17,7 +17,6 @@ import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.shizukuservice.ui.AdbPairDialogFragment
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import rikka.core.content.asActivity
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants
 
@@ -128,7 +127,9 @@ constructor(
         if (EnvironmentUtils.isTelevision()) {
             showAccessibilityDialog(context)
         } else if (PreferencesRepository.getLegacyPairing()) {
-            AdbPairDialogFragment().show(context.asActivity<FragmentActivity>().supportFragmentManager)
+            (context as? FragmentActivity)?.supportFragmentManager?.let {
+                AdbPairDialogFragment().show(it)
+            }
         } else {
             findNavController().navigate(R.id.navigate_to_pairing)
         }

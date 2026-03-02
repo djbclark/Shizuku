@@ -8,11 +8,13 @@ import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.preferences.PreferenceSync
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.ui.LocaleHelper
 import moe.shizuku.manager.watchdog.services.WatchdogManager
 import org.lsposed.hiddenapibypass.HiddenApiBypass
-import rikka.material.app.LocaleDelegate
 
 class ShizukuApplication : Application() {
 
@@ -22,16 +24,13 @@ class ShizukuApplication : Application() {
 
         lateinit var appContext: Context
             private set
-
-        lateinit var applicationScope: CoroutineScope
-            private set
     }
 
     override fun onCreate() {
         super.onCreate()
         application = this
         appContext = applicationContext
-        init(this)
+        init(applicationContext)
     }
 
     private fun init(context: Context) {
@@ -49,12 +48,16 @@ class ShizukuApplication : Application() {
     private fun injectDependencies(context: Context) {
         val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+        // Should be declared first because other dependencies may require key-value storage
         KeyValueDataSource.init(context)
+
+        PowerManagerHelper.init(context)
         WatchdogManager.init(context, applicationScope)
         PreferenceSync.init(context, applicationScope)
 
-        LocaleDelegate.defaultLocale = ShizukuSettings.getLocale()
-        AppCompatDelegate.setDefaultNightMode(ShizukuSettings.getNightMode())
+        LocaleHelper.migrate()
+
+        AppCompatDelegate.setDefaultNightMode(PreferencesRepository.getTheme().value)
     }
 
 }

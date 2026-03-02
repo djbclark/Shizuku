@@ -27,10 +27,9 @@ import moe.shizuku.manager.core.adb.AdbPairingClient
 import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.ui.MainActivity
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.home.HomeFragment
-import rikka.core.ktx.unsafeLazy
 import java.net.ConnectException
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -272,7 +271,7 @@ class AdbPairingService : Service() {
         stopSelf()
     }
 
-    private val launchIntent by unsafeLazy {
+    private val launchIntent by lazy {
         Intent(this, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -282,7 +281,7 @@ class AdbPairingService : Service() {
         }
     }
 
-    private val launchPendingIntent by unsafeLazy {
+    private val launchPendingIntent by lazy {
         PendingIntent.getActivity(
             this,
             LAUNCH_REQUEST_ID,
@@ -291,7 +290,7 @@ class AdbPairingService : Service() {
         )
     }
 
-    private val startNotificationAction by unsafeLazy {
+    private val startNotificationAction by lazy {
         val startIntent =
             Intent(launchIntent)
                 .putExtra(HomeFragment.EXTRA_START_SERVICE_VIA_WADB, true)
@@ -312,7 +311,7 @@ class AdbPairingService : Service() {
             ).build()
     }
 
-    private val stopNotificationAction by unsafeLazy {
+    private val stopNotificationAction by lazy {
         val pendingIntent =
             PendingIntent.getService(
                 this,
@@ -333,7 +332,7 @@ class AdbPairingService : Service() {
             ).build()
     }
 
-    private val retryNotificationAction by unsafeLazy {
+    private val retryNotificationAction by lazy {
         val pendingIntent =
             PendingIntent.getService(
                 this,
@@ -354,7 +353,7 @@ class AdbPairingService : Service() {
             ).build()
     }
 
-    private val replyNotificationAction by unsafeLazy {
+    private val replyNotificationAction by lazy {
         val remoteInput =
             RemoteInput.Builder(REMOTE_INPUT_RESULT_KEY).run {
                 setLabel(getString(R.string.pairing_enter_code))
@@ -400,7 +399,7 @@ class AdbPairingService : Service() {
         return action
     }
 
-    private val searchingNotification by unsafeLazy {
+    private val searchingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
             .setColor(getColor(R.color.notification))
@@ -419,7 +418,7 @@ class AdbPairingService : Service() {
             .addAction(replyNotificationAction(port))
             .build()
 
-    private val workingNotification by unsafeLazy {
+    private val workingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
             .setColor(getColor(R.color.notification))

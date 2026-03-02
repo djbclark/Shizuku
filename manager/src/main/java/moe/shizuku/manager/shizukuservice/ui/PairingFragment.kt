@@ -17,7 +17,8 @@ import androidx.fragment.app.Fragment
 import moe.shizuku.manager.adb.AdbPairingService
 import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.databinding.PairingFragmentBinding
 import rikka.compatibility.DeviceCompatibility
 
@@ -38,6 +39,8 @@ class PairingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
         notificationEnabled = isNotificationEnabled()
 

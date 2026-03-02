@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.ui.components.toast
 
 fun Context.openUrl(
     url: String,

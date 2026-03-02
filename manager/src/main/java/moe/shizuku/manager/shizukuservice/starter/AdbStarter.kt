@@ -14,7 +14,7 @@ import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.ShizukuStateMachine
