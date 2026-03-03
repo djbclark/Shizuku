@@ -11,7 +11,7 @@ object PreferenceKeys {
     val START_MODE =
         KeyValueEntry<StartMode>(
             key = "start_mode",
-            default = StartMode.PC,
+            default = StartMode.WADB,
         )
 
     val START_ON_BOOT =

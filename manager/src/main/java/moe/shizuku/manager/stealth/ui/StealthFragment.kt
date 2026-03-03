@@ -28,11 +28,11 @@ import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.dp
 import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.databinding.StealthFragmentBinding
-import moe.shizuku.manager.utils.ApkUtils.ORIGINAL_PACKAGE_NAME
-import moe.shizuku.manager.utils.ApkUtils.buildApkFilename
-import moe.shizuku.manager.utils.ApkUtils.installPackage
-import moe.shizuku.manager.utils.ApkUtils.installerReceiver
-import moe.shizuku.manager.utils.ApkUtils.uninstallPackage
+import moe.shizuku.manager.core.utils.ORIGINAL_PACKAGE_NAME
+import moe.shizuku.manager.core.utils.buildApkFilename
+import moe.shizuku.manager.core.utils.installPackage
+import moe.shizuku.manager.core.utils.installerReceiver
+import moe.shizuku.manager.core.utils.uninstallPackage
 import java.io.File
 
 class StealthFragment : Fragment() {

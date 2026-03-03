@@ -7,9 +7,9 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.updater.data.ReleaseRepository
 import moe.shizuku.manager.updater.models.AppRelease
-import moe.shizuku.manager.utils.ApkUtils.changePackageName
-import moe.shizuku.manager.utils.ApkUtils.getVersionName
-import moe.shizuku.manager.utils.ApkUtils.installPackage
+import moe.shizuku.manager.core.utils.changePackageName
+import moe.shizuku.manager.core.utils.getVersionName
+import moe.shizuku.manager.core.utils.installPackage
 import java.io.File
 
 object UpdateHelper {
@@ -90,10 +90,7 @@ object UpdateHelper {
         if (app.packageName != apkPackageName) {
             return try {
                 Log.d("UpdateHelper", "Changing package name from $apkPackageName to ${app.packageName}")
-                changePackageName(app.packageName)
-                // Assuming changePackageName handles the file or returns a new one. 
-                // Original code was a bit ambiguous here but I'll maintain its logic.
-                file 
+                file.changePackageName(app.packageName)
             } catch (e: Exception) {
                 null
             }

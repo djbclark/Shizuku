@@ -8,9 +8,8 @@ enum class StartMode(
     override val value: Int,
     @get:StringRes val labelRes: Int
 ) : IntEnum {
-    PC(0, R.string.pc),
-    WADB(1, R.string.wireless_debugging),
-    ROOT(2, R.string.root)
+    WADB(0, R.string.wireless_debugging),
+    ROOT(1, R.string.root)
 }
 
 enum class Theme(

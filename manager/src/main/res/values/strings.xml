@@ -246,10 +246,8 @@
     <string name="root">Root</string>
     <string name="wireless_debugging">Wireless debugging</string>
     <string name="wireless_debugging_requirement">Requires a Wi-Fi connection. With TCP mode, Wi-Fi
-        is only needed once per reboot.</string>
-    <string name="wireless_debugging_requirement_pre_11">Requires Android 11+</string>
-    <string name="pc">PC</string>
-    <string name="pc_requirement">Command must be run after each reboot</string>
+        is only needed once per reboot</string>
+    <string name="wireless_debugging_requirement_pre_11">Requires opening a TCP port from a PC after each reboot</string>
 
     <!-- Settings - Behavior - Watchdog -->
     <string name="settings_watchdog">Watchdog</string>
@@ -343,5 +341,7 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="error_no_browser_app">No browser app found</string>
     <string name="error_no_email_app">No email app found</string>
+    <string name="save">Save</string>
+    <string name="apply">Apply</string>
 
 </resources>

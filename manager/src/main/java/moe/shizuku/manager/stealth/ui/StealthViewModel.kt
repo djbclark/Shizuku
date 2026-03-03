@@ -10,10 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.appendRandomSuffix
-import moe.shizuku.manager.utils.ApkUtils.ORIGINAL_PACKAGE_NAME
-import moe.shizuku.manager.utils.ApkUtils.changePackageName
-import moe.shizuku.manager.utils.ApkUtils.createStubApk
-import moe.shizuku.manager.utils.ApkUtils.workDir
+import moe.shizuku.manager.core.utils.ORIGINAL_PACKAGE_NAME
+import moe.shizuku.manager.core.utils.changePackageName
+import moe.shizuku.manager.core.utils.createStubApk
+import moe.shizuku.manager.core.utils.workDir
 import java.io.File
 
 sealed class UiState {

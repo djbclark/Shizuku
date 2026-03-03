@@ -23,6 +23,7 @@ import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.KeyValueEntry
 import moe.shizuku.manager.core.data.preferences.PreferenceKeys
+import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
@@ -80,7 +81,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         startModePreference.setOnPreferenceClickListener {
             val currentStartMode = viewModel.uiState.value.startModeValue
-
             startModeBottomSheet.show(currentValue = currentStartMode)
             true
         }
@@ -229,43 +229,50 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.settings, null)
     }
 
-    private val startModeBottomSheet = RadioButtonBottomSheet(
-        context = requireContext(),
-        onConfirm = { viewModel.onStartModeChanged(it) }
-    )
+    private val startModeBottomSheet by lazy {
+        RadioButtonBottomSheet(
+            context = requireContext(),
+            titleRes = R.string.start_mode,
+            entries = StartMode.entries,
+            getLabel = { getString(it.labelRes) },
+            getDescription = { viewModel.getStartModeDescription(it) },
+            isEnabled = { viewModel.getStartModeSelectable(it) },
+            onConfirm = { viewModel.onStartModeChanged(it) }
+        )
+    }
 
-    private val tcpPortDialog = TextInputDialog(
-        context = requireContext(),
-        titleRes = R.string.settings_tcp_port,
-        placeholder = PreferenceKeys.TCP_PORT.default.toString(),
-        inputType = InputType.TYPE_CLASS_NUMBER,
-        maxLength = 5,
-        inputValidation = { input ->
-            val port = input?.toIntOrNull()
-            val isValid = (port == null) || (port in 1..65535)
-            if (!isValid) R.string.tcp_error_invalid_port else null
-        },
-        onConfirm = { input ->
-            val port = input.toIntOrNull() ?: PreferenceKeys.TCP_PORT.default
-            viewModel.onTcpPortChanged(port)
-        }
-    )
+    private val tcpPortDialog by lazy {
+        TextInputDialog(
+            context = requireContext(),
+            titleRes = R.string.settings_tcp_port,
+            placeholder = PreferenceKeys.TCP_PORT.default.toString(),
+            inputType = InputType.TYPE_CLASS_NUMBER,
+            maxLength = 5,
+            inputValidation = { viewModel.validatePort(it) },
+            onConfirm = { viewModel.onTcpPortChanged(it) }
+        )
+    }
 
-    private val themeDialog = RadioButtonDialog(
-        context = requireContext(),
-        titleRes = R.string.settings_theme,
-        entries = Theme.entries,
-        getLabel = { getString(it.labelRes) },
-        onConfirm = { viewModel.onThemeChanged(it) }
-    )
+    private val themeDialog by lazy {
+        RadioButtonDialog(
+            context = requireContext(),
+            titleRes = R.string.settings_theme,
+            entries = Theme.entries,
+            getLabel = { getString(it.labelRes) },
+            positiveLabel = R.string.apply,
+            onConfirm = { viewModel.onThemeChanged(it) }
+        )
+    }
 
-    private val updateChannelDialog = RadioButtonDialog(
-        context = requireContext(),
-        titleRes = R.string.settings_update_channel,
-        entries = UpdateChannel.entries,
-        getLabel = { getString(it.labelRes) },
-        onConfirm = { viewModel.onUpdateChannelChanged(it) }
-    )
+    private val updateChannelDialog by lazy {
+        RadioButtonDialog(
+            context = requireContext(),
+            titleRes = R.string.settings_update_channel,
+            entries = UpdateChannel.entries,
+            getLabel = { getString(it.labelRes) },
+            onConfirm = { viewModel.onUpdateChannelChanged(it) }
+        )
+    }
 
     private fun showStartOnBootBugDialog() =
         MaterialAlertDialogBuilder(requireContext()).setTitle(android.R.string.dialog_alert_title)
@@ -275,7 +282,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }.setNegativeButton(android.R.string.cancel, null).show()
 
     private fun showBatteryOptimizationSnackbar() = snackbar(
-        msg = R.string.settings_battery_optimization, actionText = R.string.fix, action = {
+        msg = R.string.settings_battery_optimization,
+        actionText = R.string.fix,
+        action = {
             val intent = PowerManagerHelper.getBatteryOptimizationIntent()
             batteryOptimizationLauncher.launch(intent)
         })

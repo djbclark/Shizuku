@@ -2,6 +2,7 @@ package moe.shizuku.manager.settings.ui
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,9 +57,7 @@ class SettingsViewModel : ViewModel() {
             state.copy(
                 startModeValue = startMode,
 
-                isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                        || isTelevision
-                        || isRooted,
+                isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || isTelevision || isRooted,
                 startOnBootValue = PreferencesRepository.getStartOnBoot(),
 
                 watchdogValue = PreferencesRepository.getWatchdog(),
@@ -69,7 +68,7 @@ class SettingsViewModel : ViewModel() {
                 isTcpPortVisible = isTcpModeVisible && isTcpModeEnabled,
                 tcpPortValue = PreferencesRepository.getTcpPort(),
 
-                isAutoDisableUsbDebuggingVisible = startMode != StartMode.ROOT,
+                isAutoDisableUsbDebuggingVisible = startMode == StartMode.WADB,
 
                 languageValue = LocaleHelper.getLocaleDisplayName(),
                 themeValue = PreferencesRepository.getTheme(),
@@ -84,26 +83,36 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    fun getStartModeDescription(startMode: StartMode): Int? = when (startMode) {
+        StartMode.WADB -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            R.string.wireless_debugging_requirement
+        } else {
+            R.string.wireless_debugging_requirement_pre_11
+        }
+
+        StartMode.ROOT -> null
+    }
+
+    fun getStartModeSelectable(startMode: StartMode): Boolean = when (startMode) {
+        StartMode.WADB -> true
+        StartMode.ROOT -> EnvironmentUtils.isRooted()
+    }
+
     fun onStartModeChanged(newValue: StartMode) {
         PreferencesRepository.setStartMode(newValue)
         updateUiState()
     }
 
     fun onStartOnBootChanged(newValue: Boolean) {
-        if (!newValue || PowerManagerHelper.isIgnoringBatteryOptimizations() || EnvironmentUtils.isTelevision()) {
-            applyStartOnBootChange(newValue)
-            return
+        if (shouldRequestBatteryOptimization(newValue)) {
+            requestBatteryOptimization(PreferenceKeys.START_ON_BOOT)
         }
-
         // https://r.android.com/2128832
-        if (!EnvironmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        else if (!EnvironmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             _events.trySend(SettingsEvent.ShowStartOnBootBugDialog)
+        } else {
+            applyStartOnBootChange(newValue)
         }
-
-        pendingBatteryOptimization = PreferenceKeys.START_ON_BOOT
-        _events.trySend(
-            SettingsEvent.RequestBatteryOptimization
-        )
     }
 
     fun applyStartOnBootChange(newValue: Boolean) {
@@ -112,7 +121,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun onWatchdogChanged(newValue: Boolean) {
-        if (newValue && shouldRequestBatteryOptimization()) {
+        if (shouldRequestBatteryOptimization(newValue)) {
             requestBatteryOptimization(PreferenceKeys.WATCHDOG)
         } else {
             PreferencesRepository.setWatchdog(newValue)
@@ -121,17 +130,16 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun onTcpModeChanged(newValue: Boolean) {
-        val isTcpEnabled = EnvironmentUtils.getAdbTcpPort() > 0
-        val isServiceRunning = ShizukuStateMachine.isRunning()
+        val isTcpModeActive = EnvironmentUtils.getAdbTcpPort() > 0
 
-        if (isTcpEnabled == newValue) {
+        if (isTcpModeActive == newValue) {
             applyTcpModeChange(newValue)
             return
         }
 
         when {
             // Service is running - restart required
-            isServiceRunning -> {
+            ShizukuStateMachine.isRunning() -> {
                 _events.trySend(SettingsEvent.PromptRestart(PreferenceKeys.TCP_MODE, true))
             }
             // Service is stopped, but user is disabling TCP mode
@@ -150,7 +158,14 @@ class SettingsViewModel : ViewModel() {
         updateUiState()
     }
 
-    fun onTcpPortChanged(newPort: Int) {
+    fun validatePort(input: String?): Int? {
+        val port = input?.toIntOrNull()
+        val isValid = (port == null) || (port in 1..65535)
+        return if (!isValid) R.string.tcp_error_invalid_port else null
+    }
+
+    fun onTcpPortChanged(input: String) {
+        val newPort = input.toIntOrNull() ?: PreferenceKeys.TCP_PORT.default
         val currentPort = EnvironmentUtils.getAdbTcpPort()
         val needsRestart = (currentPort > 0) && (currentPort != newPort)
 
@@ -217,8 +232,10 @@ class SettingsViewModel : ViewModel() {
     }
 
     // Battery optimization logic
-    private fun shouldRequestBatteryOptimization() =
-        !PowerManagerHelper.isIgnoringBatteryOptimizations() && !EnvironmentUtils.isTelevision()
+    private fun shouldRequestBatteryOptimization(settingsValue: Boolean) =
+        settingsValue &&
+                !PowerManagerHelper.isIgnoringBatteryOptimizations() &&
+                !EnvironmentUtils.isTelevision()
 
     private fun requestBatteryOptimization(pref: KeyValueEntry<*>) {
         pendingBatteryOptimization = pref
@@ -229,8 +246,8 @@ class SettingsViewModel : ViewModel() {
         val setting = pendingBatteryOptimization ?: return
         if (PowerManagerHelper.isIgnoringBatteryOptimizations()) {
             when (setting) {
-                PreferenceKeys.START_ON_BOOT -> PreferencesRepository.setStartOnBoot(true)
-                PreferenceKeys.WATCHDOG -> PreferencesRepository.setWatchdog(true)
+                PreferenceKeys.START_ON_BOOT -> onStartOnBootChanged(true)
+                PreferenceKeys.WATCHDOG -> onWatchdogChanged(true)
             }
         }
         pendingBatteryOptimization = null

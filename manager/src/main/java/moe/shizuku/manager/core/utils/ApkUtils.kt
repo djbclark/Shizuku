@@ -1,4 +1,4 @@
-package moe.shizuku.manager.utils.ApkUtils
+package moe.shizuku.manager.core.utils
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -17,8 +17,8 @@ import com.reandroid.common.Namespace
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.core.utils.ApkSigner
 import java.io.File
+import kotlin.collections.iterator
 
 const val ORIGINAL_PACKAGE_NAME = "moe.shizuku.privileged.api"
 

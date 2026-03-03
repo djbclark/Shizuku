@@ -29,6 +29,7 @@ fun String.appendRandomSuffix(n: Int = 5): String {
 fun String.capitalize(locale: Locale): String =
     replaceFirstChar { it.uppercase(locale) }
 
+// TODO remove these extension functions
 fun String.asLink(url: String): CharSequence {
     return SpannableString(this).apply {
         setSpan(object : ClickableSpan() {

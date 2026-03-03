@@ -110,17 +110,17 @@ constructor(
         binding.summary.text = summary
     }
 
-    private fun stopButton() {
-        if (ShizukuStateMachine.isRunning()) {
-            MaterialAlertDialogBuilder(context)
-                .setMessage(R.string.stop_dialog_message)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
-                    runCatching { Shizuku.exit() }
-                }.setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
-    }
+//    private fun stopButton() {
+//        if (ShizukuStateMachine.isRunning()) {
+//            MaterialAlertDialogBuilder(context)
+//                .setMessage(R.string.stop_dialog_message)
+//                .setPositiveButton(android.R.string.ok) { _, _ ->
+//                    ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
+//                    runCatching { Shizuku.exit() }
+//                }.setNegativeButton(android.R.string.cancel, null)
+//                .show()
+//        }
+//    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun onPairClicked(context: Context) {
