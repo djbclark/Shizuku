@@ -230,18 +230,8 @@
     <string name="settings_battery_optimization">Please disable battery optimization to use
         this feature.</string>
 
-    <!-- Settings - Behavior -->
-    <string name="settings_behavior">Behavior</string>
-    <string name="settings_start_on_boot">Start on boot</string>
-    <string name="settings_start_on_boot_summary">Requires Android 11+ or root</string>
-    <string name="settings_start_on_boot_bug">Due to a bug in Android 11-12, wireless debugging does
-        not remember any authorized networks.\n\nYou will need to re-authorize the network on each
-        reboot by tapping \"Allow\" when the authorization dialog pops up.</string>
-    <string name="settings_auto_disable_usb_debugging">Auto-disable USB debugging</string>
-    <string name="settings_auto_disable_usb_debugging_summary">Disable USB debugging when stopping
-        Shizuku. It will be re-enabled when Shizuku starts again.</string>
-
-    <!-- Settings - Behavior - Launch Mode -->
+    <!-- Settings - Start mode -->
+    <string name="settings_service">Service</string>
     <string name="start_mode">Start mode</string>
     <string name="root">Root</string>
     <string name="wireless_debugging">Wireless debugging</string>
@@ -249,7 +239,14 @@
         is only needed once per reboot</string>
     <string name="wireless_debugging_requirement_pre_11">Requires opening a TCP port from a PC after each reboot</string>
 
-    <!-- Settings - Behavior - Watchdog -->
+    <!-- Settings - Start on boot -->
+    <string name="settings_start_on_boot">Start on boot</string>
+    <string name="settings_start_on_boot_summary">Requires Android 11+ or root</string>
+    <string name="settings_start_on_boot_bug">Due to a bug in Android 11-12, wireless debugging does
+        not remember any authorized networks.\n\nYou will need to re-authorize the network on each
+        reboot by tapping \"Allow\" when the authorization dialog pops up.</string>
+
+    <!-- Settings - Watchdog -->
     <string name="settings_watchdog">Watchdog</string>
     <string name="settings_watchdog_summary">Automatically restart Shizuku if it crashes</string>
     <string name="watchdog_running">Watchdog is running</string>
@@ -258,7 +255,7 @@
         potential fixes to prevent future crashes.</string>
     <string name="watchdog_disable_alerts">Disable alerts</string>
 
-    <!-- Settings - Behavior - TCP -->
+    <!-- Settings - TCP -->
     <string name="settings_tcp_mode">TCP mode</string>
     <string name="settings_tcp_mode_summary">When enabled, Wi-Fi is only needed to start Shizuku
         once per reboot</string>
@@ -267,18 +264,21 @@
     <string name="tcp_close_port_message">You will need Wi-Fi to turn on TCP mode again.</string>
     <string name="tcp_error_closing">Couldn\'t close TCP port</string>
     <string name="tcp_error_invalid_port">Port must be between 1 and 65535</string>
-    <string name="tcp_restart_required">Restart required</string>
-    <string name="tcp_restart_required_message">The service must be restarted to apply this setting.</string>
-    <string name="tcp_restart_required_message_wifi_required">Shizuku will keep running and wait for
-        a Wi-Fi connection before restarting in the background.</string>
+    <string name="tcp_restarting">Restarting the service to apply changes…</string>
+    <string name="tcp_restarting_wifi">Restarting the service once Wi-Fi is connected to apply changes…</string>
+
+    <!-- Settings - Auto-disable USB debugging -->
+    <string name="settings_auto_disable_usb_debugging">Auto-disable USB debugging</string>
+    <string name="settings_auto_disable_usb_debugging_summary">Disable USB debugging when stopping
+        Shizuku. It will be re-enabled when Shizuku starts again.</string>
 
     <!-- Settings - Appearance -->
-    <string name="settings_user_interface">Appearance</string>
+    <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
-    <string name="settings_follow_system">Follow system</string>
+    <string name="settings_system">System default</string>
     <string name="settings_amoled_black">AMOLED black</string>
     <string name="settings_dynamic_color">Dynamic color</string>
     <string name="settings_dynamic_color_summary">Match your device\'s wallpaper color</string>
@@ -290,7 +290,6 @@
     <string name="settings_update_channel_beta">Beta</string>
 
     <!-- Settings - Advanced -->
-    <string name="settings_advanced">Advanced</string>
     <string name="settings_legacy_pairing">Legacy pairing</string>
     <string name="settings_legacy_pairing_summary">Enter the pairing code in a dialog instead of a
         notification</string>

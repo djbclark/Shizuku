@@ -31,7 +31,7 @@ object LocaleHelper {
         val locales = context.getSupportedLocales()
 
         val followSystem = LocaleEntry(
-            context.getString(R.string.settings_follow_system), "", ""
+            context.getString(R.string.settings_system), "", ""
         )
 
         val sortedLanguages = locales.map { locale ->

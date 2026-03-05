@@ -21,9 +21,7 @@ class RadioButtonBottomSheet<T>(
         val layoutInflater = LayoutInflater.from(context)
         val binding = RadioButtonBottomSheetBinding.inflate(layoutInflater)
 
-        var selectedValue = currentValue
         val dialog = BottomSheetDialog(context)
-        val itemBindings = mutableListOf<RadioButtonListItemBinding>()
 
         entries.forEach { entry ->
             val itemBinding = RadioButtonListItemBinding.inflate(layoutInflater, binding.container, false)
@@ -37,34 +35,27 @@ class RadioButtonBottomSheet<T>(
                     context.getString(it)
                 }
                 description.isVisible = descriptionText != null
-                
-                radioButton.isChecked = entry == selectedValue
-                
+
+                radioButton.isChecked = entry == currentValue
+
                 root.isEnabled = enabled
                 title.isEnabled = enabled
                 description.isEnabled = enabled
                 radioButton.isEnabled = enabled
-                
+
                 root.setOnClickListener {
                     if (enabled) {
-                        selectedValue = entry
-                        itemBindings.forEachIndexed { index, b ->
-                            b.radioButton.isChecked = entries[index] == selectedValue
-                        }
+                        onConfirm(entry)
+                        dialog.dismiss()
                     }
                 }
             }
-            itemBindings.add(itemBinding)
             binding.container.addView(itemBinding.root)
         }
 
         binding.apply {
             title.setText(titleRes)
-            buttonCancel.setOnClickListener {
-                dialog.dismiss()
-            }
-            buttonSave.setOnClickListener {
-                onConfirm(selectedValue)
+            buttonClose.setOnClickListener {
                 dialog.dismiss()
             }
         }

@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2sp"
             android:textAppearance="?textAppearanceBodyMedium"
-            android:textColor="?textColorOnSurfaceHighEmphasis"
+            android:textColor="?colorOnSurface"
             android:textSize="14sp"
             tools:text="moe.shizuku.manager" />
 

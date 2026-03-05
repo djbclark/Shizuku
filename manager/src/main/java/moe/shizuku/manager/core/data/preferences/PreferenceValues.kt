@@ -16,7 +16,7 @@ enum class Theme(
     override val value: Int,
     @get:StringRes val labelRes: Int
 ) : IntEnum {
-    SYSTEM(-1, R.string.follow_system),
+    SYSTEM(-1, R.string.settings_system),
     LIGHT(1, R.string.settings_theme_light),
     DARK(2, R.string.settings_theme_dark)
 }

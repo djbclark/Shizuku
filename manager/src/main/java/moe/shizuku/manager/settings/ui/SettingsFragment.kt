@@ -30,7 +30,7 @@ import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.ui.components.snackbar
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
-import moe.shizuku.manager.settings.ui.components.RadioButtonDialog
+import moe.shizuku.manager.settings.ui.components.RadioButtonBottomSheet
 import moe.shizuku.manager.settings.ui.components.TextInputDialog
 import moe.shizuku.manager.settings.ui.components.locale.LocaleBottomSheet
 
@@ -64,8 +64,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             by lazy { find(PreferenceKeys.UPDATE_CHANNEL) }
     private val legacyPairingPreference: TwoStatePreference
             by lazy { find(PreferenceKeys.LEGACY_PAIRING) }
-    private val advancedCategory: PreferenceCategory
-            by lazy { findPreference("category_advanced")!! }
+    private val wirelessDebuggingCategory: PreferenceCategory
+            by lazy { findPreference("category_wireless_debugging")!! }
 
     private val batteryOptimizationLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -116,16 +116,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        amoledBlackPreference.setOnPreferenceChangeListener { _, _ ->
-            viewModel.onAmoledBlackChanged()
-            true
-        }
-
-        dynamicColorPreference.setOnPreferenceChangeListener { _, _ ->
-            viewModel.onDynamicColorChanged()
-            true
-        }
-
         updateChannelPreference.setOnPreferenceClickListener {
             val currentUpdateChannel = viewModel.uiState.value.updateChannelValue
             updateChannelDialog.show(currentValue = currentUpdateChannel)
@@ -156,7 +146,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun updateUi(state: SettingsUiState) {
         startModePreference.summary = getString(state.startModeValue.labelRes)
-
         startOnBootPreference.apply {
             isEnabled = state.isStartOnBootToggleable
             isChecked = state.startOnBootValue
@@ -166,32 +155,26 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 getString(R.string.settings_start_on_boot_summary)
             }
         }
-
         watchdogPreference.isChecked = state.watchdogValue
 
+        wirelessDebuggingCategory.isVisible = state.isWirelessDebuggingCategoryVisible
         tcpModePreference.apply {
             isVisible = state.isTcpModeVisible
             isChecked = state.tcpModeValue
         }
-
         tcpPortPreference.apply {
             isVisible = state.isTcpPortVisible
             summary = state.tcpPortValue.toString()
         }
-
-        autoDisableUsbDebuggingPreference.isVisible = state.isAutoDisableUsbDebuggingVisible
+        legacyPairingPreference.isVisible = state.isLegacyPairingVisible
 
         languagePreference.summary =
-            state.languageValue ?: getString(R.string.follow_system)
-
+            state.languageValue ?: getString(R.string.settings_system)
         themePreference.summary = getString(state.themeValue.labelRes)
         amoledBlackPreference.isVisible = state.isAmoledBlackVisible
         dynamicColorPreference.isVisible = state.isDynamicColorVisible
 
         updateChannelPreference.summary = getString(state.updateChannelValue.labelRes)
-
-        legacyPairingPreference.isVisible = state.isLegacyPairingVisible
-        advancedCategory.isVisible = state.isAdvancedCategoryVisible
     }
 
     private fun handleEvent(event: SettingsEvent) {
@@ -200,8 +183,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 showBatteryOptimizationSnackbar()
             }
 
-            is SettingsEvent.PromptRestart -> {
-                promptRestart(event.setting, event.newValue)
+            is SettingsEvent.Snackbar -> {
+                snackbar(event.msg)
             }
 
             is SettingsEvent.PromptStopTcp -> {
@@ -210,10 +193,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
             is SettingsEvent.ShowStartOnBootBugDialog -> {
                 showStartOnBootBugDialog()
-            }
-
-            is SettingsEvent.RecreateActivity -> {
-                activity?.recreate()
             }
         }
     }
@@ -229,7 +208,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private val startModeBottomSheet by lazy {
-        RadioButtonDialog(
+        RadioButtonBottomSheet(
             context = requireContext(),
             titleRes = R.string.start_mode,
             entries = StartMode.entries,
@@ -253,18 +232,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private val themeDialog by lazy {
-        RadioButtonDialog(
+        RadioButtonBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_theme,
             entries = Theme.entries,
             getLabel = { getString(it.labelRes) },
-            positiveLabel = R.string.apply,
             onConfirm = { viewModel.onThemeChanged(it) }
         )
     }
 
     private val updateChannelDialog by lazy {
-        RadioButtonDialog(
+        RadioButtonBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_update_channel,
             entries = UpdateChannel.entries,
@@ -294,24 +272,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 viewModel.onStopTcp(requireContext())
             }.setNegativeButton(android.R.string.cancel, null).show()
-
-    private fun promptRestart(
-        pref: KeyValueEntry<*>,
-        newValue: Any
-    ) {
-        val msg = buildString {
-            append(getString(R.string.tcp_restart_required_message))
-            if (pref == PreferenceKeys.TCP_MODE) {
-                append("\n\n")
-                append(getString(R.string.tcp_restart_required_message_wifi_required))
-            }
-        }
-
-        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.tcp_restart_required)
-            .setMessage(msg).setPositiveButton(android.R.string.ok) { _, _ ->
-                viewModel.onRestart(pref, newValue, requireContext())
-            }.setNegativeButton(android.R.string.cancel, null).show()
-    }
 
     override fun onCreateRecyclerView(
         inflater: LayoutInflater,

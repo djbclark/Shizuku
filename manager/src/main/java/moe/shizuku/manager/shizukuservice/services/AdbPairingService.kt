@@ -28,6 +28,7 @@ import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.ui.MainActivity
+import moe.shizuku.manager.core.ui.ThemeHelper
 import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.home.HomeFragment
 import java.net.ConnectException
@@ -254,7 +255,7 @@ class AdbPairingService : Service() {
             NOTIFICATION_ID,
             Notification
                 .Builder(this, NOTIFICATION_CHANNEL)
-                .setColor(getColor(R.color.notification))
+                .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
                 .setSmallIcon(R.drawable.ic_system_icon)
                 .setContentTitle(title)
                 .setContentText(text)
@@ -402,7 +403,7 @@ class AdbPairingService : Service() {
     private val searchingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(getColor(R.color.notification))
+            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
             .setSmallIcon(R.drawable.ic_system_icon)
             .setContentTitle(getString(R.string.pairing_searching))
             .addAction(stopNotificationAction)
@@ -412,7 +413,7 @@ class AdbPairingService : Service() {
     private fun createInputNotification(port: Int): Notification =
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(getColor(R.color.notification))
+            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
             .setContentTitle(getString(R.string.pairing_service_found))
             .setSmallIcon(R.drawable.ic_system_icon)
             .addAction(replyNotificationAction(port))
@@ -421,7 +422,7 @@ class AdbPairingService : Service() {
     private val workingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(getColor(R.color.notification))
+            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
             .setContentTitle(getString(R.string.pairing_in_progress))
             .setSmallIcon(R.drawable.ic_system_icon)
             .build()

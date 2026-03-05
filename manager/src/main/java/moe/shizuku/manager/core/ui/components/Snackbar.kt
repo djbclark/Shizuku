@@ -23,8 +23,6 @@ fun Fragment.snackbar(
     snackbar.show()
 }
 
-// Convenience overloads for resource IDs
-
 fun Fragment.snackbar(
     @StringRes msg: Int,
     duration: Int = Snackbar.LENGTH_SHORT,
@@ -32,18 +30,6 @@ fun Fragment.snackbar(
     action: (() -> Unit)? = null
 ) = snackbar(
     getString(msg),
-    duration,
-    actionText?.let { getString(it) },
-    action
-)
-
-fun Fragment.snackbar(
-    msg: CharSequence,
-    duration: Int = Snackbar.LENGTH_SHORT,
-    @StringRes actionText: Int? = null,
-    action: (() -> Unit)? = null
-) = snackbar(
-    msg,
     duration,
     actionText?.let { getString(it) },
     action

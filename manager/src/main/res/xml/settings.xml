@@ -10,8 +10,8 @@
         app:layout="@layout/preference_empty" />
 
     <PreferenceCategory
-        android:key="category_behavior"
-        android:title="@string/settings_behavior">
+        android:key="category_service"
+        android:title="@string/settings_service">
 
         <Preference
             android:key="start_mode"
@@ -25,6 +25,12 @@
             android:key="watchdog"
             android:summary="@string/settings_watchdog_summary"
             android:title="@string/settings_watchdog" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="category_wireless_debugging"
+        android:title="@string/wireless_debugging">
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
@@ -41,11 +47,16 @@
             android:summary="@string/settings_auto_disable_usb_debugging_summary"
             android:title="@string/settings_auto_disable_usb_debugging" />
 
+        <SwitchPreferenceCompat
+            android:key="legacy_pairing"
+            android:summary="@string/settings_legacy_pairing_summary"
+            android:title="@string/settings_legacy_pairing" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="category_ui"
-        android:title="@string/settings_user_interface">
+        android:title="@string/settings_appearance">
 
         <Preference
             android:key="language"
@@ -78,17 +89,6 @@
         <Preference
             android:key="update_channel"
             android:title="@string/settings_update_channel" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="category_advanced"
-        android:title="@string/settings_advanced">
-
-        <SwitchPreferenceCompat
-            android:key="legacy_pairing"
-            android:summary="@string/settings_legacy_pairing_summary"
-            android:title="@string/settings_legacy_pairing" />
 
     </PreferenceCategory>
 

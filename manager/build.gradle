@@ -7,7 +7,6 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.plugin.serialization"
     id "dev.rikka.tools.refine"
-    id "dev.rikka.tools.materialthemebuilder"
 }
 
 android {
@@ -68,27 +67,6 @@ android {
     lint {
         checkReleaseBuilds = false
     }
-}
-
-materialThemeBuilder {
-    themes {
-        shizuku {
-            primaryColor = "#3F51B5"
-            lightThemeFormat = "Theme.Material3Expressive.Light.%s"
-            lightThemeParent = "Theme.Material3Expressive.Light"
-            darkThemeFormat = "Theme.Material3Expressive.Dark.%s"
-            darkThemeParent = "Theme.Material3Expressive.Dark"
-        }
-        dynamic_colors_overlay {
-            dynamicColors = true
-            lightThemeFormat = "ThemeOverlay.Material3.DynamicColors.Light.Shizuku"
-            lightThemeParent = "ThemeOverlay.Material3.DynamicColors.Light"
-            darkThemeFormat = "ThemeOverlay.Material3.DynamicColors.Dark.Shizuku"
-            darkThemeParent = "ThemeOverlay.Material3.DynamicColors.Dark"
-        }
-    }
-    generatePalette = true
-    generateTextColors = true
 }
 
 def collapseReleaseResourceNames = tasks.register("collapseReleaseResourceNames") {

@@ -13,6 +13,7 @@ import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.preferences.PreferenceSync
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.ui.LocaleHelper
+import moe.shizuku.manager.core.ui.ThemeHelper
 import moe.shizuku.manager.updater.data.ReleaseRepository
 import moe.shizuku.manager.watchdog.services.WatchdogManager
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -51,6 +52,8 @@ class ShizukuApplication : Application() {
 
         // Should be declared first because other dependencies may require key-value storage
         KeyValueDataSource.init(context)
+
+        ThemeHelper.init(this)
 
         PowerManagerHelper.init(context)
         WatchdogManager.init(context, applicationScope)

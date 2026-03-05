@@ -2,7 +2,6 @@ package moe.shizuku.manager.settings.ui
 
 import android.content.Context
 import android.os.Build
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -47,37 +46,29 @@ class SettingsViewModel : ViewModel() {
         val isRooted = EnvironmentUtils.isRooted()
         val startMode = PreferencesRepository.getStartMode()
 
-        val isTcpModeVisible = startMode == StartMode.WADB
+        val isTcpModeVisible = EnvironmentUtils.isTlsSupported()
         val isTcpModeEnabled = PreferencesRepository.getTcpMode()
-
-        val isLegacyPairingVisible = !isTelevision
 
         _uiState.update { state ->
             state.copy(
                 startModeValue = startMode,
-
                 isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || isTelevision || isRooted,
                 startOnBootValue = PreferencesRepository.getStartOnBoot(),
-
                 watchdogValue = PreferencesRepository.getWatchdog(),
 
+                isWirelessDebuggingCategoryVisible = startMode == StartMode.WADB,
                 isTcpModeVisible = isTcpModeVisible,
                 tcpModeValue = isTcpModeEnabled,
-
                 isTcpPortVisible = isTcpModeVisible && isTcpModeEnabled,
                 tcpPortValue = PreferencesRepository.getTcpPort(),
-
-                isAutoDisableUsbDebuggingVisible = startMode == StartMode.WADB,
+                isLegacyPairingVisible = !isTelevision,
 
                 languageValue = LocaleHelper.getLocaleDisplayName(),
                 themeValue = PreferencesRepository.getTheme(),
                 isAmoledBlackVisible = PreferencesRepository.getTheme() != Theme.LIGHT,
                 isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
 
-                updateChannelValue = PreferencesRepository.getUpdateChannel(),
-
-                isLegacyPairingVisible = isLegacyPairingVisible,
-                isAdvancedCategoryVisible = isLegacyPairingVisible
+                updateChannelValue = PreferencesRepository.getUpdateChannel()
             )
         }
     }
@@ -136,19 +127,13 @@ class SettingsViewModel : ViewModel() {
             return
         }
 
-        when {
-            // Service is running - restart required
-            ShizukuStateMachine.isRunning() -> {
-                _events.trySend(SettingsEvent.PromptRestart(PreferenceKeys.TCP_MODE, true))
+        if (!newValue) {
+            _events.trySend(SettingsEvent.PromptStopTcp)
+        } else {
+            if (ShizukuStateMachine.isRunning()) {
+                _events.trySend(SettingsEvent.Snackbar(R.string.tcp_restarting_wifi))
             }
-            // Service is stopped, but user is disabling TCP mode
-            !newValue -> {
-                _events.trySend(SettingsEvent.PromptStopTcp)
-            }
-            // Service is stopped and user is enabling TCP mode
-            else -> {
-                applyTcpModeChange(true)
-            }
+            applyTcpModeChange(true)
         }
     }
 
@@ -166,13 +151,14 @@ class SettingsViewModel : ViewModel() {
     fun onTcpPortChanged(input: String) {
         val newPort = input.toIntOrNull() ?: PreferenceKeys.TCP_PORT.default
         val currentPort = EnvironmentUtils.getAdbTcpPort()
-        val needsRestart = (currentPort > 0) && (currentPort != newPort)
+        val needsRestart = (currentPort != newPort)
 
         if (ShizukuStateMachine.isRunning() && needsRestart) {
-            _events.trySend(SettingsEvent.PromptRestart(PreferenceKeys.TCP_PORT, newPort))
+            _events.trySend(SettingsEvent.Snackbar(R.string.tcp_restarting))
         } else {
-            applyTcpPortChange(newPort)
+            // TODO cancel pending restart
         }
+        applyTcpPortChange(newPort)
     }
 
     fun applyTcpPortChange(newValue: Int) {
@@ -184,18 +170,8 @@ class SettingsViewModel : ViewModel() {
     fun onThemeChanged(value: Theme) {
         if (PreferencesRepository.getTheme() != value) {
             PreferencesRepository.setTheme(value)
-            AppCompatDelegate.setDefaultNightMode(value.value)
             updateUiState()
-            _events.trySend(SettingsEvent.RecreateActivity)
         }
-    }
-
-    fun onAmoledBlackChanged() {
-        _events.trySend(SettingsEvent.RecreateActivity)
-    }
-
-    fun onDynamicColorChanged() {
-        _events.trySend(SettingsEvent.RecreateActivity)
     }
 
     fun onUpdateChannelChanged(value: UpdateChannel) {
