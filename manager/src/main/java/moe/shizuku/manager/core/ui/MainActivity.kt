@@ -2,8 +2,8 @@ package moe.shizuku.manager.core.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -17,12 +17,12 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        WindowCompat.enableEdgeToEdge(window)
 
         binding = AppbarFragmentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         setupUI()
 
         maybeDeepLinkToSettings(intent)
@@ -34,7 +34,8 @@ open class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.appbar.toolbar)
 
         // Navigation Setup
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         navController = navHostFragment.navController
 
         // Connect them

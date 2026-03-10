@@ -22,7 +22,6 @@ import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.ui.LocaleHelper
 import moe.shizuku.manager.core.ui.components.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
-import moe.shizuku.manager.receiver.ShizukuReceiverStarter
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -63,7 +62,7 @@ class SettingsViewModel : ViewModel() {
                 tcpPortValue = PreferencesRepository.getTcpPort(),
                 isLegacyPairingVisible = !isTelevision,
 
-                languageValue = LocaleHelper.getLocaleDisplayName(),
+                languageValue = LocaleHelper.getLocale(),
                 themeValue = PreferencesRepository.getTheme(),
                 isAmoledBlackVisible = PreferencesRepository.getTheme() != Theme.LIGHT,
                 isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,

@@ -5,22 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:overScrollMode="ifContentScrolls"
         app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/footer_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <LinearLayout
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-    </androidx.core.widget.NestedScrollView>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="600dp"
+        tools:itemCount="3"
+        tools:listitem="@layout/radio_button_list_item" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/footer"
@@ -29,18 +26,19 @@
         app:constraint_referenced_ids="footer_icon, footer_text" />
 
     <ImageView
-        android:id="@+id/footer_icon"        android:layout_width="20dp"
+        android:id="@+id/footer_icon"
+        android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginStart="@dimen/dialog_horizontal_padding"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="8dp"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_outline_info_24"
-        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/footer_text"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/footer_text"
+        app:layout_constraintTop_toBottomOf="@id/list"
         app:layout_constraintVertical_bias="0"
         app:tint="?colorOnSurfaceVariant" />
 
@@ -48,16 +46,16 @@
         android:id="@+id/footer_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="8dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="@dimen/dialog_horizontal_padding"
-        android:layout_marginVertical="8dp"
         android:textAppearance="?textAppearanceBodySmall"
         android:textColor="?colorOnSurfaceVariant"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth_max="600dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/footer_icon"
-        app:layout_constraintTop_toBottomOf="@id/scroll_view"
-        tools:text="@tools:sample/lorem/random" />
+        app:layout_constraintTop_toBottomOf="@id/list"
+        app:layout_constraintWidth_max="600dp"
+        tools:text="Footer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 package moe.shizuku.manager.core.data
 
-interface IntEnum {
+interface KeyValueEnum {
     val value: Int
 }

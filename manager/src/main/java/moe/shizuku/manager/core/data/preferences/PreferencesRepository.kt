@@ -1,9 +1,7 @@
 package moe.shizuku.manager.core.data.preferences
 
-import kotlinx.coroutines.flow.combine
-import moe.shizuku.manager.core.models.ThemeConfig
-import moe.shizuku.manager.core.data.IntEnumStore as enumPrefs
 import moe.shizuku.manager.core.data.KeyValueDataSource as prefs
+import moe.shizuku.manager.core.data.KeyValueEnumStore as enumPrefs
 
 object PreferencesRepository {
 
@@ -50,14 +48,6 @@ object PreferencesRepository {
     fun observeAmoledBlack() = prefs.observe(PreferenceKeys.AMOLED_BLACK)
 
     fun observeDynamicColor() = prefs.observe(PreferenceKeys.DYNAMIC_COLOR)
-
-    fun observeThemeSettings() = combine(
-        observeTheme(),
-        observeAmoledBlack(),
-        observeDynamicColor()
-    ) { theme, amoled, dynamic ->
-        ThemeConfig(theme, amoled, dynamic)
-    }
 
     // -------------------------
     // SETTERS

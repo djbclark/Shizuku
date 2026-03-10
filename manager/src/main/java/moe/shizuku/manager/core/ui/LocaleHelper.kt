@@ -8,7 +8,6 @@ import android.os.LocaleList
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import moe.shizuku.manager.R
 import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.KeyValueEntry
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -26,30 +25,20 @@ object LocaleHelper {
         val tag: String
     )
 
+    val systemDefaultEntry = LocaleEntry("", "", "")
+
     fun getLocaleEntries(context: Context): List<LocaleEntry> {
-        val currentLocale = Locale.getDefault()
         val locales = context.getSupportedLocales()
 
-        val systemDefault = LocaleEntry(
-            context.getString(R.string.settings_system), "", ""
-        )
+        val sortedLanguages = locales.map { it.toLocaleEntry() }
+            .sortedBy { it.nameOwnLocale.lowercase() }
 
-        val sortedLanguages = locales.map { locale ->
-            val nameOwnLocale = locale.getDisplayName(locale)
-                .capitalize(locale)
-            val nameCurrentLocale = locale.getDisplayName(currentLocale)
-                .capitalize(currentLocale)
-
-            LocaleEntry(nameOwnLocale, nameCurrentLocale, locale.toLanguageTag())
-        }.sortedBy { it.nameOwnLocale.lowercase() }
-
-        return listOf(systemDefault) + sortedLanguages
+        return listOf(systemDefaultEntry) + sortedLanguages
     }
 
-    fun getLocaleDisplayName(): String? =
-        AppCompatDelegate.getApplicationLocales().get(0)?.let { locale ->
-            locale.getDisplayName(locale).capitalize(locale)
-        }
+    fun getLocale(): LocaleEntry =
+        AppCompatDelegate.getApplicationLocales().get(0)?.toLocaleEntry()
+            ?: systemDefaultEntry
 
     fun setLocale(locale: LocaleEntry) =
         setLocale(locale.tag)
@@ -61,6 +50,15 @@ object LocaleHelper {
             LocaleListCompat.forLanguageTags(tag)
         }
         AppCompatDelegate.setApplicationLocales(locale)
+    }
+
+    private fun Locale.toLocaleEntry(): LocaleEntry {
+        val currentLocale = Locale.getDefault()
+        return LocaleEntry(
+            nameOwnLocale = getDisplayName(this).capitalize(this),
+            nameCurrentLocale = getDisplayName(currentLocale).capitalize(currentLocale),
+            tag = toLanguageTag()
+        )
     }
 
     private fun Context.getSupportedLocales(): List<Locale> {

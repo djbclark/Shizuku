@@ -27,45 +27,31 @@ import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.ui.LocaleHelper
 import moe.shizuku.manager.core.ui.components.snackbar
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
-import moe.shizuku.manager.settings.ui.components.RadioButtonBottomSheet
+import moe.shizuku.manager.settings.ui.components.SelectionBottomSheet
+import moe.shizuku.manager.settings.ui.components.SelectionBottomSheet.SelectionItem
 import moe.shizuku.manager.settings.ui.components.TextInputDialog
-import moe.shizuku.manager.settings.ui.components.locale.LocaleBottomSheet
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModels()
 
-    private fun <T : Preference> find(entry: KeyValueEntry<*>): T =
-        findPreference(entry.key)!!
+    private fun <T : Preference> find(entry: KeyValueEntry<*>): T = findPreference(entry.key)!!
 
-    private val startModePreference: Preference
-            by lazy { find(PreferenceKeys.START_MODE) }
-    private val startOnBootPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.START_ON_BOOT) }
-    private val watchdogPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.WATCHDOG) }
-    private val tcpModePreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.TCP_MODE) }
-    private val tcpPortPreference: Preference
-            by lazy { find(PreferenceKeys.TCP_PORT) }
-    private val autoDisableUsbDebuggingPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.AUTO_DISABLE_USB_DEBUGGING) }
-    private val languagePreference: Preference
-            by lazy { find(PreferenceKeys.LANGUAGE) }
-    private val themePreference: Preference
-            by lazy { find(PreferenceKeys.THEME) }
-    private val amoledBlackPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.AMOLED_BLACK) }
-    private val dynamicColorPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.DYNAMIC_COLOR) }
-    private val updateChannelPreference: Preference
-            by lazy { find(PreferenceKeys.UPDATE_CHANNEL) }
-    private val legacyPairingPreference: TwoStatePreference
-            by lazy { find(PreferenceKeys.LEGACY_PAIRING) }
-    private val wirelessDebuggingCategory: PreferenceCategory
-            by lazy { findPreference("category_wireless_debugging")!! }
+    private val startModePreference: Preference by lazy { find(PreferenceKeys.START_MODE) }
+    private val startOnBootPreference: TwoStatePreference by lazy { find(PreferenceKeys.START_ON_BOOT) }
+    private val watchdogPreference: TwoStatePreference by lazy { find(PreferenceKeys.WATCHDOG) }
+    private val tcpModePreference: TwoStatePreference by lazy { find(PreferenceKeys.TCP_MODE) }
+    private val tcpPortPreference: Preference by lazy { find(PreferenceKeys.TCP_PORT) }
+    private val languagePreference: Preference by lazy { find(PreferenceKeys.LANGUAGE) }
+    private val themePreference: Preference by lazy { find(PreferenceKeys.THEME) }
+    private val amoledBlackPreference: TwoStatePreference by lazy { find(PreferenceKeys.AMOLED_BLACK) }
+    private val dynamicColorPreference: TwoStatePreference by lazy { find(PreferenceKeys.DYNAMIC_COLOR) }
+    private val updateChannelPreference: Preference by lazy { find(PreferenceKeys.UPDATE_CHANNEL) }
+    private val legacyPairingPreference: TwoStatePreference by lazy { find(PreferenceKeys.LEGACY_PAIRING) }
+    private val wirelessDebuggingCategory: PreferenceCategory by lazy { findPreference("category_wireless_debugging")!! }
 
     private val batteryOptimizationLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -106,7 +92,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         languagePreference.setOnPreferenceClickListener {
-            LocaleBottomSheet(requireContext()).show()
+            val currentLanguage = viewModel.uiState.value.languageValue
+            languageBottomSheet.show(currentValue = currentLanguage)
             true
         }
 
@@ -168,8 +155,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
         legacyPairingPreference.isVisible = state.isLegacyPairingVisible
 
-        languagePreference.summary =
-            state.languageValue ?: getString(R.string.settings_system)
+        languagePreference.summary = state.languageValue.nameOwnLocale.takeUnless { it.isEmpty() }
+            ?: getString(R.string.settings_system)
         themePreference.summary = getString(state.themeValue.labelRes)
         amoledBlackPreference.isVisible = state.isAmoledBlackVisible
         dynamicColorPreference.isVisible = state.isDynamicColorVisible
@@ -208,16 +195,21 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private val startModeBottomSheet by lazy {
-        RadioButtonBottomSheet(
+        SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.start_mode,
-            entries = StartMode.entries,
-            getLabel = { getString(it.labelRes) },
-            getDescription = { viewModel.getStartModeDescription(it) },
             footerRes = R.string.start_mode_footer,
-            isEnabled = { viewModel.getStartModeSelectable(it) },
-            onConfirm = { viewModel.onStartModeChanged(it) }
-        )
+            entries = StartMode.entries,
+            itemMapper = {
+                SelectionItem(
+                    label = getString(it.labelRes),
+                    description = viewModel.getStartModeDescription(it)?.let { description ->
+                        getString(description)
+                    },
+                    isEnabled = viewModel.getStartModeSelectable(it)
+                )
+            },
+            onConfirm = { viewModel.onStartModeChanged(it) })
     }
 
     private val tcpPortDialog by lazy {
@@ -228,28 +220,47 @@ class SettingsFragment : PreferenceFragmentCompat() {
             inputType = InputType.TYPE_CLASS_NUMBER,
             maxLength = 5,
             inputValidation = { viewModel.validatePort(it) },
-            onConfirm = { viewModel.onTcpPortChanged(it) }
-        )
+            onConfirm = { viewModel.onTcpPortChanged(it) })
+    }
+
+    private val languageBottomSheet by lazy {
+        SelectionBottomSheet(
+            context = requireContext(),
+            titleRes = R.string.settings_language,
+            entries = LocaleHelper.getLocaleEntries(requireContext()),
+            itemMapper = { locale ->
+                SelectionItem(label = locale.nameOwnLocale.takeUnless { it.isBlank() } ?: getString(
+                    R.string.settings_system
+                ),
+                    description = locale.nameCurrentLocale.takeUnless { it.isBlank() })
+            },
+            onConfirm = { LocaleHelper.setLocale(it) })
     }
 
     private val themeDialog by lazy {
-        RadioButtonBottomSheet(
+        SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_theme,
             entries = Theme.entries,
-            getLabel = { getString(it.labelRes) },
-            onConfirm = { viewModel.onThemeChanged(it) }
-        )
+            itemMapper = {
+                SelectionItem(
+                    label = getString(it.labelRes)
+                )
+            },
+            onConfirm = { viewModel.onThemeChanged(it) })
     }
 
     private val updateChannelDialog by lazy {
-        RadioButtonBottomSheet(
+        SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_update_channel,
             entries = UpdateChannel.entries,
-            getLabel = { getString(it.labelRes) },
-            onConfirm = { viewModel.onUpdateChannelChanged(it) }
-        )
+            itemMapper = {
+                SelectionItem(
+                    label = getString(it.labelRes)
+                )
+            },
+            onConfirm = { viewModel.onUpdateChannelChanged(it) })
     }
 
     private fun showStartOnBootBugDialog() =
@@ -260,9 +271,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }.setNegativeButton(android.R.string.cancel, null).show()
 
     private fun showBatteryOptimizationSnackbar() = snackbar(
-        msg = R.string.settings_battery_optimization,
-        actionText = R.string.fix,
-        action = {
+        msg = R.string.settings_battery_optimization, actionText = R.string.fix, action = {
             val intent = PowerManagerHelper.getBatteryOptimizationIntent()
             batteryOptimizationLauncher.launch(intent)
         })
@@ -275,11 +284,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }.setNegativeButton(android.R.string.cancel, null).show()
 
     override fun onCreateRecyclerView(
-        inflater: LayoutInflater,
-        parent: ViewGroup,
-        savedInstanceState: Bundle?
-    ): RecyclerView =
-        super.onCreateRecyclerView(inflater, parent, savedInstanceState).also {
-            it.applySystemBarsPadding(bottom = true, start = true, end = true)
-        }
+        inflater: LayoutInflater, parent: ViewGroup, savedInstanceState: Bundle?
+    ): RecyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState).also {
+        it.applySystemBarsPadding(bottom = true, start = true, end = true)
+    }
 }
