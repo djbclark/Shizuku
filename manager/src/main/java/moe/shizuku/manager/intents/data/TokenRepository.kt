@@ -20,8 +20,5 @@ object TokenRepository {
         generateToken().also { setAuthToken(it) }
 
     private fun setAuthToken(value: String?) =
-        source.set(
-            AUTH_TOKEN,
-            value,
-        )
+        source.set(AUTH_TOKEN, value)
 }

@@ -7,7 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.util.Log
-import moe.shizuku.manager.watchdog.services.WatchdogService
+import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
 
 sealed class SystemSettingsPage(
     private val action: String,
@@ -67,7 +67,7 @@ sealed class SystemSettingsPage(
         object NotificationChannel : Notifications() {
             override fun buildIntent(context: Context): Intent =
                 super.buildIntent(context).apply {
-                    putExtra(Settings.EXTRA_CHANNEL_ID, WatchdogService.CRASH_CHANNEL_ID)
+                    putExtra(Settings.EXTRA_CHANNEL_ID, WatchdogNotifications.CHANNEL_ID_CRASH)
                 }
         }
     }

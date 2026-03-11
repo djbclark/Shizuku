@@ -15,7 +15,7 @@ import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
 
 class WatchdogService : Service() {
 
-    private val stateListener: (ShizukuStateMachine.State) -> Unit = {
+    private val crashListener: (ShizukuStateMachine.State) -> Unit = {
         if (it == ShizukuStateMachine.State.CRASHED) {
             WatchdogNotifications.showCrashNotification(this)
             ShizukuReceiverStarter.start(applicationContext)
@@ -25,7 +25,7 @@ class WatchdogService : Service() {
     override fun onCreate() {
         super.onCreate()
         _isRunning.value = true
-        ShizukuStateMachine.addListener(stateListener)
+        ShizukuStateMachine.addListener(crashListener)
     }
 
     override fun onStartCommand(
@@ -52,7 +52,7 @@ class WatchdogService : Service() {
     }
 
     override fun onDestroy() {
-        ShizukuStateMachine.removeListener(stateListener)
+        ShizukuStateMachine.removeListener(crashListener)
         _isRunning.value = false
         super.onDestroy()
     }

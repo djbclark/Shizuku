@@ -9,9 +9,9 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import androidx.navigation.NavDeepLinkBuilder
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
-import moe.shizuku.manager.core.ui.MainActivity
 import moe.shizuku.manager.watchdog.services.WatchdogService
 
 object WatchdogNotifications {
@@ -44,13 +44,10 @@ object WatchdogNotifications {
     fun createWatchdogNotification(context: Context): Notification {
         createChannels(context)
 
-        val launchIntent = Intent(context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        }
-        val launchPendingIntent = PendingIntent.getActivity(
-            context, 0, launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        val launchPendingIntent = NavDeepLinkBuilder(context)
+            .setGraph(R.navigation.nav_graph)
+            .setDestination(R.id.home_fragment)
+            .createPendingIntent()
 
         val stopIntent = Intent(context, WatchdogService::class.java).apply {
             action = WatchdogService.ACTION_STOP_SERVICE
