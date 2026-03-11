@@ -252,6 +252,7 @@
     <string name="settings_watchdog">Watchdog</string>
     <string name="settings_watchdog_summary">Automatically restart Shizuku if it crashes</string>
     <string name="watchdog_running">Watchdog is running</string>
+    <string name="watchdog_crash_reports">Crash Reports</string>
     <string name="watchdog_crash_alert">Shizuku crashed recently</string>
     <string name="watchdog_crash_alert_message">Watchdog restarted the service. Tap to learn about
         potential fixes to prevent future crashes.</string>

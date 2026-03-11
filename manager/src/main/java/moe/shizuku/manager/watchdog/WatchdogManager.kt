@@ -7,17 +7,15 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.watchdog.models.WatchdogState
 import moe.shizuku.manager.watchdog.services.WatchdogService
 
 object WatchdogManager {
@@ -25,58 +23,67 @@ object WatchdogManager {
     private val hasFailed = MutableStateFlow(false)
     private var transitionJob: Job? = null
 
-    private lateinit var _state: StateFlow<WatchdogState>
+    private val _state = MutableStateFlow<WatchdogState>(WatchdogState.Inactive)
     val state: StateFlow<WatchdogState> get() = _state
 
     fun init(context: Context, scope: CoroutineScope) {
-        _state = combine(
-            PreferencesRepository.observeWatchdog(),
-            WatchdogService.isRunning,
-            hasFailed
-        ) { enabled, running, failed ->
-            when {
-                enabled && running -> WatchdogState.Active
-                !enabled && !running -> WatchdogState.Inactive
+        scope.launch {
+            combine(
+                PreferencesRepository.observeWatchdog(), WatchdogService.isRunning, hasFailed
+            ) { enabled, running, failed ->
+                when {
+                    enabled && running -> WatchdogState.Active
+                    !enabled && !running -> WatchdogState.Inactive
 
-                enabled && !failed -> WatchdogState.Starting
-                !enabled && !failed -> WatchdogState.Stopping
+                    enabled && !failed -> WatchdogState.Starting
+                    !enabled && !failed -> WatchdogState.Stopping
 
-                else -> WatchdogState.Mismatch
+                    enabled && !running -> WatchdogState.Mismatch(shouldBeRunning = true)
+                    else -> WatchdogState.Mismatch(shouldBeRunning = false)
+                }
+            }.distinctUntilChanged().collect { newState ->
+                _state.value = newState
+
+                when (newState) {
+                    is WatchdogState.Active, is WatchdogState.Inactive ->
+                        hasFailed.value = false
+
+                    is WatchdogState.Starting ->
+                        transition(
+                            scope, context, WatchdogState.Active
+                        )
+
+                    is WatchdogState.Stopping ->
+                        transition(
+                            scope, context, WatchdogState.Inactive
+                        )
+
+                    else -> {}
+                }
             }
-        }.onEach { state ->
-            when (state) {
-                is WatchdogState.Starting -> transition(scope, context, WatchdogState.Active)
-                is WatchdogState.Stopping -> transition(scope, context, WatchdogState.Inactive)
-                else -> {}
-            }
-        }.stateIn(
-            scope = scope,
-            started = SharingStarted.Eagerly,
-            initialValue = WatchdogState.Inactive
-        )
+        }
     }
 
     fun retry() {
         hasFailed.value = false
     }
 
-    private fun transition(scope: CoroutineScope, context: Context, state: WatchdogState) {
-        if (transitionJob?.isActive != true) {
-            transitionJob = scope.launch {
-                runCatching {
-                    withTimeout(5000) {
-                        _state.first { it == state }
-                    }
-                }.onFailure {
-                    if (it is CancellationException) throw it
-                    hasFailed.value = true
+    private fun transition(scope: CoroutineScope, context: Context, targetState: WatchdogState) {
+        transitionJob?.cancel()
+        transitionJob = scope.launch {
+            runCatching {
+                withTimeout(5000) {
+                    state.first { it == targetState }
                 }
+            }.onFailure {
+                if (it is CancellationException) throw it
+                hasFailed.value = true
             }
-            when (state) {
-                is WatchdogState.Active -> context.startWatchdogService()
-                is WatchdogState.Inactive -> context.stopWatchdogService()
-                else -> return
-            }
+        }
+        when (targetState) {
+            is WatchdogState.Active -> context.startWatchdogService()
+            is WatchdogState.Inactive -> context.stopWatchdogService()
+            else -> return
         }
     }
 
