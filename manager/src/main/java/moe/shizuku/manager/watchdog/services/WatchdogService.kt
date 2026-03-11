@@ -5,20 +5,23 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
 import moe.shizuku.manager.core.ui.MainActivity
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import java.util.concurrent.atomic.AtomicBoolean
+
+private const val NOTIFICATION_ID_WATCHDOG = 1001
+private const val NOTIFICATION_ID_CRASH = 1002
 
 class WatchdogService : Service() {
     private val stateListener: (ShizukuStateMachine.State) -> Unit = {
@@ -30,7 +33,7 @@ class WatchdogService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        isRunning.set(true)
+        _isRunning.value = true
         ShizukuStateMachine.addListener(stateListener)
     }
 
@@ -60,7 +63,7 @@ class WatchdogService : Service() {
 
     override fun onDestroy() {
         ShizukuStateMachine.removeListener(stateListener)
-        isRunning.set(false)
+        _isRunning.value = false
         super.onDestroy()
     }
 
@@ -171,27 +174,9 @@ class WatchdogService : Service() {
     }
 
     companion object {
-        private const val NOTIFICATION_ID_WATCHDOG = 1001
-        private const val NOTIFICATION_ID_CRASH = 1002
         const val CRASH_CHANNEL_ID = "crash_reports"
+        private val _isRunning = MutableStateFlow(false)
 
-        private val isRunning = AtomicBoolean(false)
-
-        @JvmStatic
-        fun start(context: Context) {
-            try {
-                context.startForegroundService(Intent(context, WatchdogService::class.java))
-            } catch (e: Exception) {
-                Log.e("ShizukuApplication", "Failed to start WatchdogService: ${e.message}")
-            }
-        }
-
-        @JvmStatic
-        fun stop(context: Context) {
-            context.stopService(Intent(context, WatchdogService::class.java))
-        }
-
-        @JvmStatic
-        fun isRunning(): Boolean = isRunning.get()
+        val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
     }
 }
