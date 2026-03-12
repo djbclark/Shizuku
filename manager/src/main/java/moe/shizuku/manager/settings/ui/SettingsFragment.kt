@@ -108,6 +108,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             updateChannelSelector.show(currentValue = currentUpdateChannel)
             true
         }
+
+        // Needed to prevent flickering by overriding default visibility in settings.xml
+        updateUi(viewModel.uiState.value)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
