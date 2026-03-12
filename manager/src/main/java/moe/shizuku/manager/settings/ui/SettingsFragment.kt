@@ -20,9 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.KeyValueDataSource
-import moe.shizuku.manager.core.data.KeyValueEntry
-import moe.shizuku.manager.core.data.preferences.PreferenceKeys
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
@@ -35,23 +33,24 @@ import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.settings.ui.components.SelectionBottomSheet
 import moe.shizuku.manager.settings.ui.components.SelectionBottomSheet.SelectionItem
 import moe.shizuku.manager.settings.ui.components.TextInputDialog
+import moe.shizuku.manager.core.data.preferences.Preference as ShizukuPreference
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModels()
 
-    private fun <T : Preference> find(entry: KeyValueEntry<*>): T = findPreference(entry.key)!!
+    private fun <T : Preference> find(pref: ShizukuPreference<*>): T = findPreference(pref.key)!!
 
-    private val startModePreference: Preference by lazy { find(PreferenceKeys.START_MODE) }
-    private val startOnBootPreference: TwoStatePreference by lazy { find(PreferenceKeys.START_ON_BOOT) }
-    private val watchdogPreference: TwoStatePreference by lazy { find(PreferenceKeys.WATCHDOG) }
-    private val tcpModePreference: TwoStatePreference by lazy { find(PreferenceKeys.TCP_MODE) }
-    private val tcpPortPreference: Preference by lazy { find(PreferenceKeys.TCP_PORT) }
-    private val languagePreference: Preference by lazy { find(PreferenceKeys.LANGUAGE) }
-    private val themePreference: Preference by lazy { find(PreferenceKeys.THEME) }
-    private val amoledBlackPreference: TwoStatePreference by lazy { find(PreferenceKeys.AMOLED_BLACK) }
-    private val dynamicColorPreference: TwoStatePreference by lazy { find(PreferenceKeys.DYNAMIC_COLOR) }
-    private val updateChannelPreference: Preference by lazy { find(PreferenceKeys.UPDATE_CHANNEL) }
-    private val legacyPairingPreference: TwoStatePreference by lazy { find(PreferenceKeys.LEGACY_PAIRING) }
+    private val startModePreference: Preference by lazy { find(PreferencesRepository.startMode) }
+    private val startOnBootPreference: TwoStatePreference by lazy { find(PreferencesRepository.startOnBoot) }
+    private val watchdogPreference: TwoStatePreference by lazy { find(PreferencesRepository.watchdog) }
+    private val tcpModePreference: TwoStatePreference by lazy { find(PreferencesRepository.tcpMode) }
+    private val tcpPortPreference: Preference by lazy { find(PreferencesRepository.tcpPort) }
+    private val languagePreference: Preference by lazy { find(PreferencesRepository.language) }
+    private val themePreference: Preference by lazy { find(PreferencesRepository.theme) }
+    private val amoledBlackPreference: TwoStatePreference by lazy { find(PreferencesRepository.amoledBlack) }
+    private val dynamicColorPreference: TwoStatePreference by lazy { find(PreferencesRepository.dynamicColor) }
+    private val updateChannelPreference: Preference by lazy { find(PreferencesRepository.updateChannel) }
+    private val legacyPairingPreference: TwoStatePreference by lazy { find(PreferencesRepository.legacyPairing) }
     private val wirelessDebuggingCategory: PreferenceCategory by lazy { findPreference("category_wireless_debugging")!! }
 
     private val batteryOptimizationLauncher =
@@ -209,7 +208,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         TextInputDialog(
             context = requireContext(),
             titleRes = R.string.settings_tcp_port,
-            placeholder = PreferenceKeys.TCP_PORT.default.toString(),
+            placeholder = PreferencesRepository.tcpPort.default.toString(),
             inputType = InputType.TYPE_CLASS_NUMBER,
             maxLength = 5,
             inputValidation = { viewModel.validatePort(it) },
@@ -224,8 +223,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             itemMapper = { locale ->
                 SelectionItem(
                     label = locale.nameOwnLocale.takeUnless { it.isBlank() } ?: getString(
-                    R.string.settings_system
-                ),
+                        R.string.settings_system
+                    ),
                     description = locale.nameCurrentLocale.takeUnless { it.isBlank() }
                 )
             },
@@ -263,7 +262,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     // -------------------
 
     private fun initSharedPrefs() {
-        preferenceManager.sharedPreferencesName = KeyValueDataSource.PREFS_NAME
+        preferenceManager.sharedPreferencesName = PreferencesRepository.PREFS_NAME
         preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
         setPreferencesFromResource(R.xml.settings, null)
     }

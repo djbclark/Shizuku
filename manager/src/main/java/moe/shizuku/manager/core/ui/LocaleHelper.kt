@@ -8,9 +8,9 @@ import android.os.LocaleList
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import moe.shizuku.manager.core.data.KeyValueDataSource
-import moe.shizuku.manager.core.data.KeyValueEntry
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
+import moe.shizuku.manager.core.data.preferences.boolean
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.capitalize
 import org.xmlpull.v1.XmlPullParser
@@ -114,22 +114,18 @@ object LocaleHelper {
         return locales.also { cachedLocales = it }
     }
 
-    private val LANGUAGE_MIGRATED = KeyValueEntry<Boolean>(
-        key = "language_migrated",
-        default = false,
-    )
+    private val languageMigrated by pref { boolean("language_migrated", false) }
 
     // https://developer.android.com/guide/topics/resources/app-languages#custom-storage
     fun migrate() {
-        val isMigrated = KeyValueDataSource.get(LANGUAGE_MIGRATED)
-        if (isMigrated) return
+        if (languageMigrated.value) return
 
         // Handles switching all users from custom storage to system storage
-        val language = PreferencesRepository.getLanguage()
+        val language = PreferencesRepository.language.value
         if (language != null) {
             val tag = language.takeUnless { it.lowercase() == "system" } ?: ""
             setLocale(tag)
-            PreferencesRepository.setLanguage(null)
+            PreferencesRepository.language.value = null
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -140,7 +136,7 @@ object LocaleHelper {
             }
 
             // Migration is finished only for users with Android 13+
-            KeyValueDataSource.set(LANGUAGE_MIGRATED, true)
+            languageMigrated.value = true
         }
     }
 }

@@ -8,7 +8,6 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
@@ -16,7 +15,6 @@ import moe.shizuku.manager.databinding.HomeStatusCardBinding
 import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.shizukuservice.ui.AdbPairDialogFragment
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
-import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants
 
@@ -126,7 +124,7 @@ constructor(
     private fun onPairClicked(context: Context) {
         if (EnvironmentUtils.isTelevision()) {
             showAccessibilityDialog(context)
-        } else if (PreferencesRepository.getLegacyPairing()) {
+        } else if (PreferencesRepository.legacyPairing.value) {
             (context as? FragmentActivity)?.supportFragmentManager?.let {
                 AdbPairDialogFragment().show(it)
             }

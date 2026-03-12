@@ -57,7 +57,7 @@ class AdbStartWorker(
             Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
 
             val tcpPort = EnvironmentUtils.getAdbTcpPort()
-            if (tcpPort > 0 && !PreferencesRepository.getTcpMode()) {
+            if (tcpPort > 0 && !PreferencesRepository.tcpMode.value) {
                 AdbStarter.stopTcp(applicationContext, tcpPort)
             }
 

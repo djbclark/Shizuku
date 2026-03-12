@@ -29,7 +29,7 @@ object WatchdogManager {
     fun init(context: Context, scope: CoroutineScope) {
         scope.launch {
             combine(
-                PreferencesRepository.observeWatchdog(), WatchdogService.isRunning, hasFailed
+                PreferencesRepository.watchdog.flow, WatchdogService.isRunning, hasFailed
             ) { enabled, running, failed ->
                 when {
                     enabled && running -> WatchdogState.Active

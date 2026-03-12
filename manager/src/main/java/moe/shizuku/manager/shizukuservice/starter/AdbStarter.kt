@@ -11,7 +11,6 @@ import moe.shizuku.manager.core.adb.AdbClient
 import moe.shizuku.manager.core.adb.AdbKey
 import moe.shizuku.manager.core.adb.AdbKeyException
 import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
-import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.extensions.toast
@@ -40,7 +39,7 @@ object AdbStarter {
                 val key =
                     runCatching {
                         AdbKey(
-                            PreferenceAdbKeyStore(KeyValueDataSource.getPreferences()),
+                            PreferenceAdbKeyStore(PreferencesRepository.prefs),
                             "shizuku"
                         )
                     }
@@ -53,8 +52,8 @@ object AdbStarter {
                         }
 
                 var activePort = port
-                val tcpMode = PreferencesRepository.getTcpMode()
-                val tcpPort = PreferencesRepository.getTcpPort()
+                val tcpMode = PreferencesRepository.tcpMode.value
+                val tcpPort = PreferencesRepository.tcpPort.value
                 if (tcpMode && activePort != tcpPort) {
                     log?.invoke("Connecting on port $activePort...")
 
@@ -102,7 +101,7 @@ object AdbStarter {
 
             ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
             val key =
-                AdbKey(PreferenceAdbKeyStore(KeyValueDataSource.getPreferences()), "shizuku")
+                AdbKey(PreferenceAdbKeyStore(PreferencesRepository.prefs), "shizuku")
             withContext(Dispatchers.IO) {
                 AdbClient("127.0.0.1", port, key).use { client ->
                     connectWithRetry(client)

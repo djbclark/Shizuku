@@ -13,14 +13,13 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.adb.AdbStarter
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.KeyValueEntry
-import moe.shizuku.manager.core.data.preferences.PreferenceKeys
+import moe.shizuku.manager.core.data.preferences.Preference
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.ui.LocaleHelper
 import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.ui.LocaleHelper
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
@@ -34,7 +33,7 @@ class SettingsViewModel : ViewModel() {
     private val _events = Channel<SettingsEvent>()
     val events = _events.receiveAsFlow()
 
-    private var pendingBatteryOptimization: KeyValueEntry<*>? = null
+    private var pendingBatteryOptimization: Preference<*>? = null
 
     init {
         updateUiState()
@@ -43,31 +42,31 @@ class SettingsViewModel : ViewModel() {
     private fun updateUiState() {
         val isTelevision = EnvironmentUtils.isTelevision()
         val isRooted = EnvironmentUtils.isRooted()
-        val startMode = PreferencesRepository.getStartMode()
+        val startMode = PreferencesRepository.startMode.value
 
         val isTcpModeVisible = EnvironmentUtils.isTlsSupported()
-        val isTcpModeEnabled = PreferencesRepository.getTcpMode()
+        val isTcpModeEnabled = PreferencesRepository.tcpMode.value
 
         _uiState.update { state ->
             state.copy(
                 startModeValue = startMode,
                 isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || isTelevision || isRooted,
-                startOnBootValue = PreferencesRepository.getStartOnBoot(),
-                watchdogValue = PreferencesRepository.getWatchdog(),
+                startOnBootValue = PreferencesRepository.startOnBoot.value,
+                watchdogValue = PreferencesRepository.watchdog.value,
 
                 isWirelessDebuggingCategoryVisible = startMode == StartMode.WADB,
                 isTcpModeVisible = isTcpModeVisible,
                 tcpModeValue = isTcpModeEnabled,
                 isTcpPortVisible = isTcpModeVisible && isTcpModeEnabled,
-                tcpPortValue = PreferencesRepository.getTcpPort(),
+                tcpPortValue = PreferencesRepository.tcpPort.value,
                 isLegacyPairingVisible = !isTelevision,
 
                 languageValue = LocaleHelper.getLocale(),
-                themeValue = PreferencesRepository.getTheme(),
-                isAmoledBlackVisible = PreferencesRepository.getTheme() != Theme.LIGHT,
+                themeValue = PreferencesRepository.theme.value,
+                isAmoledBlackVisible = PreferencesRepository.theme.value != Theme.LIGHT,
                 isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
 
-                updateChannelValue = PreferencesRepository.getUpdateChannel()
+                updateChannelValue = PreferencesRepository.updateChannel.value
             )
         }
     }
@@ -88,13 +87,13 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun onStartModeChanged(newValue: StartMode) {
-        PreferencesRepository.setStartMode(newValue)
+        PreferencesRepository.startMode.value = newValue
         updateUiState()
     }
 
     fun onStartOnBootChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
-            requestBatteryOptimization(PreferenceKeys.START_ON_BOOT)
+            requestBatteryOptimization(PreferencesRepository.startOnBoot)
         }
         // https://r.android.com/2128832
         else if (!EnvironmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -105,15 +104,15 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun applyStartOnBootChange(newValue: Boolean) {
-        PreferencesRepository.setStartOnBoot(newValue)
+        PreferencesRepository.startOnBoot.value = newValue
         updateUiState()
     }
 
     fun onWatchdogChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
-            requestBatteryOptimization(PreferenceKeys.WATCHDOG)
+            requestBatteryOptimization(PreferencesRepository.watchdog)
         } else {
-            PreferencesRepository.setWatchdog(newValue)
+            PreferencesRepository.watchdog.value = newValue
             updateUiState()
         }
     }
@@ -137,7 +136,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun applyTcpModeChange(newValue: Boolean) {
-        PreferencesRepository.setTcpMode(newValue)
+        PreferencesRepository.tcpMode.value = newValue
         updateUiState()
     }
 
@@ -148,7 +147,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun onTcpPortChanged(input: String) {
-        val newPort = input.toIntOrNull() ?: PreferenceKeys.TCP_PORT.default
+        val newPort = input.toIntOrNull() ?: PreferencesRepository.tcpPort.default
         val currentPort = EnvironmentUtils.getAdbTcpPort()
         val needsRestart = (currentPort != newPort)
 
@@ -161,20 +160,20 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun applyTcpPortChange(newValue: Int) {
-        PreferencesRepository.setTcpPort(newValue)
+        PreferencesRepository.tcpPort.value = newValue
         updateUiState()
     }
 
     // TODO remove theme changed listeners in favor of ThemeHelper
     fun onThemeChanged(value: Theme) {
-        if (PreferencesRepository.getTheme() != value) {
-            PreferencesRepository.setTheme(value)
+        if (PreferencesRepository.theme.value != value) {
+            PreferencesRepository.theme.value = value
             updateUiState()
         }
     }
 
     fun onUpdateChannelChanged(value: UpdateChannel) {
-        PreferencesRepository.setUpdateChannel(value)
+        PreferencesRepository.updateChannel.value = value
         updateUiState()
     }
 
@@ -196,7 +195,7 @@ class SettingsViewModel : ViewModel() {
                 !PowerManagerHelper.isIgnoringBatteryOptimizations() &&
                 !EnvironmentUtils.isTelevision()
 
-    private fun requestBatteryOptimization(pref: KeyValueEntry<*>) {
+    private fun requestBatteryOptimization(pref: Preference<*>) {
         pendingBatteryOptimization = pref
         _events.trySend(SettingsEvent.RequestBatteryOptimization)
     }
@@ -205,8 +204,8 @@ class SettingsViewModel : ViewModel() {
         val setting = pendingBatteryOptimization ?: return
         if (PowerManagerHelper.isIgnoringBatteryOptimizations()) {
             when (setting) {
-                PreferenceKeys.START_ON_BOOT -> onStartOnBootChanged(true)
-                PreferenceKeys.WATCHDOG -> onWatchdogChanged(true)
+                PreferencesRepository.startOnBoot -> onStartOnBootChanged(true)
+                PreferencesRepository.watchdog -> onWatchdogChanged(true)
             }
         }
         pendingBatteryOptimization = null

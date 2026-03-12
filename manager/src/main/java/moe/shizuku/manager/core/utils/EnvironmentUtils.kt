@@ -33,7 +33,7 @@ object EnvironmentUtils {
     }
 
     fun isWifiRequired(): Boolean {
-        return (getAdbTcpPort() <= 0 || !PreferencesRepository.getTcpMode())
+        return (getAdbTcpPort() <= 0 || !PreferencesRepository.tcpMode.value)
     }
 
     fun isRooted(): Boolean {
@@ -44,7 +44,7 @@ object EnvironmentUtils {
         var port = SystemProperties.getInt("service.adb.tcp.port", -1)
         if (port == -1) port = SystemProperties.getInt("persist.adb.tcp.port", -1)
         if (port == -1 && isTelevision() && !isTlsSupported()) port =
-            PreferencesRepository.getTcpPort()
+            PreferencesRepository.tcpPort.value
         return port
     }
 }

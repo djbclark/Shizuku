@@ -43,13 +43,13 @@ object ShizukuReceiverStarter {
     ) {
         if ((UserHandleCompat.myUserId() > 0 || ShizukuStateMachine.isRunning()) && !forceStart) return
 
-        if (prefs.getStartMode() == StartMode.ROOT) {
+        if (prefs.startMode.value == StartMode.ROOT) {
             rootStart()
         } else if ((
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || EnvironmentUtils.isTelevision() ||
                             EnvironmentUtils.getAdbTcpPort() > 0
                     ) &&
-            prefs.getStartMode() == StartMode.WADB
+            prefs.startMode.value == StartMode.WADB
         ) {
             if (context.hasWriteSecureSettings()) {
                 AdbStartWorker.enqueue(context)

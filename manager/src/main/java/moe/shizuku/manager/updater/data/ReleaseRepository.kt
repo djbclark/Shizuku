@@ -1,9 +1,9 @@
 package moe.shizuku.manager.updater.data
 
 import android.content.Context
-import moe.shizuku.manager.core.data.KeyValueDataSource
-import moe.shizuku.manager.core.data.KeyValueEntry
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
+import moe.shizuku.manager.core.data.preferences.string
 import moe.shizuku.manager.updater.models.AppRelease
 import moe.shizuku.manager.updater.models.Version
 import java.io.File
@@ -13,10 +13,7 @@ object ReleaseRepository {
     private lateinit var appContext: Context
     private val remoteDataSource = ReleaseRemoteDataSource
 
-    private val LAST_PROMPTED_VERSION = KeyValueEntry<String?>(
-        key = "last_prompted_version",
-        default = null,
-    )
+    private val lastPromptedVersion by pref { string("last_prompted_version", null) }
 
     fun init(context: Context) {
         appContext = context.applicationContext
@@ -32,7 +29,8 @@ object ReleaseRepository {
 
         return filteredReleases.mapNotNull { dto ->
             val version = Version.parse(dto.tag_name) ?: return@mapNotNull null
-            val asset = dto.assets.firstOrNull { it.name.endsWith(".apk") } ?: return@mapNotNull null
+            val asset =
+                dto.assets.firstOrNull { it.name.endsWith(".apk") } ?: return@mapNotNull null
 
             AppRelease(
                 version = version,
@@ -55,9 +53,11 @@ object ReleaseRepository {
         return apkFile
     }
 
-    fun getLastPromptedVersion(): String? = KeyValueDataSource.get(LAST_PROMPTED_VERSION)
+    fun getLastPromptedVersion(): String? = lastPromptedVersion.value
 
-    fun setLastPromptedVersion(version: String?) = KeyValueDataSource.set(LAST_PROMPTED_VERSION, version)
+    fun setLastPromptedVersion(version: String?) {
+        lastPromptedVersion.value = version
+    }
 
     private fun File.sha256(): String {
         val digest = MessageDigest.getInstance("SHA-256")

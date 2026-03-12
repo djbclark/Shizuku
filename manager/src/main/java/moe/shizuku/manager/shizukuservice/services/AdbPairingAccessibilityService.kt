@@ -20,7 +20,7 @@ import moe.shizuku.manager.core.adb.AdbKey
 import moe.shizuku.manager.core.adb.AdbKeyException
 import moe.shizuku.manager.core.adb.AdbPairingClient
 import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
-import moe.shizuku.manager.core.data.KeyValueDataSource
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.home.HomeFragment
@@ -83,7 +83,7 @@ class AdbPairingAccessibilityService : AccessibilityService() {
                 val key =
                     try {
                         AdbKey(
-                            PreferenceAdbKeyStore(KeyValueDataSource.getPreferences()),
+                            PreferenceAdbKeyStore(PreferencesRepository.prefs),
                             "shizuku"
                         )
                     } catch (_: Throwable) {

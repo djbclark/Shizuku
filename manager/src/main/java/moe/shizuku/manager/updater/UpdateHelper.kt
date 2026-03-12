@@ -5,11 +5,11 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.updater.data.ReleaseRepository
-import moe.shizuku.manager.updater.models.AppRelease
 import moe.shizuku.manager.core.utils.changePackageName
 import moe.shizuku.manager.core.utils.getVersionName
 import moe.shizuku.manager.core.utils.installPackage
+import moe.shizuku.manager.updater.data.ReleaseRepository
+import moe.shizuku.manager.updater.models.AppRelease
 import java.io.File
 
 object UpdateHelper {
@@ -27,23 +27,25 @@ object UpdateHelper {
         }
     }
 
-    fun isCheckForUpdatesEnabled(): Boolean = PreferencesRepository.getCheckForUpdates()
+    fun isCheckForUpdatesEnabled(): Boolean = PreferencesRepository.checkForUpdates.value
 
     suspend fun isNewUpdateAvailable(): Boolean {
         val lastPromptedVersionStr = repository.getLastPromptedVersion()
-        val lastPromptedVersion = moe.shizuku.manager.updater.models.Version.parse(lastPromptedVersionStr ?: "")
-            ?: moe.shizuku.manager.updater.models.Version.parse(getVersionName())
-            ?: return false
-            
+        val lastPromptedVersion =
+            moe.shizuku.manager.updater.models.Version.parse(lastPromptedVersionStr ?: "")
+                ?: moe.shizuku.manager.updater.models.Version.parse(getVersionName())
+                ?: return false
+
         return if (isUpdateAvailable()) latestRelease.version > lastPromptedVersion else false
     }
 
     suspend fun isUpdateAvailable(): Boolean {
         return try {
-            val channel = PreferencesRepository.getUpdateChannel()
+            val channel = PreferencesRepository.updateChannel.value
             val latest = repository.getLatestRelease(channel)
             latestRelease = latest
-            val current = moe.shizuku.manager.updater.models.Version.parse(getVersionName()) ?: return false
+            val current =
+                moe.shizuku.manager.updater.models.Version.parse(getVersionName()) ?: return false
             latest.version > current
         } catch (e: Exception) {
             Log.e("UpdateHelper", "Update check failed", e)
@@ -66,7 +68,7 @@ object UpdateHelper {
         try {
             val downloadedFile = repository.downloadRelease(latestRelease)
             val apk = processDownloadedApk(downloadedFile)
-            
+
             if (apk == null) {
                 appContext.toast(R.string.update_download_failed)
                 return
@@ -86,12 +88,15 @@ object UpdateHelper {
     private fun processDownloadedApk(file: File): File? {
         val pm = appContext.packageManager
         val apkPackageName = pm.getPackageArchiveInfo(file.path, 0)?.packageName
-        
+
         if (app.packageName != apkPackageName) {
             return try {
-                Log.d("UpdateHelper", "Changing package name from $apkPackageName to ${app.packageName}")
+                Log.d(
+                    "UpdateHelper",
+                    "Changing package name from $apkPackageName to ${app.packageName}"
+                )
                 file.changePackageName(app.packageName)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

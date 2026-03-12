@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.KeyValueDataSource
 import moe.shizuku.manager.core.data.preferences.PreferenceSync
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.ui.LocaleHelper
@@ -51,7 +50,7 @@ class ShizukuApplication : Application() {
         val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
         // Should be declared first because other dependencies may require key-value storage
-        KeyValueDataSource.init(context)
+        PreferencesRepository.init(context)
 
         ThemeHelper.init(this)
 
@@ -62,7 +61,7 @@ class ShizukuApplication : Application() {
 
         LocaleHelper.migrate()
 
-        AppCompatDelegate.setDefaultNightMode(PreferencesRepository.getTheme().value)
+        AppCompatDelegate.setDefaultNightMode(PreferencesRepository.theme.value.value)
     }
 
 }

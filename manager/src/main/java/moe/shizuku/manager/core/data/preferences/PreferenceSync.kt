@@ -16,7 +16,7 @@ object PreferenceSync {
     val bootReceiverEnabled: StateFlow<Boolean> = _bootReceiverEnabled.asStateFlow()
 
     fun init(context: Context, scope: CoroutineScope) {
-        PreferencesRepository.observeStartOnBoot().onEach {
+        PreferencesRepository.startOnBoot.flow.onEach {
             setBootReceiverEnabled(context, it)
             _bootReceiverEnabled.value = isBootReceiverEnabled(context)
         }.launchIn(scope)

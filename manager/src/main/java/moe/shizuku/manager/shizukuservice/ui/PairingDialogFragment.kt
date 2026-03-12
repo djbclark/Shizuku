@@ -28,7 +28,7 @@ import moe.shizuku.manager.core.adb.AdbMdns
 import moe.shizuku.manager.core.adb.AdbPairingClient
 import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
-import moe.shizuku.manager.core.data.KeyValueDataSource
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.databinding.AdbPairDialogBinding
 import java.net.ConnectException
@@ -203,7 +203,7 @@ class ViewModel(
 
             val key =
                 try {
-                    AdbKey(PreferenceAdbKeyStore(KeyValueDataSource.getPreferences()), "shizuku")
+                    AdbKey(PreferenceAdbKeyStore(PreferencesRepository.prefs), "shizuku")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     _result.postValue(AdbKeyException(e))

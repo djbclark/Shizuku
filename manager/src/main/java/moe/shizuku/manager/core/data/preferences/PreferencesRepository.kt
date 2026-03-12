@@ -1,104 +1,57 @@
 package moe.shizuku.manager.core.data.preferences
 
-import moe.shizuku.manager.core.data.KeyValueDataSource as prefs
-import moe.shizuku.manager.core.data.KeyValueEnumStore as enumPrefs
+import android.content.Context
+import android.content.SharedPreferences
 
 object PreferencesRepository {
 
-    // -------------------------
-    // GETTERS
-    // -------------------------
+    const val PREFS_NAME = "settings"
 
-    fun getStartMode() = enumPrefs.get(PreferenceKeys.START_MODE)
+    // TODO remove public prefs val (used by AdbKeyPreferenceStore)
+    private lateinit var _prefs: SharedPreferences
+    val prefs: SharedPreferences
+        get() = _prefs
 
-    fun getStartOnBoot() = prefs.get(PreferenceKeys.START_ON_BOOT)
+    fun init(context: Context) {
+        _prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
 
-    fun getWatchdog() = prefs.get(PreferenceKeys.WATCHDOG)
-
-    fun getTcpMode() = prefs.get(PreferenceKeys.TCP_MODE)
-
-    fun getTcpPort() = prefs.get(PreferenceKeys.TCP_PORT)
-
-    fun getAutoDisableUsbDebugging() = prefs.get(PreferenceKeys.AUTO_DISABLE_USB_DEBUGGING)
-
-    fun getLanguage() = prefs.get(PreferenceKeys.LANGUAGE)
-
-    fun getTheme() = enumPrefs.get(PreferenceKeys.THEME)
-
-    fun getAmoledBlack() = prefs.get(PreferenceKeys.AMOLED_BLACK)
-
-    fun getDynamicColor() = prefs.get(PreferenceKeys.DYNAMIC_COLOR)
-
-    fun getCheckForUpdates() = prefs.get(PreferenceKeys.CHECK_FOR_UPDATES)
-
-    fun getUpdateChannel() = enumPrefs.get(PreferenceKeys.UPDATE_CHANNEL)
-
-    fun getLegacyPairing() = prefs.get(PreferenceKeys.LEGACY_PAIRING)
+    // Global delegate for persisting internal flags, etc. from other features
+    fun <T> pref(block: SharedPreferences.() -> Preference<T>) = lazy {
+        prefs.block()
+    }
 
     // -------------------------
-    // FLOWS
+    // BEHAVIOR
     // -------------------------
 
-    fun observeStartOnBoot() = prefs.observe(PreferenceKeys.START_ON_BOOT)
-
-    fun observeWatchdog() = prefs.observe(PreferenceKeys.WATCHDOG)
-
-    fun observeTheme() = enumPrefs.observe(PreferenceKeys.THEME)
-
-    fun observeAmoledBlack() = prefs.observe(PreferenceKeys.AMOLED_BLACK)
-
-    fun observeDynamicColor() = prefs.observe(PreferenceKeys.DYNAMIC_COLOR)
+    val startMode by pref { enum("start_mode", StartMode.WADB) }
+    val startOnBoot by pref { boolean("start_on_boot", false) }
+    val watchdog by pref { boolean("watchdog", false) }
 
     // -------------------------
-    // SETTERS
+    // WIRELESS DEBUGGING
     // -------------------------
 
-    fun setStartMode(value: StartMode) =
-        enumPrefs.set(
-            PreferenceKeys.START_MODE,
-            value,
-        )
+    val tcpMode by pref { prefs.boolean("tcp_mode", true) }
+    val tcpPort by pref { int("tcp_port", 5555) }
+    val autoDisableUsbDebugging by pref { boolean("auto_disable_usb_debugging", false) }
+    val legacyPairing by pref { boolean("legacy_pairing", false) }
 
-    fun setStartOnBoot(value: Boolean) =
-        prefs.set(
-            PreferenceKeys.START_ON_BOOT,
-            value,
-        )
+    // -------------------------
+    // APPEARANCE
+    // -------------------------
 
-    fun setWatchdog(value: Boolean) =
-        prefs.set(
-            PreferenceKeys.WATCHDOG,
-            value,
-        )
+    val language by pref { string("language", null) }
+    val theme by pref { enum("theme", Theme.SYSTEM) }
+    val amoledBlack by pref { boolean("amoled_black", false) }
+    val dynamicColor by pref { boolean("dynamic_color", true) }
 
-    fun setTcpMode(value: Boolean) =
-        prefs.set(
-            PreferenceKeys.TCP_MODE,
-            value,
-        )
+    // -------------------------
+    // UPDATES
+    // -------------------------
 
-    fun setTcpPort(value: Int) =
-        prefs.set(
-            PreferenceKeys.TCP_PORT,
-            value,
-        )
-
-    fun setLanguage(value: String?) =
-        prefs.set(
-            PreferenceKeys.LANGUAGE,
-            value,
-        )
-
-    fun setTheme(value: Theme) =
-        enumPrefs.set(
-            PreferenceKeys.THEME,
-            value,
-        )
-
-    fun setUpdateChannel(value: UpdateChannel) =
-        enumPrefs.set(
-            PreferenceKeys.UPDATE_CHANNEL,
-            value,
-        )
+    val checkForUpdates by pref { boolean("check_for_updates", true) }
+    val updateChannel by pref { enum("update_channel", UpdateChannel.STABLE) }
 
 }
