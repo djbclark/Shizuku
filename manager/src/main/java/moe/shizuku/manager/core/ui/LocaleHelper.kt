@@ -111,7 +111,7 @@ object LocaleHelper {
             Log.e(TAG, "Error loading locales from XML", e)
         }
 
-        return locales.also { cachedLocales = it }
+        return locales
     }
 
     private val languageMigrated by pref { boolean("language_migrated", false) }
