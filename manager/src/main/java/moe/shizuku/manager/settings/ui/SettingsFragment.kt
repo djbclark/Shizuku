@@ -109,8 +109,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        // Needed to prevent flickering by overriding default visibility in settings.xml
-        updateUi(viewModel.uiState.value)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -268,6 +266,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         preferenceManager.sharedPreferencesName = PreferencesRepository.PREFS_NAME
         preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
         setPreferencesFromResource(R.xml.settings, null)
+        
+        // Needed to prevent flickering by overriding default visibility in settings.xml
+        updateUi(viewModel.uiState.value)
     }
 
     private fun showStartOnBootBugDialog() =
