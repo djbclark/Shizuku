@@ -41,58 +41,38 @@ class SettingsViewModel : ViewModel() {
         PreferencesRepository.tcpPort.flow,
         PreferencesRepository.theme.flow,
         PreferencesRepository.updateChannel.flow
-    ) { args: Array<Any?> ->
-        val prefs = Prefs(
-            startMode = args[0] as StartMode,
-            startOnBoot = args[1] as Boolean,
-            watchdog = args[2] as Boolean,
-            tcpMode = args[3] as Boolean,
-            tcpPort = args[4] as Int,
-            theme = args[5] as Theme,
-            updateChannel = args[6] as UpdateChannel
-        )
-        calculateUiState(prefs)
+    ) { _: Array<Any?> ->
+        calculateUiState()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = calculateUiState()
     )
 
-    private data class Prefs(
-        val startMode: StartMode = PreferencesRepository.startMode.value,
-        val startOnBoot: Boolean = PreferencesRepository.startOnBoot.value,
-        val watchdog: Boolean = PreferencesRepository.watchdog.value,
-        val tcpMode: Boolean = PreferencesRepository.tcpMode.value,
-        val tcpPort: Int = PreferencesRepository.tcpPort.value,
-        val theme: Theme = PreferencesRepository.theme.value,
-        val updateChannel: UpdateChannel = PreferencesRepository.updateChannel.value,
-        val language: LocaleHelper.LocaleEntry = LocaleHelper.getLocale()
-    )
-
-    private fun calculateUiState(prefs: Prefs = Prefs()): SettingsUiState {
+    private fun calculateUiState(): SettingsUiState = with(PreferencesRepository) {
         val isTelevision = EnvironmentUtils.isTelevision()
         val isRooted = EnvironmentUtils.isRooted()
         val isTcpModeVisible = EnvironmentUtils.isTlsSupported()
 
-        return SettingsUiState(
-            startModeValue = prefs.startMode,
+        SettingsUiState(
+            startModeValue = startMode.value,
             isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || isTelevision || isRooted,
-            startOnBootValue = PreferencesRepository.startOnBoot.value,
-            watchdogValue = PreferencesRepository.watchdog.value,
+            startOnBootValue = startOnBoot.value,
+            watchdogValue = watchdog.value,
 
-            isWirelessDebuggingCategoryVisible = prefs.startMode == StartMode.WADB,
+            isWirelessDebuggingCategoryVisible = startMode.value == StartMode.WADB,
             isTcpModeVisible = isTcpModeVisible,
-            tcpModeValue = prefs.tcpMode,
-            isTcpPortVisible = isTcpModeVisible && prefs.tcpMode,
-            tcpPortValue = PreferencesRepository.tcpPort.value,
+            tcpModeValue = tcpMode.value,
+            isTcpPortVisible = isTcpModeVisible && tcpMode.value,
+            tcpPortValue = tcpPort.value,
             isLegacyPairingVisible = !isTelevision,
 
-            languageValue = prefs.language,
-            themeValue = prefs.theme,
-            isAmoledBlackVisible = prefs.theme != Theme.LIGHT,
+            languageValue = LocaleHelper.getLocale(),
+            themeValue = theme.value,
+            isAmoledBlackVisible = theme.value != Theme.LIGHT,
             isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
 
-            updateChannelValue = PreferencesRepository.updateChannel.value
+            updateChannelValue = updateChannel.value
         )
     }
 
