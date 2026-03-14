@@ -14,19 +14,19 @@ import moe.shizuku.manager.databinding.TextInputDialogBinding
 
 class TextInputDialog(
     private val context: Context,
-    @get:StringRes private val titleRes: Int,
+    @param:StringRes private val title: Int,
     private val placeholder: String? = null,
     private val inputType: Int = InputType.TYPE_CLASS_TEXT,
     private val maxLength: Int? = null,
     private val inputValidation: ((String?) -> Int?)? = null,
-    @get:StringRes private val positiveLabel: Int = R.string.save,
+    @param:StringRes private val positiveLabel: Int = R.string.save,
     private val onConfirm: (String) -> Unit
 ) {
     fun show(currentValue: Any) {
         val binding = TextInputDialogBinding.inflate(LayoutInflater.from(context))
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(titleRes)
+            .setTitle(title)
             .setView(binding.root)
             .setPositiveButton(positiveLabel) { _, _ ->
                 val input = binding.editText.text.toString()

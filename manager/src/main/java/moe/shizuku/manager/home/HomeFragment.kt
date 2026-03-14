@@ -15,13 +15,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.shizukuservice.services.AdbPairingService
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.databinding.HomeFragmentBinding
-import moe.shizuku.manager.intents.ui.IntentsBottomSheet
 import moe.shizuku.manager.permission.ui.authorizedapps.AppsViewModel
+import moe.shizuku.manager.shizukuservice.services.AdbPairingService
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -69,7 +68,8 @@ class HomeFragment : Fragment() {
             Lifecycle.State.RESUMED
         )
 
-        val shouldShowAccessibilityPairingDialog = arguments?.getBoolean(ARG_SHOW_PAIRING_DIALOG, false) ?: false
+        val shouldShowAccessibilityPairingDialog =
+            arguments?.getBoolean(ARG_SHOW_PAIRING_DIALOG, false) ?: false
         if (shouldShowAccessibilityPairingDialog) {
             showAccessibilityDialog(requireContext())
             arguments?.putBoolean(ARG_SHOW_PAIRING_DIALOG, false)
@@ -178,7 +178,7 @@ class HomeFragment : Fragment() {
                 title = getString(R.string.intents)
                 icon = R.drawable.ic_integration_instructions_24
                 onClickListener = {
-                    IntentsBottomSheet(requireContext()).show()
+                    findNavController().navigate(R.id.navigate_to_intents)
                 }
             }
         }

@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -33,7 +33,10 @@ class SettingsViewModel : ViewModel() {
 
     private var pendingBatteryOptimization: Preference<*>? = null
 
-    val uiState: StateFlow<SettingsUiState> = PreferencesRepository.all.map {
+    val uiState: StateFlow<SettingsUiState> = combine(
+        PreferencesRepository.all,
+        LocaleHelper.localeFlow
+    ) { _, _ ->
         calculateUiState()
     }.stateIn(
         scope = viewModelScope,

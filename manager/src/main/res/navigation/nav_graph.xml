@@ -32,6 +32,9 @@
         <action
             android:id="@+id/navigate_to_terminal_apps"
             app:destination="@id/terminal_apps_fragment" />
+        <action
+            android:id="@+id/navigate_to_intents"
+            app:destination="@id/intents_fragment" />
     </fragment>
 
     <fragment
@@ -70,5 +73,11 @@
         android:name="moe.shizuku.manager.shell.ui.TerminalAppsFragment"
         android:label="@string/terminal_apps"
         tools:layout="@layout/terminal_apps_fragment" />
+
+    <fragment
+        android:id="@+id/intents_fragment"
+        android:name="moe.shizuku.manager.intents.ui.IntentsFragment"
+        android:label="@string/intents"
+        tools:layout="@layout/intents_fragment" />
 
 </navigation>

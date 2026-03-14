@@ -8,6 +8,9 @@ import android.os.LocaleList
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
 import moe.shizuku.manager.core.data.preferences.boolean
@@ -40,8 +43,13 @@ object LocaleHelper {
         AppCompatDelegate.getApplicationLocales().get(0)?.toLocaleEntry()
             ?: systemDefaultEntry
 
-    fun setLocale(locale: LocaleEntry) =
+    private val _localeFlow = MutableStateFlow(getLocale())
+    val localeFlow: StateFlow<LocaleEntry> = _localeFlow.asStateFlow()
+
+    fun setLocale(locale: LocaleEntry) {
         setLocale(locale.tag)
+        _localeFlow.value = getLocale()
+    }
 
     private fun setLocale(tag: String) {
         val locale = if (tag.isBlank()) {
@@ -88,7 +96,8 @@ object LocaleHelper {
             // Thus, the compiler doesn't have access to R.xml.locales_config
             // So, we must use resources.getIdentifier, which is a discouraged API
             @SuppressLint("DiscouragedApi") val resId =
-                resources.getIdentifier("locales_config", "xml", packageName).takeUnless { it == 0 }
+                resources.getIdentifier("_generated_res_locale_config", "xml", packageName)
+                    .takeUnless { it == 0 }
                     ?: run {
                         Log.e(TAG, "locales_config.xml not found")
                         return emptyList()
