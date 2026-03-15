@@ -159,6 +159,10 @@ class SettingsViewModel : ViewModel() {
         PreferencesRepository.tcpPort.set(newValue)
     }
 
+    fun onLanguageChanged(newValue: LocaleHelper.LocaleEntry) {
+        LocaleHelper.setLocale(newValue)
+    }
+
     fun onThemeChanged(value: Theme) {
         if (PreferencesRepository.theme.get() != value) {
             PreferencesRepository.theme.set(value)

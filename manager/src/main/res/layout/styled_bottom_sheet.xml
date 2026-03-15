@@ -5,25 +5,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="title, button_close" />
+
+    <TextView
+        android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:overScrollMode="ifContentScrolls"
-        app:layout_constrainedHeight="true"
-        app:layout_constraintBottom_toTopOf="@id/footer_text"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="@dimen/dialog_top_padding"
+        android:textAppearance="?textAppearanceTitleLarge"
+        android:textColor="?colorOnSurface"
+        app:layout_constraintEnd_toStartOf="@+id/button_close"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_max="600dp"
-        tools:itemCount="3"
-        tools:listitem="@layout/radio_button_list_item" />
+        tools:text="Title" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_close"
+        style="?attr/materialIconButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@android:string/cancel"
+        app:icon="@drawable/ic_close_24"
+        app:iconTint="?colorOnSurfaceVariant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/content_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/footer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="footer_icon, footer_text" />
+        android:visibility="gone"
+        app:constraint_referenced_ids="footer_icon, footer_text"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/footer_icon"
@@ -38,7 +70,7 @@
         app:layout_constraintEnd_toStartOf="@id/footer_text"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/list"
+        app:layout_constraintTop_toBottomOf="@id/content_container"
         app:layout_constraintVertical_bias="0"
         app:tint="?colorOnSurfaceVariant" />
 
@@ -54,7 +86,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/footer_icon"
-        app:layout_constraintTop_toBottomOf="@id/list"
+        app:layout_constraintTop_toBottomOf="@id/content_container"
         app:layout_constraintWidth_max="600dp"
         tools:text="Footer" />
 

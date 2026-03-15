@@ -66,7 +66,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         startModePreference.setOnPreferenceClickListener {
             val currentStartMode = viewModel.uiState.value.startModeValue
-            startModeSelector.show(currentValue = currentStartMode)
+            startModeSelector.show(currentStartMode)
             true
         }
 
@@ -93,19 +93,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         languagePreference.setOnPreferenceClickListener {
             val currentLanguage = viewModel.uiState.value.languageValue
-            languageSelector.show(currentValue = currentLanguage)
+            languageSelector.show(currentLanguage)
             true
         }
 
         themePreference.setOnPreferenceClickListener {
             val currentTheme = viewModel.uiState.value.themeValue
-            themeSelector.show(currentValue = currentTheme)
+            themeSelector.show(currentTheme)
             true
         }
 
         updateChannelPreference.setOnPreferenceClickListener {
             val currentUpdateChannel = viewModel.uiState.value.updateChannelValue
-            updateChannelSelector.show(currentValue = currentUpdateChannel)
+            updateChannelSelector.show(currentUpdateChannel)
             true
         }
 
@@ -192,9 +192,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             context = requireContext(),
             titleRes = R.string.start_mode,
             footerRes = R.string.start_mode_footer,
-            entries = StartMode.entries,
-            itemMapper = {
+            items = StartMode.entries.map {
                 SelectionItem(
+                    value = it,
                     label = getString(it.labelRes),
                     description = viewModel.getStartModeDescription(it)?.let { description ->
                         getString(description)
@@ -202,60 +202,65 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     isEnabled = viewModel.getStartModeSelectable(it)
                 )
             },
-            onConfirm = { viewModel.onStartModeChanged(it) })
+            onConfirm = { viewModel.onStartModeChanged(it) }
+        )
     }
 
     private val tcpPortInput by lazy {
         TextInputDialog(
             context = requireContext(),
-            titleRes = R.string.settings_tcp_port,
+            title = R.string.settings_tcp_port,
             placeholder = PreferencesRepository.tcpPort.default.toString(),
             inputType = InputType.TYPE_CLASS_NUMBER,
             maxLength = 5,
             inputValidation = { viewModel.validatePort(it) },
-            onConfirm = { viewModel.onTcpPortChanged(it) })
+            onConfirm = { viewModel.onTcpPortChanged(it) }
+        )
     }
 
     private val languageSelector by lazy {
         SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_language,
-            entries = LocaleHelper.getLocaleEntries(requireContext()),
-            itemMapper = { locale ->
+            items = LocaleHelper.getLocaleEntries(requireContext()).map { locale ->
                 SelectionItem(
+                    value = locale,
                     label = locale.nameOwnLocale.takeUnless { it.isBlank() } ?: getString(
                         R.string.settings_system
                     ),
                     description = locale.nameCurrentLocale.takeUnless { it.isBlank() }
                 )
             },
-            onConfirm = { LocaleHelper.setLocale(it) })
+            onConfirm = { viewModel.onLanguageChanged(it) }
+        )
     }
 
     private val themeSelector by lazy {
         SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_theme,
-            entries = Theme.entries,
-            itemMapper = {
+            items = Theme.entries.map {
                 SelectionItem(
+                    value = it,
                     label = getString(it.labelRes)
                 )
             },
-            onConfirm = { viewModel.onThemeChanged(it) })
+            onConfirm = { viewModel.onThemeChanged(it) }
+        )
     }
 
     private val updateChannelSelector by lazy {
         SelectionBottomSheet(
             context = requireContext(),
             titleRes = R.string.settings_update_channel,
-            entries = UpdateChannel.entries,
-            itemMapper = {
+            items = UpdateChannel.entries.map {
                 SelectionItem(
+                    value = it,
                     label = getString(it.labelRes)
                 )
             },
-            onConfirm = { viewModel.onUpdateChannelChanged(it) })
+            onConfirm = { viewModel.onUpdateChannelChanged(it) }
+        )
     }
 
     // -------------------
