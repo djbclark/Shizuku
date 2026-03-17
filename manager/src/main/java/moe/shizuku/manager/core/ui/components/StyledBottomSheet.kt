@@ -12,14 +12,14 @@ import moe.shizuku.manager.databinding.StyledBottomSheetBinding
 
 abstract class StyledBottomSheet : BottomSheetDialogFragment() {
 
-    var title: Int?
+    var titleRes: Int?
         @StringRes get() = arguments?.getInt("arg_title")?.takeIf { it != 0 }
         set(value) {
             val args = arguments ?: Bundle().also { arguments = it }
             args.putInt("arg_title", value ?: 0)
         }
 
-    var footer: Int?
+    var footerRes: Int?
         @StringRes get() = arguments?.getInt("arg_footer")?.takeIf { it != 0 }
         set(value) {
             val args = arguments ?: Bundle().also { arguments = it }
@@ -43,19 +43,27 @@ abstract class StyledBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.root.applySystemBarsPadding(bottom = true)
+        with(binding) {
+            val contentView = onCreateContentView(layoutInflater, contentContainer)
 
-        binding.header.isVisible = title != null
-        title?.let {
-            binding.title.setText(it)
-            binding.buttonClose.setOnClickListener { dismiss() }
-        }
+            if (footerRes == null) {
+                contentView.applySystemBarsPadding(bottom = true)
+            } else {
+                root.applySystemBarsPadding(bottom = true)
+            }
 
-        binding.contentContainer.addView(onCreateContentView(layoutInflater, binding.contentContainer))
+            header.isVisible = titleRes != null
+            titleRes?.let {
+                title.setText(it)
+                buttonClose.setOnClickListener { dismiss() }
+            }
 
-        binding.footer.isVisible = footer != null
-        footer?.let {
-            binding.footerText.setText(it)
+            contentContainer.addView(contentView)
+
+            footer.isVisible = footerRes != null
+            footerRes?.let {
+                footerText.setText(it)
+            }
         }
     }
 

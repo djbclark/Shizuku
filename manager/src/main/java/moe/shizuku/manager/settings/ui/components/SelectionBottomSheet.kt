@@ -28,8 +28,8 @@ class SelectionBottomSheet : StyledBottomSheet() {
             viewModel.selectedValue = selectedValue
 
             SelectionBottomSheet().apply {
-                this.title = title
-                this.footer = footer
+                this.titleRes = title
+                this.footerRes = footer
             }.show(fragmentManager, TAG)
         }
     }
