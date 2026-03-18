@@ -1,3 +1,5 @@
+import com.android.build.api.artifact.SingleArtifact
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.rikka.refine)
@@ -30,28 +32,37 @@ android {
     }
 }
 
-android.applicationVariants.all { variant ->
-    variant.outputs.all {
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def capName = variant.name.capitalize()
+
         def outDir = new File(rootDir, "out")
-        def mappingPath = new File(outDir, "mapping").absolutePath
-        def dexPath = "${rootProject.rootDir.path}/manager/src/main/assets"
-        variant.assembleProvider.get().doLast {
-            if (variant.getBuildType().isMinifyEnabled()) {
-                copy {
-                    from variant.mappingFileProvider.get()
-                    into mappingPath
-                    rename { String fileName ->
-                        mappingPath + File.separator + "cmd-v${variant.versionName}.txt"
+        def mappingDir = new File(outDir, "mapping")
+        def dexDir = new File(project(':manager').projectDir, "src/main/assets")
+
+        tasks.matching { it.name == "assemble${capName}" }.configureEach { assembleTask ->
+            assembleTask.doLast {
+                def apkDir = variant.artifacts.get(SingleArtifact.APK.INSTANCE).get().asFile
+                def apkFile = apkDir.listFiles().find { it.name.endsWith(".apk") }
+
+                if (apkFile == null) {
+                    throw new GradleException("Could not find APK in ${apkDir}")
+                }
+
+                def mappingProvider = variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE.INSTANCE)
+                if (mappingProvider.isPresent()) {
+                    copy {
+                        from mappingProvider.get().asFile
+                        into mappingDir
+                        rename { "cmd-v${android.defaultConfig.versionName}.txt" }
                     }
                 }
-            }
-            copy {
-                def file = zipTree(file(outputFile)).matching { include "classes*.dex" }.singleFile
 
-                from file
-                into dexPath
-                rename { String fileName ->
-                    fileName.replace(file.getName(), "rish_shizuku.dex")
+                copy {
+                    from zipTree(apkFile)
+                    include "classes.dex"
+                    into dexDir
+                    rename { "rish_shizuku.dex" }
                 }
             }
         }

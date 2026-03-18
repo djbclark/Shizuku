@@ -17,6 +17,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.NavDeepLinkBuilder
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,7 +31,6 @@ import moe.shizuku.manager.core.adb.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.core.ui.ThemeHelper
 import moe.shizuku.manager.home.HomeFragment
 import java.net.ConnectException
 
@@ -254,7 +254,7 @@ class AdbPairingService : Service() {
             NOTIFICATION_ID,
             Notification
                 .Builder(this, NOTIFICATION_CHANNEL)
-                .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
+                .setColor(MaterialColors.getColor(this, android.R.attr.colorPrimary, 0))
                 .setSmallIcon(R.drawable.ic_system_icon)
                 .setContentTitle(title)
                 .setContentText(text)
@@ -382,7 +382,7 @@ class AdbPairingService : Service() {
     private val searchingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
+            .setColor(MaterialColors.getColor(this, android.R.attr.colorPrimary, 0))
             .setSmallIcon(R.drawable.ic_system_icon)
             .setContentTitle(getString(R.string.pairing_searching))
             .addAction(stopNotificationAction)
@@ -392,7 +392,7 @@ class AdbPairingService : Service() {
     private fun createInputNotification(port: Int): Notification =
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
+            .setColor(MaterialColors.getColor(this, android.R.attr.colorPrimary, 0))
             .setContentTitle(getString(R.string.pairing_service_found))
             .setSmallIcon(R.drawable.ic_system_icon)
             .addAction(replyNotificationAction(port))
@@ -401,7 +401,7 @@ class AdbPairingService : Service() {
     private val workingNotification by lazy {
         Notification
             .Builder(this, NOTIFICATION_CHANNEL)
-            .setColor(ThemeHelper.resolveColor(this, R.attr.colorPrimary))
+            .setColor(MaterialColors.getColor(this, android.R.attr.colorPrimary, 0))
             .setContentTitle(getString(R.string.pairing_in_progress))
             .setSmallIcon(R.drawable.ic_system_icon)
             .build()

@@ -2,17 +2,12 @@ package moe.shizuku.manager.core.ui
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.TypedValue
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -89,18 +84,5 @@ object ThemeHelper {
                     }
                 }
         }
-    }
-
-    @ColorInt
-    fun resolveColor(context: Context, @AttrRes attrRes: Int): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(attrRes, typedValue, true)
-        return typedValue.data
-    }
-
-    fun applySnackbarTheme(context: Context, snackbar: Snackbar) {
-        snackbar.setBackgroundTint(resolveColor(context, R.attr.colorPrimaryContainer))
-            .setTextColor(resolveColor(context, R.attr.colorOnSurface))
-            .setActionTextColor(resolveColor(context, R.attr.colorPrimary))
     }
 }

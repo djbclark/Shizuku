@@ -1,10 +1,8 @@
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.gradle.internal.tasks.CompileArtProfileTask
-
-import java.nio.file.Paths
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.rikka.refine)
 }
@@ -50,10 +48,7 @@ android {
             version = "3.31.0+"
         }
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-    packagingOptions {
+    packaging {
         jniLibs {
             useLegacyPackaging = true
         }
@@ -69,50 +64,40 @@ android {
     }
 }
 
-def collapseReleaseResourceNames = tasks.register("collapseReleaseResourceNames") {
-    def aapt2 = Paths.get(project.android.sdkDirectory.path, "build-tools", project.android.buildToolsVersion, "aapt2")
-    def zip = Paths.get(project.buildDir.path, "intermediates",
-            "optimized_processed_res", "release", "optimizeReleaseResources", "resources-release-optimize.ap_")
-    doLast {
-        def optimized = new File("${zip}.opt")
-        def execOps = services.get(ExecOperations)
-        execOps.exec {
-            commandLine aapt2.toFile(), "optimize", "--collapse-resource-names",
-                    "--resources-config-path", "aapt2-resources.cfg",
-                    "-o", optimized, zip.toFile()
-            ignoreExitValue = false
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def capName = variant.name.capitalize()
+
+        def outDir = new File(rootDir, "out")
+        def mappingDir = new File(outDir, "mapping")
+        def apkDir = new File(outDir, "apk")
+
+        def shellTaskName = (variant.name == "debug") ? ":shell:assembleDebug" : ":shell:assembleRelease"
+        tasks.matching { it.name == "pre${capName}Build" }.configureEach {
+            it.dependsOn(shellTaskName)
         }
-        if (optimized.exists()) {
-            delete(zip.toFile())
-            optimized.renameTo(zip.toFile())
-        }
-    }
-}
 
-afterEvaluate {
-    tasks.getByName("optimizeReleaseResources").finalizedBy(collapseReleaseResourceNames)
-    tasks.getByName("preReleaseBuild").dependsOn(":shell:assembleRelease")
-    tasks.getByName("preDebugBuild").dependsOn(":shell:assembleDebug")
-}
+        tasks.matching { it.name == "assemble${capName}" }.configureEach { assembleTask ->
+            assembleTask.doLast {
+                def apkArtifactDir = variant.artifacts.get(SingleArtifact.APK.INSTANCE).get().asFile
 
-android.applicationVariants.configureEach { variant ->
-    variant.outputs.configureEach {
-        outputFileName = "shizuku-v${variant.versionName}-${variant.name}.apk"
+                def apkFile = apkArtifactDir.listFiles().find { it.name.endsWith(".apk") }
 
-        variant.assembleProvider.get().doLast {
-            def outDir = new File(rootDir, "out")
-            def mappingDir = new File(outDir, "mapping").absolutePath
-            def apkDir = new File(outDir, "apk").absolutePath
-
-            if (variant.getBuildType().isMinifyEnabled()) {
-                copy {
-                    from variant.mappingFileProvider.get()
-                    into mappingDir
-                    rename { String fileName -> "mapping-${variant.versionName}.txt" }
+                if (apkFile != null) {
+                    copy {
+                        from apkFile
+                        into apkDir
+                        rename { "shizuku-v${android.defaultConfig.versionName}-${variant.name}.apk" }
+                    }
                 }
-                copy {
-                    from outputFile
-                    into apkDir
+
+                def mappingProvider = variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE.INSTANCE)
+                if (mappingProvider.isPresent()) {
+                    copy {
+                        from mappingProvider.get().asFile
+                        into mappingDir
+                        rename { "mapping-v${android.defaultConfig.versionName}.txt" }
+                    }
                 }
             }
         }

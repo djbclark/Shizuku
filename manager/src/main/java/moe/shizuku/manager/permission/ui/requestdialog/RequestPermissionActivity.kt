@@ -9,13 +9,13 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.ui.ThemeHelper
 import moe.shizuku.manager.databinding.ConfirmationDialogBinding
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.shizuku.Shizuku
@@ -48,7 +48,7 @@ class RequestPermissionActivity : AppCompatActivity() {
         if (permission) return true
 
         val icon = getDrawable(R.drawable.ic_system_icon)
-        icon?.setTint(ThemeHelper.resolveColor(this, android.R.attr.colorAccent))
+        icon?.setTint(MaterialColors.getColor(this, android.R.attr.colorPrimary, 0))
 
 
         val dialog =
@@ -66,7 +66,7 @@ class RequestPermissionActivity : AppCompatActivity() {
         }
         try {
             dialog.show()
-        } catch (ignored: Throwable) {
+        } catch (_: Throwable) {
         }
         return false
     }
@@ -108,7 +108,7 @@ class RequestPermissionActivity : AppCompatActivity() {
         val label =
             try {
                 ai.loadLabel(packageManager)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 ai.packageName
             }
 
