@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -17,8 +18,11 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.snackbar
+import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
 import moe.shizuku.manager.databinding.HomeFragmentBinding
+import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.ui.authorizedapps.AppsViewModel
 import moe.shizuku.manager.shizukuservice.services.AdbPairingService
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
@@ -33,6 +37,7 @@ class HomeFragment : Fragment() {
     }
 
     private val homeModel: HomeViewModel by viewModels()
+    private val listSelectionModel: ListSelectionViewModel by viewModels()
     private val appsModel: AppsViewModel by viewModels()
 
     private lateinit var binding: HomeFragmentBinding
@@ -89,35 +94,21 @@ class HomeFragment : Fragment() {
             }
         }
 
-        homeModel.shouldShowRebootDialog.observe(viewLifecycleOwner) { shouldShow ->
-            if (shouldShow) {
-                showExitDialog(
-                    getString(R.string.home_reboot_required),
-                    getString(R.string.home_reboot_required_message),
-                )
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    homeModel.events.collect { event ->
+                        handleEvent(event)
+                    }
+                }
+                launch {
+                    listSelectionModel.results.collect {
+                        homeModel.handleSelectionResult(it)
+                    }
+                }
             }
         }
 
-        homeModel.shouldShowUninstallDialog.observe(viewLifecycleOwner) { shouldShow ->
-            if (shouldShow) {
-                showExitDialog(
-                    getString(R.string.home_duplicate_app_detected),
-                    getString(R.string.home_duplicate_app_detected_message),
-                )
-            }
-        }
-
-        homeModel.shouldShowBatteryOptimizationSnackbar.observe(viewLifecycleOwner) { shouldShow ->
-            if (shouldShow) {
-                snackbar(
-                    msg = getString(R.string.home_battery_optimization),
-                    duration = Snackbar.LENGTH_INDEFINITE
-                ).setAction(R.string.fix) {
-                    val intent = PowerManagerHelper.getBatteryOptimizationIntent()
-                    startActivity(intent)
-                }.show()
-            }
-        }
         homeModel.checkBatteryOptimization()
 
         appsModel.grantedCount.observe(viewLifecycleOwner) {
@@ -146,6 +137,36 @@ class HomeFragment : Fragment() {
         }
 
         ShizukuStateMachine.addListener(stateListener)
+    }
+
+    private fun handleEvent(event: HomeEvent) {
+        when (event) {
+            is HomeEvent.OpenUrl -> openUrl(event.url)
+
+            HomeEvent.ShowRebootDialog -> {
+                showExitDialog(
+                    getString(R.string.home_reboot_required),
+                    getString(R.string.home_reboot_required_message),
+                )
+            }
+
+            HomeEvent.ShowUninstallDialog -> {
+                showExitDialog(
+                    getString(R.string.home_duplicate_app_detected),
+                    getString(R.string.home_duplicate_app_detected_message),
+                )
+            }
+
+            HomeEvent.ShowBatteryOptimizationSnackbar -> {
+                snackbar(
+                    msg = getString(R.string.home_battery_optimization),
+                    duration = Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.fix) {
+                    val intent = PowerManagerHelper.getBatteryOptimizationIntent()
+                    startActivity(intent)
+                }.show()
+            }
+        }
     }
 
     private fun setupCards() {
@@ -184,12 +205,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        homeModel.reload()
-        appsModel.load()
-    }
-
     private fun showExitDialog(
         title: String,
         message: String,
@@ -205,6 +220,12 @@ class HomeFragment : Fragment() {
 
         dialog.setCanceledOnTouchOutside(false)
         dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        homeModel.reload()
+        appsModel.load()
     }
 
     override fun onDestroyView() {

@@ -1,5 +1,6 @@
-package moe.shizuku.manager.settings.ui.components
+package moe.shizuku.manager.core.ui.components.listselection
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,28 +14,37 @@ import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.ui.components.StyledBottomSheet
 import moe.shizuku.manager.databinding.RadioButtonListItemBinding
 
-class SelectionBottomSheet : StyledBottomSheet() {
+class ListSelectionBottomSheet : StyledBottomSheet() {
 
     companion object {
         fun <T : Any> show(
             fragmentManager: FragmentManager,
-            viewModel: SelectionViewModel,
             @StringRes title: Int,
             @StringRes footer: Int? = null,
-            items: List<SelectionItem<T>>,
-            selectedValue: T?
+            items: List<ListSelectionItem<T>>,
+            selectedItem: T? = null
         ) {
-            viewModel.items = items
-            viewModel.selectedValue = selectedValue
-
-            SelectionBottomSheet().apply {
+            ListSelectionBottomSheet().apply {
                 this.titleRes = title
                 this.footerRes = footer
+                this.items = items
+                this.selectedItem = selectedItem
             }.show(fragmentManager, TAG)
         }
     }
 
-    private val viewModel: SelectionViewModel by viewModels({ requireParentFragment() })
+    private val viewModel: ListSelectionViewModel by viewModels({ requireParentFragment() })
+
+    // Items and selectedItem will be null on config change
+    // Only update the ViewModel on the initial show() call
+    private var items: List<ListSelectionItem<Any>>? = null
+    private var selectedItem: Any? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        items?.let { viewModel.items = it }
+        selectedItem?.let { viewModel.selectedItem = it }
+    }
 
     override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?): View =
         RecyclerView(requireContext()).apply {
@@ -67,13 +77,18 @@ class SelectionBottomSheet : StyledBottomSheet() {
     private inner class ViewHolder(private val binding: RadioButtonListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: SelectionItem<Any>) {
+        fun bind(item: ListSelectionItem<Any>) {
             binding.apply {
                 title.text = item.label
                 description.text = item.description
                 description.isVisible = item.description != null
 
-                radioButton.isChecked = item.value == viewModel.selectedValue
+                radioButton.isVisible = item.type == ListSelectionItem.Type.RADIO
+                radioButton.isChecked = item.value == viewModel.selectedItem
+
+                icon.isVisible = item.type == ListSelectionItem.Type.ICON
+                item.iconRes?.let { icon.setImageResource(it) }
+
                 root.apply {
                     isEnabled = item.isEnabled
                     alpha = if (item.isEnabled) 1f else 0.38f

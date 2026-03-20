@@ -10,11 +10,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.ShizukuSystemApis
+import moe.shizuku.manager.home.models.HelpItem
+import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.lifecycle.Resource
@@ -27,15 +31,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _serviceStatus = MutableLiveData<Resource<ServiceStatus>>()
     val serviceStatus = _serviceStatus as LiveData<Resource<ServiceStatus>>
 
-    private val _shouldShowBatteryOptimizationSnackbar = MutableLiveData(false)
-    val shouldShowBatteryOptimizationSnackbar: LiveData<Boolean> =
-        _shouldShowBatteryOptimizationSnackbar
-
-    private val _shouldShowRebootDialog = MutableLiveData(false)
-    val shouldShowRebootDialog: LiveData<Boolean> = _shouldShowRebootDialog
-
-    private val _shouldShowUninstallDialog = MutableLiveData(false)
-    val shouldShowUninstallDialog: LiveData<Boolean> = _shouldShowUninstallDialog
+    private val _events = Channel<HomeEvent>()
+    val events = _events.receiveAsFlow()
 
     private val shizukuPermissionGroup = "moe.shizuku.manager.permission-group.API"
     private val shizukuPermission = "moe.shizuku.manager.permission.API_V23"
@@ -49,10 +46,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             appContext.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
             val permission = appContext.packageManager.getPermissionInfo(shizukuPermission, 0)
             if (permission.packageName != appContext.packageName) {
-                _shouldShowUninstallDialog.postValue(true)
+                _events.trySend(HomeEvent.ShowUninstallDialog)
             }
         } catch (_: PackageManager.NameNotFoundException) {
-            _shouldShowRebootDialog.postValue(true)
+            _events.trySend(HomeEvent.ShowRebootDialog)
         }
 
         if (Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)) {
@@ -96,12 +93,29 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun handleSelectionResult(value: Any) {
+        when (value) {
+            is HelpItem -> onHelpItemSelected(value)
+        }
+    }
+
+    private fun onHelpItemSelected(item: HelpItem) {
+        val url = when (item) {
+            HelpItem.USER_GUIDE -> "https://shizuku.rikka.app/guide/setup/"
+            HelpItem.BUG_REPORT -> "https://github.com/RikkaApps/Shizuku/issues"
+            HelpItem.FEATURE_REQUEST -> "https://github.com/RikkaApps/Shizuku/issues"
+            HelpItem.TRANSLATE -> "https://crowdin.com/project/shizuku"
+            HelpItem.PRIVACY -> "https://shizuku.rikka.app/privacy.html"
+        }
+        _events.trySend(HomeEvent.OpenUrl(url))
+    }
+
     fun checkBatteryOptimization() {
         if (EnvironmentUtils.isTelevision()) return
         if (!PreferencesRepository.startOnBoot.get() && !PreferencesRepository.watchdog.get()) return
-        _shouldShowBatteryOptimizationSnackbar.postValue(
-            !PowerManagerHelper.isIgnoringBatteryOptimizations()
-        )
+        if (!PowerManagerHelper.isIgnoringBatteryOptimizations()) {
+            _events.trySend(HomeEvent.ShowBatteryOptimizationSnackbar)
+        }
     }
 
 }

@@ -5,6 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
+    android:maxWidth="600dp"
     android:padding="?android:dialogPreferredPadding">
 
     <ImageView
@@ -22,51 +23,81 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:text="@string/app_name"
-        android:textAppearance="@android:style/TextAppearance.Material.Body1"
-        android:textSize="18sp"
+        android:textAppearance="?textAppearanceTitleMedium"
+        app:layout_constraintBottom_toTopOf="@+id/version_name"
+        app:layout_constraintEnd_toStartOf="@id/btnClose"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toEndOf="@android:id/icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@android:id/icon"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/version_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:textAppearance="?textAppearanceLabelMedium"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintEnd_toStartOf="@id/btnClose"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@id/app_name"
         app:layout_constraintTop_toBottomOf="@id/app_name"
         tools:text="v13.6.0" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="16dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="16dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:text="@string/check_for_updates"
         app:icon="@drawable/ic_update_24"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
         app:layout_constraintTop_toBottomOf="@id/version_name" />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/buttons_flow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:constraint_referenced_ids="btnGitHub,btnDonate"
+        app:flow_horizontalGap="4dp"
+        app:flow_horizontalStyle="packed"
+        app:flow_wrapMode="chain"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
+        app:layout_constraintTop_toBottomOf="@id/btnUpdate" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGitHub"
         style="?materialButtonTonalStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:text="@string/about_github"
-        app:icon="@drawable/ic_github"
-        app:layout_constraintStart_toStartOf="@id/btnUpdate"
-        app:layout_constraintTop_toBottomOf="@id/btnUpdate" />
+        app:icon="@drawable/ic_github" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDonate"
         style="?materialButtonTonalStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
         android:text="@string/about_donate"
-        app:icon="@drawable/ic_bmc_logo"
-        app:layout_constraintStart_toEndOf="@id/btnGitHub"
-        app:layout_constraintTop_toTopOf="@id/btnGitHub" />
+        app:icon="@drawable/ic_bmc_logo" />
 
     <TextView
         android:id="@+id/developer"
@@ -75,9 +106,9 @@
         android:layout_marginTop="16dp"
         android:textAppearance="?textAppearanceBodySmall"
         android:textColor="?android:textColorSecondary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnDonate"
+        app:layout_constraintEnd_toEndOf="@id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
+        app:layout_constraintTop_toBottomOf="@id/buttons_flow"
         tools:text="Made by RikkaApps" />
 
     <TextView
@@ -93,14 +124,15 @@
         tools:text="Forked by thedjchi" />
 
     <!-- Close button -->
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnClose"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        style="?attr/materialIconButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="-8dp"
         android:layout_marginEnd="-8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close_24"
+        android:contentDescription="@string/close"
+        app:icon="@drawable/ic_close_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:background="?android:selectableItemBackground"
     android:minHeight="56dp"
-    android:paddingHorizontal="@dimen/dialog_horizontal_padding"
+    android:paddingStart="@dimen/dialog_horizontal_padding"
+    android:paddingEnd="16dp"
     android:paddingVertical="8dp">
 
     <TextView
@@ -16,7 +17,7 @@
         android:textAppearance="?textAppearanceBodyLarge"
         android:textColor="?colorOnSurface"
         app:layout_constraintBottom_toTopOf="@id/description"
-        app:layout_constraintEnd_toStartOf="@id/radio_button"
+        app:layout_constraintEnd_toStartOf="@+id/barrier"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -37,17 +38,38 @@
         tools:text="Description"
         tools:visibility="visible" />
 
-    <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/radio_button"
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="-16dp"
+        app:barrierDirection="start"
+        app:barrierMargin="-16dp"
+        app:constraint_referenced_ids="radio_button,icon" />
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/radio_button"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:clickable="false"
         android:focusable="false"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/title"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="3dp"
+        android:importantForAccessibility="no"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?colorOnSurfaceVariant"
+        tools:src="@drawable/ic_close_24"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -347,5 +347,11 @@
     <string name="apply">Apply</string>
     <string name="export_success">Export succeeded</string>
     <string name="export_failed">Export failed</string>
+    <string name="close">Close</string>
+    <string name="help_user_guide">User guide</string>
+    <string name="help_bug_report">Report a bug</string>
+    <string name="help_feature_request">Request a feature</string>
+    <string name="help_translate">Contribute translations</string>
+    <string name="help_privacy">Privacy policy</string>
 
 </resources>

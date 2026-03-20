@@ -71,6 +71,15 @@ class SettingsViewModel : ViewModel() {
         )
     }
 
+    fun handleSelectionResult(value: Any) {
+        when (value) {
+            is StartMode -> onStartModeChanged(value)
+            is LocaleHelper.LocaleEntry -> onLanguageChanged(value)
+            is Theme -> onThemeChanged(value)
+            is UpdateChannel -> onUpdateChannelChanged(value)
+        }
+    }
+
     fun getStartModeDescription(startMode: StartMode): Int? = when (startMode) {
         StartMode.WADB -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             R.string.wireless_debugging_requirement
@@ -86,7 +95,7 @@ class SettingsViewModel : ViewModel() {
         StartMode.ROOT -> EnvironmentUtils.isRooted()
     }
 
-    fun onStartModeChanged(newValue: StartMode) {
+    private fun onStartModeChanged(newValue: StartMode) {
         PreferencesRepository.startMode.set(newValue)
     }
 
@@ -132,7 +141,7 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun applyTcpModeChange(newValue: Boolean) {
+    private fun applyTcpModeChange(newValue: Boolean) {
         PreferencesRepository.tcpMode.set(newValue)
     }
 
@@ -155,21 +164,21 @@ class SettingsViewModel : ViewModel() {
         applyTcpPortChange(newPort)
     }
 
-    fun applyTcpPortChange(newValue: Int) {
+    private fun applyTcpPortChange(newValue: Int) {
         PreferencesRepository.tcpPort.set(newValue)
     }
 
-    fun onLanguageChanged(newValue: LocaleHelper.LocaleEntry) {
+    private fun onLanguageChanged(newValue: LocaleHelper.LocaleEntry) {
         LocaleHelper.setLocale(newValue)
     }
 
-    fun onThemeChanged(value: Theme) {
+    private fun onThemeChanged(value: Theme) {
         if (PreferencesRepository.theme.get() != value) {
             PreferencesRepository.theme.set(value)
         }
     }
 
-    fun onUpdateChannelChanged(value: UpdateChannel) {
+    private fun onUpdateChannelChanged(value: UpdateChannel) {
         PreferencesRepository.updateChannel.set(value)
     }
 
