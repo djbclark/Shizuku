@@ -14,14 +14,16 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
 import moe.shizuku.manager.watchdog.services.WatchdogService
 
-object WatchdogNotifications {
+class WatchdogNotifications(private val context: Context) {
 
-    const val ID_WATCHDOG = 1001
-    const val ID_CRASH = 1002
-    const val CHANNEL_ID_WATCHDOG = "shizuku_watchdog"
-    const val CHANNEL_ID_CRASH = "crash_reports"
+    companion object {
+        const val ID_WATCHDOG = 1001
+        const val ID_CRASH = 1002
+        const val CHANNEL_ID_WATCHDOG = "shizuku_watchdog"
+        const val CHANNEL_ID_CRASH = "crash_reports"
+    }
 
-    private fun createChannels(context: Context) {
+    private fun createChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -41,8 +43,8 @@ object WatchdogNotifications {
         manager.createNotificationChannels(listOf(watchdogChannel, crashChannel))
     }
 
-    fun createWatchdogNotification(context: Context): Notification {
-        createChannels(context)
+    fun createWatchdogNotification(): Notification {
+        createChannels()
 
         val launchPendingIntent = NavDeepLinkBuilder(context)
             .setGraph(R.navigation.nav_graph)
@@ -72,8 +74,8 @@ object WatchdogNotifications {
             .build()
     }
 
-    fun showCrashNotification(context: Context) {
-        createChannels(context)
+    fun showCrashNotification() {
+        createChannels()
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val learnMoreIntent = Intent(Intent.ACTION_VIEW).apply {

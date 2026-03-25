@@ -6,8 +6,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import org.koin.core.component.KoinComponent
 
-class NotifCancelReceiver : BroadcastReceiver() {
+class NotifCancelReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
         WorkManager.getInstance(context).cancelUniqueWork("adb_start_worker")
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

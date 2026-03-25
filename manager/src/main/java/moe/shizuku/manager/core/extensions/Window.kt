@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.os.Build
 import android.view.Window
 import androidx.core.view.WindowInsetsControllerCompat
-import moe.shizuku.manager.core.ui.helpers.ThemeHelper.isNightMode
+import moe.shizuku.manager.core.ui.helpers.ThemeHelper.Companion.isNightMode
 
 private val darkScrim = Color.argb(0x80, 0x1B, 0x1B, 0x1B)
 private val lightScrim = Color.argb(0xE6, 0xFF, 0xFF, 0xFF)

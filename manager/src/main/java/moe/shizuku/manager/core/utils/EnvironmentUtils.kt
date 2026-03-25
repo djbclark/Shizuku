@@ -1,29 +1,28 @@
 package moe.shizuku.manager.core.utils
 
 import android.app.UiModeManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.SystemProperties
 import com.topjohnwu.superuser.Shell
-import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 
-private val appContext = ShizukuApplication.appContext
+class EnvironmentUtils(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository
+) {
 
-object EnvironmentUtils {
-
-    @JvmStatic
     fun isWatch(): Boolean {
-        return (appContext.getSystemService(UiModeManager::class.java).currentModeType
+        return (context.getSystemService(UiModeManager::class.java).currentModeType
                 == Configuration.UI_MODE_TYPE_WATCH)
     }
 
-    @JvmStatic
     fun isTelevision(): Boolean {
-        return (appContext.getSystemService(UiModeManager::class.java).currentModeType
+        return (context.getSystemService(UiModeManager::class.java).currentModeType
                 == Configuration.UI_MODE_TYPE_TELEVISION ||
-                appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
+                context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
     }
 
     fun isTlsSupported(): Boolean {
@@ -33,18 +32,20 @@ object EnvironmentUtils {
     }
 
     fun isWifiRequired(): Boolean {
-        return (getAdbTcpPort() <= 0 || !PreferencesRepository.tcpMode.get())
-    }
-
-    fun isRooted(): Boolean {
-        return Shell.getShell().isRoot
+        return (getAdbTcpPort() <= 0 || !preferencesRepository.tcpMode.get())
     }
 
     fun getAdbTcpPort(): Int {
         var port = SystemProperties.getInt("service.adb.tcp.port", -1)
         if (port == -1) port = SystemProperties.getInt("persist.adb.tcp.port", -1)
         if (port == -1 && isTelevision() && !isTlsSupported()) port =
-            PreferencesRepository.tcpPort.get()
+            preferencesRepository.tcpPort.get()
         return port
+    }
+
+    companion object {
+        fun isRooted(): Boolean {
+            return Shell.getShell().isRoot
+        }
     }
 }

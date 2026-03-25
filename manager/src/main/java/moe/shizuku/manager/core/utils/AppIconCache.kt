@@ -15,7 +15,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
-object AppIconCache : CoroutineScope {
+class AppIconCache : CoroutineScope {
 
     private class AppIconLruCache constructor(maxSize: Int) :
         LruCache<Triple<String, Int, Int>, Bitmap>(maxSize) {
@@ -40,12 +40,12 @@ object AppIconCache : CoroutineScope {
         lruCache = AppIconLruCache(availableCacheSize)
 
         // Initialize load icon scheduler
-        val availableProcessorsCount = try {
+        val availableProcessorsCountCount = try {
             Runtime.getRuntime().availableProcessors()
         } catch (ignored: Exception) {
             1
         }
-        val threadCount = 1.coerceAtLeast(availableProcessorsCount / 2)
+        val threadCount = 1.coerceAtLeast(availableProcessorsCountCount / 2)
         val loadIconExecutor: Executor = Executors.newFixedThreadPool(threadCount)
         dispatcher = loadIconExecutor.asCoroutineDispatcher()
     }
@@ -87,7 +87,6 @@ object AppIconCache : CoroutineScope {
         return bitmap
     }
 
-    @JvmStatic
     fun loadIconBitmapAsync(
         context: Context,
         info: ApplicationInfo, userId: Int,

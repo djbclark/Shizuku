@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.shizukuservice.starter
 
 import android.content.Context
 import android.provider.Settings
@@ -21,9 +21,14 @@ import java.io.EOFException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
-object AdbStarter {
+class AdbStarter(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository,
+    private val environmentUtils: EnvironmentUtils,
+    private val shizukuStateMachine: ShizukuStateMachine,
+    private val starter: Starter
+) {
     suspend fun startAdb(
-        context: Context,
         port: Int,
         log: ((String) -> Unit)? = null,
     ) {
@@ -32,14 +37,14 @@ object AdbStarter {
         }
 
         try {
-            ShizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
+            shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
             log?.invoke("Starting with wireless adb...\n")
 
             withContext(Dispatchers.IO) {
                 val key =
                     runCatching {
                         AdbKey(
-                            PreferenceAdbKeyStore(PreferencesRepository.prefs),
+                            PreferenceAdbKeyStore(preferencesRepository.prefs),
                             "shizuku"
                         )
                     }
@@ -52,8 +57,8 @@ object AdbStarter {
                         }
 
                 var activePort = port
-                val tcpMode = PreferencesRepository.tcpMode.get()
-                val tcpPort = PreferencesRepository.tcpPort.get()
+                val tcpMode = preferencesRepository.tcpMode.get()
+                val tcpPort = preferencesRepository.tcpPort.get()
                 if (tcpMode && activePort != tcpPort) {
                     log?.invoke("Connecting on port $activePort...")
 
@@ -66,7 +71,7 @@ object AdbStarter {
                         activePort = tcpPort
                         runCatching {
                             client.command("tcpip:$activePort")
-                        }.onFailure { if (it !is EOFException && it !is SocketException) throw it } // Expected when ADB restarts in TCP mode
+                        }.onFailure { if (it !is EOFException && it !is SocketException) throw it }
                     }
                 }
 
@@ -75,7 +80,7 @@ object AdbStarter {
                 AdbClient("127.0.0.1", activePort, key).use { client ->
                     connectWithRetry(client)
                     log?.invoke("Successfully connected on port $activePort...\n")
-                    client.runCommand("shell:${Starter.internalCommand}")
+                    client.runCommand("shell:${starter.internalCommand}")
                 }
             }
         } finally {
@@ -86,7 +91,6 @@ object AdbStarter {
     }
 
     suspend fun stopTcp(
-        context: Context,
         port: Int,
     ) {
         runCatching {
@@ -99,9 +103,9 @@ object AdbStarter {
             val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
             if (adbEnabled == 0) throw IllegalStateException("ADB is not enabled")
 
-            ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
+            shizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
             val key =
-                AdbKey(PreferenceAdbKeyStore(PreferencesRepository.prefs), "shizuku")
+                AdbKey(PreferenceAdbKeyStore(preferencesRepository.prefs), "shizuku")
             withContext(Dispatchers.IO) {
                 AdbClient("127.0.0.1", port, key).use { client ->
                     connectWithRetry(client)
@@ -109,8 +113,8 @@ object AdbStarter {
                 }
             }
         }.onFailure {
-            if (EnvironmentUtils.getAdbTcpPort() > 0) {
-                ShizukuStateMachine.update()
+            if (environmentUtils.getAdbTcpPort() > 0) {
+                shizukuStateMachine.update()
                 withContext(Dispatchers.Main) {
                     val errorMsg =
                         when (it) {

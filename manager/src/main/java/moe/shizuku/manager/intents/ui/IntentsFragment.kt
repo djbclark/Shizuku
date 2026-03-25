@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -15,9 +14,10 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.databinding.IntentsFragmentBinding
 import moe.shizuku.manager.intents.models.IntentsUiState
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class IntentsFragment : Fragment(R.layout.intents_fragment) {
-    private val viewModel: IntentsViewModel by viewModels()
+    private val viewModel: IntentsViewModel by viewModel()
     private val binding by viewBinding(IntentsFragmentBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

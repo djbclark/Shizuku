@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.adb.AdbStarter
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.Preference
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -26,7 +26,14 @@ import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(
+    private val preferencesRepository: PreferencesRepository,
+    private val localeHelper: LocaleHelper,
+    private val powerManagerHelper: PowerManagerHelper,
+    private val stateMachine: ShizukuStateMachine,
+    private val adbStarter: AdbStarter,
+    private val environmentUtils: EnvironmentUtils
+) : ViewModel() {
 
     private val _events = Channel<SettingsEvent>()
     val events = _events.receiveAsFlow()
@@ -34,8 +41,8 @@ class SettingsViewModel : ViewModel() {
     private var pendingBatteryOptimization: Preference<*>? = null
 
     val uiState: StateFlow<SettingsUiState> = combine(
-        PreferencesRepository.all,
-        LocaleHelper.localeFlow
+        preferencesRepository.all,
+        localeHelper.localeFlow
     ) { _, _ ->
         calculateUiState()
     }.stateIn(
@@ -44,10 +51,10 @@ class SettingsViewModel : ViewModel() {
         initialValue = calculateUiState()
     )
 
-    private fun calculateUiState(): SettingsUiState = with(PreferencesRepository) {
-        val isTelevision = EnvironmentUtils.isTelevision()
+    private fun calculateUiState(): SettingsUiState = with(preferencesRepository) {
+        val isTelevision = environmentUtils.isTelevision()
         val isRooted = EnvironmentUtils.isRooted()
-        val isTcpModeVisible = EnvironmentUtils.isTlsSupported()
+        val isTcpModeVisible = environmentUtils.isTlsSupported()
 
         SettingsUiState(
             startModeValue = startMode.get(),
@@ -62,7 +69,7 @@ class SettingsViewModel : ViewModel() {
             tcpPortValue = tcpPort.get(),
             isLegacyPairingVisible = !isTelevision,
 
-            languageValue = LocaleHelper.getLocale(),
+            languageValue = localeHelper.getLocale(),
             themeValue = theme.get(),
             isAmoledBlackVisible = theme.get() != Theme.LIGHT,
             isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
@@ -81,15 +88,14 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun onStartModeChanged(newValue: StartMode) {
-        PreferencesRepository.startMode.set(newValue)
+        preferencesRepository.startMode.set(newValue)
     }
 
     fun onStartOnBootChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
-            requestBatteryOptimization(PreferencesRepository.startOnBoot)
+            requestBatteryOptimization(preferencesRepository.startOnBoot)
         }
-        // https://r.android.com/2128832
-        else if (!EnvironmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        else if (!environmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             _events.trySend(SettingsEvent.ShowStartOnBootBugDialog)
         } else {
             applyStartOnBootChange(newValue)
@@ -97,19 +103,19 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun applyStartOnBootChange(newValue: Boolean) {
-        PreferencesRepository.startOnBoot.set(newValue)
+        preferencesRepository.startOnBoot.set(newValue)
     }
 
     fun onWatchdogChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
-            requestBatteryOptimization(PreferencesRepository.watchdog)
+            requestBatteryOptimization(preferencesRepository.watchdog)
         } else {
-            PreferencesRepository.watchdog.set(newValue)
+            preferencesRepository.watchdog.set(newValue)
         }
     }
 
     fun onTcpModeChanged(newValue: Boolean) {
-        val isTcpModeActive = EnvironmentUtils.getAdbTcpPort() > 0
+        val isTcpModeActive = environmentUtils.getAdbTcpPort() > 0
 
         if (isTcpModeActive == newValue) {
             applyTcpModeChange(newValue)
@@ -119,7 +125,7 @@ class SettingsViewModel : ViewModel() {
         if (!newValue) {
             _events.trySend(SettingsEvent.PromptStopTcp)
         } else {
-            if (ShizukuStateMachine.isRunning()) {
+            if (stateMachine.isRunning()) {
                 _events.trySend(SettingsEvent.Snackbar(R.string.tcp_restarting_wifi))
             }
             applyTcpModeChange(true)
@@ -127,7 +133,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun applyTcpModeChange(newValue: Boolean) {
-        PreferencesRepository.tcpMode.set(newValue)
+        preferencesRepository.tcpMode.set(newValue)
     }
 
     fun validatePort(input: String?): Int? {
@@ -137,41 +143,38 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun onTcpPortChanged(input: String) {
-        val newPort = input.toIntOrNull() ?: PreferencesRepository.tcpPort.default
-        val currentPort = EnvironmentUtils.getAdbTcpPort()
+        val newPort = input.toIntOrNull() ?: preferencesRepository.tcpPort.default
+        val currentPort = environmentUtils.getAdbTcpPort()
         val needsRestart = (currentPort != newPort)
 
-        if (ShizukuStateMachine.isRunning() && needsRestart) {
+        if (stateMachine.isRunning() && needsRestart) {
             _events.trySend(SettingsEvent.Snackbar(R.string.tcp_restarting))
-        } else {
-            // TODO cancel pending restart
         }
         applyTcpPortChange(newPort)
     }
 
     private fun applyTcpPortChange(newValue: Int) {
-        PreferencesRepository.tcpPort.set(newValue)
+        preferencesRepository.tcpPort.set(newValue)
     }
 
     private fun onLanguageChanged(newValue: LocaleHelper.LocaleEntry) {
-        LocaleHelper.setLocale(newValue)
+        localeHelper.setLocale(newValue)
     }
 
     private fun onThemeChanged(value: Theme) {
-        if (PreferencesRepository.theme.get() != value) {
-            PreferencesRepository.theme.set(value)
+        if (preferencesRepository.theme.get() != value) {
+            preferencesRepository.theme.set(value)
         }
     }
 
     private fun onUpdateChannelChanged(value: UpdateChannel) {
-        PreferencesRepository.updateChannel.set(value)
+        preferencesRepository.updateChannel.set(value)
     }
 
-    // TODO remove context
     fun onStopTcp(context: Context) {
         viewModelScope.launch {
-            AdbStarter.stopTcp(context, EnvironmentUtils.getAdbTcpPort())
-            if (EnvironmentUtils.getAdbTcpPort() <= 0) {
+            adbStarter.stopTcp(environmentUtils.getAdbTcpPort())
+            if (environmentUtils.getAdbTcpPort() <= 0) {
                 applyTcpModeChange(false)
             } else {
                 context.toast(R.string.tcp_error_closing)
@@ -179,9 +182,8 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    // Battery optimization logic
     private fun shouldRequestBatteryOptimization(settingsValue: Boolean) =
-        settingsValue && !PowerManagerHelper.isIgnoringBatteryOptimizations() && !EnvironmentUtils.isTelevision()
+        settingsValue && !powerManagerHelper.isIgnoringBatteryOptimizations() && !environmentUtils.isTelevision()
 
     private fun requestBatteryOptimization(pref: Preference<*>) {
         pendingBatteryOptimization = pref
@@ -190,10 +192,10 @@ class SettingsViewModel : ViewModel() {
 
     fun onBatteryOptimizationResult() {
         val setting = pendingBatteryOptimization ?: return
-        if (PowerManagerHelper.isIgnoringBatteryOptimizations()) {
+        if (powerManagerHelper.isIgnoringBatteryOptimizations()) {
             when (setting) {
-                PreferencesRepository.startOnBoot -> onStartOnBootChanged(true)
-                PreferencesRepository.watchdog -> onWatchdogChanged(true)
+                preferencesRepository.startOnBoot -> onStartOnBootChanged(true)
+                preferencesRepository.watchdog -> onWatchdogChanged(true)
             }
         }
         pendingBatteryOptimization = null

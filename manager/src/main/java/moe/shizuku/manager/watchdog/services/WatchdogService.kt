@@ -12,20 +12,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
+import org.koin.android.ext.android.inject
 
 class WatchdogService : Service() {
 
+    private val watchdogNotifications: WatchdogNotifications by inject()
+    private val shizukuReceiverStarter: ShizukuReceiverStarter by inject()
+    private val shizukuStateMachine: ShizukuStateMachine by inject()
+
     private val crashListener: (ShizukuStateMachine.State) -> Unit = {
         if (it == ShizukuStateMachine.State.CRASHED) {
-            WatchdogNotifications.showCrashNotification(this)
-            ShizukuReceiverStarter.start(applicationContext)
+            watchdogNotifications.showCrashNotification()
+            shizukuReceiverStarter.start()
         }
     }
 
     override fun onCreate() {
         super.onCreate()
         _isRunning.value = true
-        ShizukuStateMachine.addListener(crashListener)
+        shizukuStateMachine.addListener(crashListener)
     }
 
     override fun onStartCommand(
@@ -45,14 +50,14 @@ class WatchdogService : Service() {
         ServiceCompat.startForeground(
             this,
             WatchdogNotifications.ID_WATCHDOG,
-            WatchdogNotifications.createWatchdogNotification(this),
+            watchdogNotifications.createWatchdogNotification(),
             fgsType,
         )
         return START_STICKY
     }
 
     override fun onDestroy() {
-        ShizukuStateMachine.removeListener(crashListener)
+        shizukuStateMachine.removeListener(crashListener)
         _isRunning.value = false
         super.onDestroy()
     }

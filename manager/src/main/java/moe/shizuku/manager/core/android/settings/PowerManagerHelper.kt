@@ -7,25 +7,20 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.net.toUri
 
-object PowerManagerHelper {
-    private lateinit var appContext: Context
-
-    fun init(context: Context) {
-        appContext = context
-    }
+class PowerManagerHelper(private val context: Context) {
 
     private val powerManager by lazy {
-        appContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        context.getSystemService(Context.POWER_SERVICE) as PowerManager
     }
 
     fun isIgnoringBatteryOptimizations(): Boolean {
-        return powerManager.isIgnoringBatteryOptimizations(appContext.packageName)
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     @SuppressLint("BatteryLife")
     fun getBatteryOptimizationIntent(): Intent {
         return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-            data = "package:${appContext.packageName}".toUri()
+            data = "package:${context.packageName}".toUri()
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }

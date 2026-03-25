@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Bundle
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
@@ -18,19 +19,26 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 
-object ThemeHelper {
+class ThemeHelper(
+    application: Application,
+    private val environmentUtils: EnvironmentUtils,
+    private val preferencesRepository: PreferencesRepository
+) {
+
+    companion object {
+        fun Resources.isNightMode() =
+            (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
+
     private data class ThemeState(
         val theme: Theme,
         val amoled: Boolean,
         val dynamic: Boolean
     )
 
-    fun Resources.isNightMode() =
-        (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
     fun applyTheme(activity: AppCompatActivity) {
-        val amoledBlack = PreferencesRepository.amoledBlack.get() || EnvironmentUtils.isWatch()
-        val dynamicColor = PreferencesRepository.dynamicColor.get()
+        val amoledBlack = preferencesRepository.amoledBlack.get() || environmentUtils.isWatch()
+        val dynamicColor = preferencesRepository.dynamicColor.get()
 
         activity.setTheme(R.style.Theme_App)
 
@@ -44,7 +52,7 @@ object ThemeHelper {
         }
     }
 
-    fun init(application: Application) {
+    init {
         application.registerActivityLifecycleCallbacks(object :
             Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -66,9 +74,9 @@ object ThemeHelper {
     fun observe(activity: AppCompatActivity) {
         activity.lifecycleScope.launch {
             combine(
-                PreferencesRepository.theme.flow,
-                PreferencesRepository.amoledBlack.flow,
-                PreferencesRepository.dynamicColor.flow
+                preferencesRepository.theme.flow,
+                preferencesRepository.amoledBlack.flow,
+                preferencesRepository.dynamicColor.flow
             ) { theme, amoled, dynamic ->
                 ThemeState(theme, amoled, dynamic)
             }

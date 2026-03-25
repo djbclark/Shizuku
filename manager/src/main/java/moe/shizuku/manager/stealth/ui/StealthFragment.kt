@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
@@ -18,7 +17,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -29,15 +27,14 @@ import moe.shizuku.manager.core.extensions.dp
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.databinding.StealthFragmentBinding
-import moe.shizuku.manager.core.utils.ORIGINAL_PACKAGE_NAME
-import moe.shizuku.manager.core.utils.buildApkFilename
-import moe.shizuku.manager.core.utils.installPackage
-import moe.shizuku.manager.core.utils.installerReceiver
-import moe.shizuku.manager.core.utils.uninstallPackage
+import moe.shizuku.manager.core.utils.ApkUtils
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 
 class StealthFragment : Fragment(R.layout.stealth_fragment) {
-    private val viewModel: StealthViewModel by viewModels()
+    private val viewModel: StealthViewModel by viewModel()
+    private val apkUtils: ApkUtils by inject()
     private val binding by viewBinding(StealthFragmentBinding::bind)
     private lateinit var outDir: Uri
 
@@ -78,7 +75,7 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
                                 }
 
                                 ApkType.STUB -> {
-                                    requireContext().installPackage(apk) { isSuccess, msg ->
+                                    apkUtils.installPackage(apk) { isSuccess, msg ->
                                         handleInstallerResult(
                                             isSuccess,
                                             msg
@@ -141,13 +138,6 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
         }
     }
 
-    override fun onDestroyView() {
-        runCatching {
-            requireActivity().unregisterReceiver(installerReceiver)
-        }
-        super.onDestroyView()
-    }
-
     private fun onClick(action: Action) {
         when (action) {
             Action.HIDE -> {
@@ -162,7 +152,7 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
             }
 
             Action.REHIDE -> {
-                requireContext().uninstallPackage(ORIGINAL_PACKAGE_NAME) { isSuccess, msg ->
+                apkUtils.uninstallPackage(ApkUtils.ORIGINAL_PACKAGE_NAME) { isSuccess, msg ->
                     handleInstallerResult(
                         isSuccess,
                         msg
@@ -202,7 +192,7 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
                 requireContext().contentResolver,
                 docUri,
                 "application/vnd.android.package-archive",
-                buildApkFilename(),
+                apkUtils.buildApkFilename(),
             )
 
         if (doc == null) throw Exception("Could not create file in selected folder")
@@ -219,7 +209,7 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
             .setTitle(R.string.stealth_uninstall_required)
             .setMessage(R.string.stealth_uninstall_message)
             .setPositiveButton(R.string.uninstall) { _, _ ->
-                requireContext().uninstallPackage(requireContext().packageName)
+                apkUtils.uninstallPackage(requireContext().packageName)
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
     }

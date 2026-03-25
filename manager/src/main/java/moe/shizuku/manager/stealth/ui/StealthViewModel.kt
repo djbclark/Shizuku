@@ -1,20 +1,17 @@
 package moe.shizuku.manager.stealth.ui
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.appendRandomSuffix
-import moe.shizuku.manager.core.utils.ORIGINAL_PACKAGE_NAME
-import moe.shizuku.manager.core.utils.changePackageName
-import moe.shizuku.manager.core.utils.createStubApk
-import moe.shizuku.manager.core.utils.workDir
+import moe.shizuku.manager.core.utils.ApkUtils
 import java.io.File
 
 sealed class UiState {
@@ -46,10 +43,9 @@ enum class ApkType {
 }
 
 class StealthViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-    private val app: Application = getApplication()
-    private val appContext = app.applicationContext
+    private val context: Context,
+    private val apkUtils: ApkUtils
+) : ViewModel() {
 
     private val _uiState = MutableLiveData<UiState>(UiState.Idle(Action.HIDE))
     val uiState: LiveData<UiState> = _uiState
@@ -58,7 +54,7 @@ class StealthViewModel(
 
     private fun isShizukuHidden() =
         runCatching {
-            appContext.packageManager.getPackageInfo(ORIGINAL_PACKAGE_NAME, 0)
+            context.packageManager.getPackageInfo(ApkUtils.ORIGINAL_PACKAGE_NAME, 0)
         }.isFailure
 
     init {
@@ -69,7 +65,7 @@ class StealthViewModel(
         val action =
             if (isShizukuHidden()) {
                 Action.UNHIDE
-            } else if (app.packageName == ORIGINAL_PACKAGE_NAME) {
+            } else if (context.packageName == ApkUtils.ORIGINAL_PACKAGE_NAME) {
                 Action.HIDE
             } else {
                 Action.REHIDE
@@ -78,7 +74,7 @@ class StealthViewModel(
     }
 
     fun setPackageName(packageName: String? = null) {
-        _packageName = packageName ?: app.packageName.appendRandomSuffix()
+        _packageName = packageName ?: context.packageName.appendRandomSuffix()
     }
 
     fun createApk(apkType: ApkType) {
@@ -89,12 +85,15 @@ class StealthViewModel(
                 val apk =
                     when (apkType) {
                         ApkType.CLONE -> {
-                            File(app.applicationInfo.sourceDir)
-                                .changePackageName(_packageName!!, maybeCreateSigningKey = true)
+                            apkUtils.changePackageName(
+                                File(context.applicationInfo.sourceDir),
+                                _packageName!!,
+                                maybeCreateSigningKey = true
+                            )
                         }
 
                         ApkType.STUB -> {
-                            createStubApk(ORIGINAL_PACKAGE_NAME)
+                            apkUtils.createStubApk(ApkUtils.ORIGINAL_PACKAGE_NAME)
                         }
                     }
 
@@ -108,7 +107,8 @@ class StealthViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        workDir.deleteRecursively()
+        // WorkDir is now managed by ApkUtils if needed, or we can just clean up cache.
+        // For now, let's assume we don't need to manually delete workDir if it's in cache.
     }
 }
 

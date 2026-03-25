@@ -1,10 +1,10 @@
 package moe.shizuku.manager.shizukuservice.ui
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.CallbackList
 import com.topjohnwu.superuser.Shell
@@ -13,18 +13,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import moe.shizuku.manager.adb.AdbStarter
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.starter.Starter
-import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.lifecycle.Resource
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class StartViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-    private val appContext = getApplication<Application>().applicationContext
+    private val adbStarter: AdbStarter,
+    private val starter: Starter
+) : ViewModel() {
 
     private val sb = StringBuilder()
     private val _output = MutableLiveData<Resource<StringBuilder>>()
@@ -33,7 +32,6 @@ class StartViewModel(
 
     private val handler =
         CoroutineExceptionHandler { _, throwable ->
-            ShizukuStateMachine.update()
             log(error = throwable)
         }
 
@@ -50,9 +48,9 @@ class StartViewModel(
             if (root) {
                 startRoot()
             } else {
-                AdbStarter.startAdb(appContext, port) { log(it) }
+                adbStarter.startAdb(port) { log(it) }
             }
-            Starter.waitForBinder { log(it) }
+            starter.waitForBinder { log(it) }
         }
     }
 
@@ -64,9 +62,9 @@ class StartViewModel(
         error?.let { sb.appendLine().appendLine(Log.getStackTraceString(it)) }
 
         if (error == null) {
-            _output.postValue(Resource.Companion.success(sb))
+            _output.postValue(Resource.success(sb))
         } else {
-            _output.postValue(Resource.Companion.error(error, sb))
+            _output.postValue(Resource.error(error, sb))
         }
     }
 
@@ -75,7 +73,6 @@ class StartViewModel(
 
         return withContext(Dispatchers.IO) {
             if (!Shell.getShell().isRoot) {
-                // Try again just in case
                 Shell.getCachedShell()?.close()
 
                 if (!Shell.getShell().isRoot) {
@@ -84,10 +81,9 @@ class StartViewModel(
                 }
             }
 
-            ShizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
             suspendCancellableCoroutine { cont ->
                 Shell
-                    .cmd(Starter.internalCommand)
+                    .cmd(starter.internalCommand)
                     .to(
                         object : CallbackList<String?>() {
                             override fun onAddElement(s: String?) {

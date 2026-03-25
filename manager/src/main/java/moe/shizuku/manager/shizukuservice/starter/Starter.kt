@@ -1,22 +1,23 @@
 package moe.shizuku.manager.starter
 
+import android.content.Context
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
-import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import java.io.File
 import java.util.concurrent.TimeoutException
 
-private val app = ShizukuApplication.application
+class Starter(
+    private val context: Context,
+    private val shizukuStateMachine: ShizukuStateMachine
+) {
 
-object Starter {
-
-    private val starterFile = File(app.applicationInfo.nativeLibraryDir, "libshizuku.so")
+    private val starterFile = File(context.applicationInfo.nativeLibraryDir, "libshizuku.so")
 
     val userCommand: String = starterFile.absolutePath
     val adbCommand = "adb shell $userCommand"
-    val internalCommand = "$userCommand --apk=${app.applicationInfo.sourceDir}"
+    val internalCommand = "$userCommand --apk=${context.applicationInfo.sourceDir}"
 
     val serviceStartedMessage =
         "Service started, this window will be automatically closed in 3 seconds"
@@ -25,7 +26,7 @@ object Starter {
         try {
             log?.invoke("\nWaiting for service. This may take up to 1 minute...")
             withTimeout(60_000) {
-                ShizukuStateMachine.asFlow()
+                shizukuStateMachine.asFlow()
                     .first { it == ShizukuStateMachine.State.RUNNING }
             }
             log?.invoke(serviceStartedMessage)

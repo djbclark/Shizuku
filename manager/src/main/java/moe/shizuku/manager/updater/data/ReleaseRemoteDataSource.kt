@@ -23,7 +23,7 @@ data class GitHubAssetDto(
     val digest: String
 )
 
-object ReleaseRemoteDataSource {
+class ReleaseRemoteDataSource {
     private val client = OkHttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 

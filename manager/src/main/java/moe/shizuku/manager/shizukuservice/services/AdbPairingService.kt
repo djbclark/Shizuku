@@ -32,6 +32,7 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.home.HomeFragment
+import org.koin.android.ext.android.inject
 import java.net.ConnectException
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -62,6 +63,7 @@ class AdbPairingService : Service() {
             .putExtra(PORT_KEY, port)
     }
 
+    private val preferencesRepository: PreferencesRepository by inject()
     private var adbMdns: AdbMdns? = null
 
     private val observer =
@@ -186,7 +188,7 @@ class AdbPairingService : Service() {
 
             val key =
                 try {
-                    AdbKey(PreferenceAdbKeyStore(PreferencesRepository.prefs), "shizuku")
+                    AdbKey(PreferenceAdbKeyStore(preferencesRepository.prefs), "shizuku")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     return@launch

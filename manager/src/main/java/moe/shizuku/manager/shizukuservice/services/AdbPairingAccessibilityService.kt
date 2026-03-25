@@ -24,6 +24,7 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.home.HomeFragment
+import org.koin.android.ext.android.inject
 import java.net.ConnectException
 
 @SuppressLint("AccessibilityPolicy")
@@ -32,11 +33,13 @@ class AdbPairingAccessibilityService : AccessibilityService() {
     var password: String? = null
 
     private val handler = Handler(Looper.getMainLooper())
+    private val environmentUtils: EnvironmentUtils by inject()
+    private val preferencesRepository: PreferencesRepository by inject()
 
     override fun onServiceConnected() {
         super.onServiceConnected()
 
-        if (!(EnvironmentUtils.isTelevision() && EnvironmentUtils.isTlsSupported())) {
+        if (!(environmentUtils.isTelevision() && environmentUtils.isTlsSupported())) {
             disableSelf()
             return
         }
@@ -83,7 +86,7 @@ class AdbPairingAccessibilityService : AccessibilityService() {
                 val key =
                     try {
                         AdbKey(
-                            PreferenceAdbKeyStore(PreferencesRepository.prefs),
+                            PreferenceAdbKeyStore(preferencesRepository.prefs),
                             "shizuku"
                         )
                     } catch (_: Throwable) {

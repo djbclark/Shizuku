@@ -1,15 +1,18 @@
-package moe.shizuku.manager.receiver
+package moe.shizuku.manager.intents.receivers
 
 import android.content.Context
 import android.content.Intent
 import moe.shizuku.manager.BuildConfig
-import moe.shizuku.manager.intents.receivers.AuthenticatedReceiver
+import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class ManualStartReceiver : AuthenticatedReceiver() {
+class ManualStartReceiver : AuthenticatedReceiver(), KoinComponent {
     override fun onAuthenticated(context: Context, intent: Intent) {
         val applicationId = BuildConfig.APPLICATION_ID
         if (intent.action != "${applicationId}.START") return
 
-        ShizukuReceiverStarter.start(context)
+        val shizukuReceiverStarter: ShizukuReceiverStarter = get()
+        shizukuReceiverStarter.start()
     }
 }

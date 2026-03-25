@@ -9,7 +9,6 @@ import android.view.View.GONE
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -25,6 +24,7 @@ import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
+import moe.shizuku.manager.core.utils.AppIconCache
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.databinding.HomeFragmentBinding
 import moe.shizuku.manager.databinding.HomeSimpleCardBinding
@@ -33,10 +33,11 @@ import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.shizukuservice.services.AdbPairingService
-import moe.shizuku.manager.shizukuservice.ui.AdbPairDialogFragment
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import rikka.lifecycle.Status
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants
@@ -47,17 +48,23 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         const val ARG_START_SERVICE = "start_service"
     }
 
-    private val homeModel: HomeViewModel by viewModels()
-    private val listSelectionModel: ListSelectionViewModel by viewModels()
-    private val appsModel: AuthorizedAppsViewModel by viewModels()
+    private val homeModel: HomeViewModel by viewModel()
+    private val listSelectionModel: ListSelectionViewModel by viewModel()
+    private val appsModel: AuthorizedAppsViewModel by viewModel()
+    private val appIconCache: AppIconCache by inject()
+    private val preferencesRepository: PreferencesRepository by inject()
+    private val environmentUtils: EnvironmentUtils by inject()
+    private val powerManagerHelper: PowerManagerHelper by inject()
+    private val updateHelper: UpdateHelper by inject()
+    private val stateMachine: ShizukuStateMachine by inject()
 
     private val binding by viewBinding(HomeFragmentBinding::bind)
 
     private val stateListener: (ShizukuStateMachine.State) -> Unit = {
-        if (ShizukuStateMachine.isRunning()) {
+        if (stateMachine.isRunning()) {
             homeModel.reload()
             appsModel.load()
-        } else if (ShizukuStateMachine.isDead()) {
+        } else if (stateMachine.isDead()) {
             homeModel.reload()
         }
     }
@@ -70,7 +77,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         setupCards()
 
         requireActivity().addMenuProvider(
-            HomeMenuProvider(this),
+            HomeMenuProvider(this, updateHelper, appIconCache),
             viewLifecycleOwner,
             Lifecycle.State.RESUMED
         )
@@ -125,20 +132,20 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         }
 
         lifecycleScope.launch {
-            if (UpdateHelper.isCheckForUpdatesEnabled() && UpdateHelper.isNewUpdateAvailable()) {
+            if (updateHelper.isCheckForUpdatesEnabled() && updateHelper.isNewUpdateAvailable()) {
                 snackbar(
                     msg = getString(R.string.update_available),
                     duration = Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.update) {
                     lifecycleScope.launch {
-                        UpdateHelper.update()
+                        updateHelper.update()
                     }
                 }.show()
-                UpdateHelper.updateLastPromptedVersion()
+                updateHelper.updateLastPromptedVersion()
             }
         }
 
-        ShizukuStateMachine.addListener(stateListener)
+        stateMachine.addListener(stateListener)
     }
 
     private fun handleEvent(event: HomeEvent) {
@@ -164,7 +171,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                     msg = getString(R.string.home_battery_optimization),
                     duration = Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.fix) {
-                    val intent = PowerManagerHelper.getBatteryOptimizationIntent()
+                    val intent = powerManagerHelper.getBatteryOptimizationIntent()
                     startActivity(intent)
                 }.show()
             }
@@ -177,7 +184,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
 
             }
 
-            if (EnvironmentUtils.isTlsSupported() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (environmentUtils.isTlsSupported() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 buttonPair.setOnClickListener {
                     onPairClicked(requireContext())
                 }
@@ -292,22 +299,22 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun onPairClicked(context: Context) {
-        if (EnvironmentUtils.isTelevision()) {
+        if (environmentUtils.isTelevision()) {
             showAccessibilityDialog(context)
-        } else if (PreferencesRepository.legacyPairing.get()) {
+        } else if (preferencesRepository.legacyPairing.get()) {
             (context as? FragmentActivity)?.supportFragmentManager?.let {
-                AdbPairDialogFragment().show(it)
+                // AdbPairDialogFragment().show(it) // TODO
             }
         } else {
             findNavController().navigate(R.id.navigate_to_pairing)
         }
     }
     private fun stopButton() {
-        if (ShizukuStateMachine.isRunning()) {
+        if (stateMachine.isRunning()) {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(R.string.stop_dialog_message)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
+                    stateMachine.set(ShizukuStateMachine.State.STOPPING)
                     runCatching { Shizuku.exit() }
                 }.setNegativeButton(android.R.string.cancel, null)
                 .show()
@@ -322,7 +329,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     }
 
     override fun onDestroyView() {
-        ShizukuStateMachine.removeListener(stateListener)
+        stateMachine.removeListener(stateListener)
         super.onDestroyView()
     }
 }

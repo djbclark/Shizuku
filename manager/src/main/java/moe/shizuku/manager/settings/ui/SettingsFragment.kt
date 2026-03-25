@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -33,11 +32,17 @@ import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.settings.ui.components.TextInputDialog
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import moe.shizuku.manager.core.data.preferences.Preference as ShizukuPreference
 
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val viewModel: SettingsViewModel by viewModels()
-    private val listSelectionViewModel: ListSelectionViewModel by viewModels()
+    private val viewModel: SettingsViewModel by viewModel()
+    private val listSelectionViewModel: ListSelectionViewModel by viewModel()
+    
+    private val preferencesRepository: PreferencesRepository by inject()
+    private val localeHelper: LocaleHelper by inject()
+    private val powerManagerHelper: PowerManagerHelper by inject()
 
     // -------------------
     // PREFERENCES
@@ -45,17 +50,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun <T : Preference> find(pref: ShizukuPreference<*>): T = findPreference(pref.key)!!
 
-    private val startModePreference: Preference by lazy { find(PreferencesRepository.startMode) }
-    private val startOnBootPreference: TwoStatePreference by lazy { find(PreferencesRepository.startOnBoot) }
-    private val watchdogPreference: TwoStatePreference by lazy { find(PreferencesRepository.watchdog) }
-    private val tcpModePreference: TwoStatePreference by lazy { find(PreferencesRepository.tcpMode) }
-    private val tcpPortPreference: Preference by lazy { find(PreferencesRepository.tcpPort) }
-    private val languagePreference: Preference by lazy { find(PreferencesRepository.language) }
-    private val themePreference: Preference by lazy { find(PreferencesRepository.theme) }
-    private val amoledBlackPreference: TwoStatePreference by lazy { find(PreferencesRepository.amoledBlack) }
-    private val dynamicColorPreference: TwoStatePreference by lazy { find(PreferencesRepository.dynamicColor) }
-    private val updateChannelPreference: Preference by lazy { find(PreferencesRepository.updateChannel) }
-    private val legacyPairingPreference: TwoStatePreference by lazy { find(PreferencesRepository.legacyPairing) }
+    private val startModePreference: Preference by lazy { find(preferencesRepository.startMode) }
+    private val startOnBootPreference: TwoStatePreference by lazy { find(preferencesRepository.startOnBoot) }
+    private val watchdogPreference: TwoStatePreference by lazy { find(preferencesRepository.watchdog) }
+    private val tcpModePreference: TwoStatePreference by lazy { find(preferencesRepository.tcpMode) }
+    private val tcpPortPreference: Preference by lazy { find(preferencesRepository.tcpPort) }
+    private val languagePreference: Preference by lazy { find(preferencesRepository.language) }
+    private val themePreference: Preference by lazy { find(preferencesRepository.theme) }
+    private val amoledBlackPreference: TwoStatePreference by lazy { find(preferencesRepository.amoledBlack) }
+    private val dynamicColorPreference: TwoStatePreference by lazy { find(preferencesRepository.dynamicColor) }
+    private val updateChannelPreference: Preference by lazy { find(preferencesRepository.updateChannel) }
+    private val legacyPairingPreference: TwoStatePreference by lazy { find(preferencesRepository.legacyPairing) }
     private val wirelessDebuggingCategory: PreferenceCategory by lazy { findPreference("category_wireless_debugging")!! }
 
     override fun onCreatePreferences(
@@ -214,7 +219,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         TextInputDialog(
             context = requireContext(),
             title = R.string.settings_tcp_port,
-            placeholder = PreferencesRepository.tcpPort.default.toString(),
+            placeholder = preferencesRepository.tcpPort.default.toString(),
             inputType = InputType.TYPE_CLASS_NUMBER,
             maxLength = 5,
             inputValidation = { viewModel.validatePort(it) },
@@ -226,7 +231,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         ListSelectionBottomSheet.show(
             childFragmentManager,
             title = R.string.settings_language,
-            items = LocaleHelper.getLocaleEntries(requireContext()),
+            items = localeHelper.getLocaleEntries(),
             selectedItem = viewModel.uiState.value.languageValue
         )
 
@@ -269,7 +274,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun showBatteryOptimizationSnackbar() =
         snackbar(R.string.settings_battery_optimization)
             .setAction(R.string.fix) {
-                val intent = PowerManagerHelper.getBatteryOptimizationIntent()
+                val intent = powerManagerHelper.getBatteryOptimizationIntent()
                 val batteryOptimizationLauncher =
                     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         viewModel.onBatteryOptimizationResult()

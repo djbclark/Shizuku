@@ -3,14 +3,19 @@ package moe.shizuku.manager.core.utils
 import android.content.pm.PackageManager
 import android.os.RemoteException
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.utils.UserHandleCompat
-import moe.shizuku.manager.utils.UserInfoCompat
 import rikka.hidden.compat.PermissionManagerApis
 import rikka.hidden.compat.UserManagerApis
 import rikka.hidden.compat.util.SystemServiceBinder
 import rikka.shizuku.ShizukuBinderWrapper
 
-object ShizukuSystemApis {
+class ShizukuSystemApis(
+    private val stateMachine: ShizukuStateMachine,
+    private val userHandleCompat: UserHandleCompat
+) {
+    data class UserInfoCompat(
+        val id: Int,
+        val name: String?
+    )
 
     init {
         SystemServiceBinder.setOnGetBinderListener {
@@ -21,17 +26,17 @@ object ShizukuSystemApis {
     private val users = arrayListOf<UserInfoCompat>()
 
     private fun getUsers(): List<UserInfoCompat> {
-        return if (!ShizukuStateMachine.isRunning()) {
-            arrayListOf(UserInfoCompat(UserHandleCompat.myUserId(), "Owner"))
+        return if (!stateMachine.isRunning()) {
+            arrayListOf(UserInfoCompat(userHandleCompat.myUserId(), "Owner"))
         } else try {
             val list = UserManagerApis.getUsers(true, true, true)
-            val users: MutableList<UserInfoCompat> = ArrayList<UserInfoCompat>()
+            val users: MutableList<UserInfoCompat> = ArrayList()
             for (ui in list) {
                 users.add(UserInfoCompat(ui.id, ui.name))
             }
             return users
-        } catch (tr: Throwable) {
-            arrayListOf(UserInfoCompat(UserHandleCompat.myUserId(), "Owner"))
+        } catch (_: Throwable) {
+            arrayListOf(UserInfoCompat(userHandleCompat.myUserId(), "Owner"))
         }
     }
 
@@ -47,13 +52,13 @@ object ShizukuSystemApis {
 
     fun getUserInfo(userId: Int): UserInfoCompat {
         return getUsers(useCache = true).firstOrNull { it.id == userId } ?: UserInfoCompat(
-            UserHandleCompat.myUserId(),
+            userHandleCompat.myUserId(),
             "Unknown"
         )
     }
 
     fun checkPermission(permName: String, pkgName: String, userId: Int): Int {
-        return if (!ShizukuStateMachine.isRunning()) {
+        return if (!stateMachine.isRunning()) {
             PackageManager.PERMISSION_DENIED
         } else try {
             PermissionManagerApis.checkPermission(permName, pkgName, userId)

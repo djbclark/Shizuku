@@ -11,6 +11,7 @@ import kotlinx.coroutines.withTimeout
 import moe.shizuku.api.BinderContainer
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.utils.ShizukuStateMachine
+import org.koin.android.ext.android.inject
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants.USER_SERVICE_ARG_TOKEN
 import rikka.shizuku.ShizukuProvider
@@ -22,6 +23,8 @@ class ShizukuManagerProvider : ShizukuProvider() {
         private const val EXTRA_BINDER = "moe.shizuku.privileged.api.intent.extra.BINDER"
         private const val METHOD_SEND_USER_SERVICE = "sendUserService"
     }
+
+    private val stateMachine: ShizukuStateMachine by inject()
 
     override fun onCreate(): Boolean {
         disableAutomaticSuiInitialization()
@@ -43,7 +46,7 @@ class ShizukuManagerProvider : ShizukuProvider() {
 
         runBlocking(workerHandler.asCoroutineDispatcher()) {
             withTimeout(5000) {
-                ShizukuStateMachine.asFlow().first { it == ShizukuStateMachine.State.RUNNING }
+                stateMachine.asFlow().first { it == ShizukuStateMachine.State.RUNNING }
 
                 val serviceArgs = Bundle().apply { putString(USER_SERVICE_ARG_TOKEN, token) }
                 Shizuku.attachUserService(binder, serviceArgs)

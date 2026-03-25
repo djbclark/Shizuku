@@ -1,8 +1,8 @@
 package moe.shizuku.manager.shizukuservice.ui
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.app.Dialog
+import android.content.Context
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import androidx.annotation.RequiresApi
@@ -11,13 +11,12 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.adb.AdbInvalidPairingCodeException
@@ -31,11 +30,12 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.databinding.AdbPairDialogBinding
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import java.net.ConnectException
 
 @RequiresApi(VERSION_CODES.R)
 class AdbPairDialogFragment : DialogFragment() {
-    private val viewModel: ViewModel by activityViewModels()
+    private val viewModel: AdbPairingViewModel by activityViewModel()
     private val binding by viewBinding(AdbPairDialogBinding::inflate)
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -139,7 +139,7 @@ class AdbPairDialogFragment : DialogFragment() {
             dialog?.setTitle(R.string.pair)
         }
 
-        viewModel.result.observe(this) {
+        viewModel.result.observe(viewLifecycleOwner) {
             if (it == null) {
                 dismissAllowingStateLoss()
             } else {
@@ -170,10 +170,10 @@ class AdbPairDialogFragment : DialogFragment() {
 }
 
 @SuppressLint("NewApi")
-class ViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-    private val appContext = getApplication<Application>().applicationContext
+class AdbPairingViewModel(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     private val _result = MutableLiveData<Throwable?>()
     val result = _result as LiveData<Throwable?>
@@ -182,7 +182,7 @@ class ViewModel(
     val port = _port as LiveData<Int>
 
     private val adbMdns: AdbMdns =
-        AdbMdns(appContext, AdbMdns.TLS_PAIRING) {
+        AdbMdns(context, AdbMdns.TLS_PAIRING) {
             _port.postValue(it)
         }
 
@@ -194,12 +194,12 @@ class ViewModel(
         port: Int,
         password: String,
     ) {
-        GlobalScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             val host = "127.0.0.1"
 
             val key =
                 try {
-                    AdbKey(PreferenceAdbKeyStore(PreferencesRepository.prefs), "shizuku")
+                    AdbKey(PreferenceAdbKeyStore(preferencesRepository.prefs), "shizuku")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     _result.postValue(AdbKeyException(e))

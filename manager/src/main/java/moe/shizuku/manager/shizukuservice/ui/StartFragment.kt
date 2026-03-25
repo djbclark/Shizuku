@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
@@ -15,13 +14,16 @@ import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.databinding.StartFragmentBinding
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.starter.Starter
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import rikka.lifecycle.Status
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLProtocolException
 
 class StartFragment : Fragment() {
-    private val startViewModel: StartViewModel by viewModels()
+    private val startViewModel: StartViewModel by viewModel()
+    private val starter: Starter  by inject()
 
     private var _binding: StartFragmentBinding? = null
     private val binding get() = _binding!!
@@ -47,7 +49,7 @@ class StartFragment : Fragment() {
 
         startViewModel.output.observe(viewLifecycleOwner) {
             val output = it.data!!.trim()
-            if (output.endsWith(Starter.serviceStartedMessage)) {
+            if (output.endsWith(starter.serviceStartedMessage)) {
                 requireActivity().window?.decorView?.postDelayed({
                     if (isAdded) findNavController().popBackStack()
                 }, 3000)

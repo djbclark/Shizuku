@@ -10,8 +10,10 @@ import androidx.core.app.NotificationCompat
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.ui.MainActivity
 import moe.shizuku.manager.intents.data.TokenRepository
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-abstract class AuthenticatedReceiver : BroadcastReceiver() {
+abstract class AuthenticatedReceiver : BroadcastReceiver(), KoinComponent {
     companion object {
         private const val CHANNEL_ID = "auth_errors"
         private const val CHANNEL_NAME = "Authentication Errors"
@@ -22,8 +24,10 @@ abstract class AuthenticatedReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent,
     ) {
+        val tokenRepository: TokenRepository = get()
+
         val authToken = intent.getStringExtra("auth")
-        val expectedToken = TokenRepository.getAuthToken()
+        val expectedToken = tokenRepository.getAuthToken()
 
         if (authToken.isNullOrEmpty()) {
             context.notify(

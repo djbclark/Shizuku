@@ -23,12 +23,21 @@ import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.shizukuservice.workers.AdbStartWorker
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.utils.UserHandleCompat
+import moe.shizuku.manager.core.utils.UserHandleCompat
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 
-object ShizukuReceiverStarter {
-    const val NOTIFICATION_ID = 1447
-    private const val CHANNEL_ID = "AdbStartWorker"
+class ShizukuReceiverStarter(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository,
+    private val environmentUtils: EnvironmentUtils,
+    private val shizukuStateMachine: ShizukuStateMachine,
+    private val starter: Starter,
+    private val userHandleCompat: UserHandleCompat
+) {
+    companion object {
+        const val NOTIFICATION_ID = 1447
+        private const val CHANNEL_ID = "AdbStartWorker"
+    }
 
     enum class WorkerState {
         AWAITING_WIFI,
@@ -37,35 +46,29 @@ object ShizukuReceiverStarter {
         STOPPED,
     }
 
-    fun start(
-        context: Context,
-        forceStart: Boolean = false,
-    ) {
-        if ((UserHandleCompat.myUserId() > 0 || ShizukuStateMachine.isRunning()) && !forceStart) return
+    fun start(forceStart: Boolean = false) {
+        if ((userHandleCompat.myUserId() > 0 || shizukuStateMachine.isRunning()) && !forceStart) return
 
-        if (PreferencesRepository.startMode.get() == StartMode.ROOT) {
+        if (preferencesRepository.startMode.get() == StartMode.ROOT) {
             rootStart()
         } else if ((
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || EnvironmentUtils.isTelevision() ||
-                            EnvironmentUtils.getAdbTcpPort() > 0
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || environmentUtils.isTelevision() ||
+                            environmentUtils.getAdbTcpPort() > 0
                     ) &&
-            PreferencesRepository.startMode.get() == StartMode.WADB
+            preferencesRepository.startMode.get() == StartMode.WADB
         ) {
             if (context.hasWriteSecureSettings()) {
                 AdbStartWorker.enqueue(context)
-                updateNotification(context, WorkerState.AWAITING_WIFI)
+                updateNotification(WorkerState.AWAITING_WIFI)
             } else {
-                showPermissionErrorNotification(context)
+                showPermissionErrorNotification()
             }
         } else {
             Log.w(TAG, "Background start not supported")
         }
     }
 
-    fun buildNotification(
-        context: Context,
-        msg: String? = null,
-    ): Notification {
+    fun buildNotification(msg: String? = null): Notification {
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
@@ -135,10 +138,7 @@ object ShizukuReceiverStarter {
             .build()
     }
 
-    fun updateNotification(
-        context: Context,
-        state: WorkerState,
-    ) {
+    fun updateNotification(state: WorkerState) {
         if (state == WorkerState.STOPPED) return
         val msgId =
             when (state) {
@@ -148,7 +148,7 @@ object ShizukuReceiverStarter {
             }
         val msg = if (msgId != null) context.getString(msgId) else null
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(NOTIFICATION_ID, buildNotification(context, msg))
+        nm.notify(NOTIFICATION_ID, buildNotification(msg))
     }
 
     private fun rootStart() {
@@ -158,15 +158,15 @@ object ShizukuReceiverStarter {
         }
 
         try {
-            ShizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
-            Shell.cmd(Starter.internalCommand).exec()
+            shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
+            Shell.cmd(starter.internalCommand).exec()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start Shizuku with root", e)
-            ShizukuStateMachine.update()
+            shizukuStateMachine.update()
         }
     }
 
-    private fun showPermissionErrorNotification(context: Context) {
+    private fun showPermissionErrorNotification() {
         val channel =
             NotificationChannel(
                 CHANNEL_ID,

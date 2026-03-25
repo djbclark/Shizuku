@@ -6,7 +6,9 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -19,18 +21,21 @@ import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.watchdog.models.WatchdogState
 import moe.shizuku.manager.watchdog.services.WatchdogService
 
-object WatchdogManager {
-
+class WatchdogManager(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val hasFailed = MutableStateFlow(false)
     private var transitionJob: Job? = null
 
     private val _state = MutableStateFlow<WatchdogState>(WatchdogState.Inactive)
     val state: StateFlow<WatchdogState> get() = _state
 
-    fun init(context: Context, scope: CoroutineScope) {
+    init {
         scope.launch {
             combine(
-                PreferencesRepository.watchdog.flow, WatchdogService.isRunning, hasFailed
+                preferencesRepository.watchdog.flow, WatchdogService.isRunning, hasFailed
             ) { enabled, running, failed ->
                 when {
                     enabled && running -> WatchdogState.Active
@@ -50,14 +55,10 @@ object WatchdogManager {
                         hasFailed.value = false
 
                     is WatchdogState.Starting ->
-                        transition(
-                            scope, context, WatchdogState.Active
-                        )
+                        transition(WatchdogState.Active)
 
                     is WatchdogState.Stopping ->
-                        transition(
-                            scope, context, WatchdogState.Inactive
-                        )
+                        transition(WatchdogState.Inactive)
 
                     else -> {}
                 }
@@ -69,7 +70,7 @@ object WatchdogManager {
         hasFailed.value = false
     }
 
-    private fun transition(scope: CoroutineScope, context: Context, targetState: WatchdogState) {
+    private fun transition(targetState: WatchdogState) {
         transitionJob?.cancel()
         transitionJob = scope.launch {
             runCatching {

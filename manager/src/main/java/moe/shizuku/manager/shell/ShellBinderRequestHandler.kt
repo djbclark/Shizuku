@@ -7,7 +7,7 @@ import android.os.Parcel
 import android.util.Log
 import rikka.shizuku.Shizuku
 
-object ShellBinderRequestHandler {
+class ShellBinderRequestHandler {
 
     fun handleRequest(context: Context, intent: Intent) {
         val binder = intent.getBundleExtra("data")?.getBinder("binder") ?: return

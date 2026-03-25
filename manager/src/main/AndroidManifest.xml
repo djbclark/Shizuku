@@ -91,7 +91,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".authorization.RequestPermissionActivity"
+            android:name=".permission.ui.requestdialog.RequestPermissionActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"
@@ -176,7 +176,7 @@
         </receiver>
 
         <receiver
-            android:name=".receiver.ManualStartReceiver"
+            android:name=".intents.receivers.ManualStartReceiver"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedReceiver">
@@ -186,7 +186,7 @@
         </receiver>
 
         <receiver
-            android:name=".receiver.ManualStopReceiver"
+            android:name=".intents.receivers.ManualStopReceiver"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedReceiver">

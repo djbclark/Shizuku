@@ -3,6 +3,7 @@ import com.android.build.gradle.internal.tasks.CompileArtProfileTask
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.rikka.refine)
 }
@@ -136,6 +137,10 @@ dependencies {
     implementation libs.androidx.navigation.ui.ktx
     implementation libs.androidx.preference.ktx
     implementation libs.androidx.work.runtime.ktx
+
+    implementation platform(libs.koin.bom)
+    implementation libs.koin.android
+    implementation libs.koin.core
 
     implementation libs.apksig
     implementation libs.material

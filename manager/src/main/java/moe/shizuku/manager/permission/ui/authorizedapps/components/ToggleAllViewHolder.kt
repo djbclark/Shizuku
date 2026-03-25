@@ -1,25 +1,18 @@
 package moe.shizuku.manager.permission.ui.authorizedapps.components
 
 import android.content.pm.PackageInfo
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import moe.shizuku.manager.authorization.AuthorizationManager
+import androidx.recyclerview.widget.RecyclerView
+import moe.shizuku.manager.permission.PermissionManager
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.databinding.AppListToggleAllBinding
-import moe.shizuku.manager.permission.ui.authorizedapps.AppsAdapter
-import rikka.recyclerview.BaseViewHolder
 
-class ToggleAllViewHolder(private val binding: AppListToggleAllBinding) :
-    BaseViewHolder<AppsAdapter.HeaderMarker>(binding.root), View.OnClickListener {
-
-    companion object {
-        @JvmField
-        val CREATOR =
-            Creator<AppsAdapter.HeaderMarker> { inflater: LayoutInflater, parent: ViewGroup? ->
-                ToggleAllViewHolder(AppListToggleAllBinding.inflate(inflater, parent, false))
-            }
-    }
+class ToggleAllViewHolder(
+    private val binding: AppListToggleAllBinding,
+    private val permissionManager: PermissionManager,
+    private val getItems: () -> List<Any>,
+    private val onAuthorizationsChanged: () -> Unit
+) : RecyclerView.ViewHolder(binding.root), View.OnClickListener {
 
     private val switchWidget get() = binding.switchWidget
 
@@ -31,52 +24,42 @@ class ToggleAllViewHolder(private val binding: AppListToggleAllBinding) :
 
     override fun onClick(v: View) {
         setAllEnabled(!areAllEnabled())
-        switchWidget.isChecked = areAllEnabled()
     }
 
-    override fun onBind() {
+    fun bind() {
         switchWidget.isChecked = areAllEnabled()
     }
-
-    override fun onBind(payloads: List<Any>) {
-        switchWidget.isChecked = areAllEnabled()
-    }
-
-    override fun onRecycle() {}
 
     private fun setAllEnabled(enabled: Boolean) {
-        val items = adapter.getItems()
+        val items = getItems()
         for (item in items) {
             if (item is PackageInfo) {
                 try {
                     if (enabled) {
-                        AuthorizationManager.grant(item.packageName, item.applicationInfo!!.uid)
+                        permissionManager.grant(item.applicationInfo!!.uid)
                     } else {
-                        AuthorizationManager.revoke(item.packageName, item.applicationInfo!!.uid)
+                        permissionManager.revoke(item.applicationInfo!!.uid)
                     }
                 } catch (_: Exception) {
                 }
             }
         }
-        adapter.notifyDataSetChanged()
+        onAuthorizationsChanged()
     }
 
     private fun areAllEnabled(): Boolean {
-        val items = adapter.getItems()
-        if (items.size <= 1) {
+        val items = getItems()
+        val apps = items.filterIsInstance<PackageInfo>()
+        if (apps.isEmpty()) {
             return false
         }
-        for (item in items) {
-            if (item is PackageInfo) {
-                try {
-                    if (!AuthorizationManager.granted(
-                            item.packageName,
-                            item.applicationInfo!!.uid
-                        )
-                    ) return false
-                } catch (_: Exception) {
+        for (item in apps) {
+            try {
+                if (!permissionManager.granted(item.applicationInfo!!.uid)) {
                     return false
                 }
+            } catch (_: Exception) {
+                return false
             }
         }
         return true

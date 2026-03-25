@@ -10,13 +10,15 @@ import kotlinx.coroutines.flow.stateIn
 import moe.shizuku.manager.intents.data.TokenRepository
 import moe.shizuku.manager.intents.models.IntentsUiState
 
-class IntentsViewModel : ViewModel() {
+class IntentsViewModel(
+    private val tokenRepository: TokenRepository
+) : ViewModel() {
 
     private val _intentAction = MutableStateFlow(IntentsUiState.IntentAction.START)
 
     val uiState: StateFlow<IntentsUiState> = combine(
         _intentAction,
-        TokenRepository.authTokenFlow
+        tokenRepository.authTokenFlow
     ) { action, token ->
         IntentsUiState(
             enabled = true,
@@ -38,5 +40,5 @@ class IntentsViewModel : ViewModel() {
     }
 
     fun onRegenerateToken() =
-        TokenRepository.regenerateAuthToken()
+        tokenRepository.regenerateAuthToken()
 }

@@ -3,18 +3,13 @@ package moe.shizuku.manager.core.data.preferences
 import android.content.Context
 import android.content.SharedPreferences
 
-object PreferencesRepository {
+class PreferencesRepository(context: Context) {
 
-    const val PREFS_NAME = "settings"
-
-    // TODO remove public prefs val (used by AdbKeyPreferenceStore)
-    private lateinit var _prefs: SharedPreferences
-    val prefs: SharedPreferences
-        get() = _prefs
-
-    fun init(context: Context) {
-        _prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    companion object {
+        const val PREFS_NAME = "settings"
     }
+
+    val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     // Global delegate for persisting internal flags, etc. from other features
     fun <T> pref(type: SharedPreferences.() -> Preference<T>) = lazy {

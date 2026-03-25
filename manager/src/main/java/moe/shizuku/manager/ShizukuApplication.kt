@@ -3,18 +3,13 @@ package moe.shizuku.manager
 import android.app.Application
 import android.content.Context
 import android.os.Build
-import androidx.appcompat.app.AppCompatDelegate
 import com.topjohnwu.superuser.Shell
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.preferences.PreferenceSync
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.ui.helpers.LocaleHelper
-import moe.shizuku.manager.core.ui.helpers.ThemeHelper
-import moe.shizuku.manager.updater.data.ReleaseRepository
-import moe.shizuku.manager.watchdog.WatchdogManager
+import moe.shizuku.manager.core.di.appModule
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 class ShizukuApplication : Application() {
@@ -27,10 +22,19 @@ class ShizukuApplication : Application() {
             private set
     }
 
+    private val localeHelper: LocaleHelper by inject()
+
     override fun onCreate() {
         super.onCreate()
         application = this
         appContext = applicationContext
+        
+        startKoin {
+            androidLogger()
+            androidContext(this@ShizukuApplication)
+            modules(appModule)
+        }
+
         init(applicationContext)
     }
 
@@ -43,23 +47,6 @@ class ShizukuApplication : Application() {
             System.loadLibrary("adb")
         }
 
-        injectDependencies(context)
+        localeHelper.migrate()
     }
-
-    private fun injectDependencies(context: Context) {
-        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
-        // Should be declared first because other dependencies may require key-value storage
-        PreferencesRepository.init(context)
-
-        ThemeHelper.init(this)
-
-        PowerManagerHelper.init(context)
-        WatchdogManager.init(context, applicationScope)
-        PreferenceSync.init(context, applicationScope)
-        ReleaseRepository.init(context)
-
-        LocaleHelper.migrate()
-    }
-
 }

@@ -1,22 +1,16 @@
 package moe.shizuku.manager.updater.data
 
 import android.content.Context
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.data.preferences.string
 import moe.shizuku.manager.updater.models.AppRelease
 import moe.shizuku.manager.updater.models.Version
 import java.io.File
 import java.security.MessageDigest
 
-object ReleaseRepository {
-    private lateinit var appContext: Context
-    private val remoteDataSource = ReleaseRemoteDataSource
-
-    fun init(context: Context) {
-        appContext = context.applicationContext
-    }
-
+class ReleaseRepository(
+    private val context: Context,
+    private val remoteDataSource: ReleaseRemoteDataSource
+) {
     suspend fun getLatestRelease(channel: UpdateChannel): AppRelease {
         val releases = remoteDataSource.fetchReleases()
         val filteredReleases = if (channel == UpdateChannel.BETA) {
@@ -40,7 +34,7 @@ object ReleaseRepository {
     }
 
     suspend fun downloadRelease(release: AppRelease): File {
-        val apkFile = File(appContext.cacheDir, release.filename)
+        val apkFile = File(context.cacheDir, release.filename)
         remoteDataSource.downloadFile(release.url, apkFile)
 
         val downloadedDigest = "sha256:" + apkFile.sha256()

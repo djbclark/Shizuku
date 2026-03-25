@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
 import moe.shizuku.manager.core.data.preferences.boolean
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.capitalize
@@ -21,7 +20,10 @@ import moe.shizuku.manager.core.ui.components.listselection.ListSelectionItem
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
-object LocaleHelper {
+class LocaleHelper(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository
+) {
     private var cachedLocales: List<Locale>? = null
 
     data class LocaleEntry(
@@ -43,7 +45,7 @@ object LocaleHelper {
 
     val systemDefaultEntry = LocaleEntry("", "", "")
 
-    fun getLocaleEntries(context: Context): List<LocaleEntry> {
+    fun getLocaleEntries(): List<LocaleEntry> {
         val locales = context.getSupportedLocales()
 
         val sortedLanguages = locales.map { it.toLocaleEntry() }
@@ -136,18 +138,18 @@ object LocaleHelper {
         return locales
     }
 
-    private val languageMigrated by pref { boolean("language_migrated", false) }
+    private val languageMigrated by preferencesRepository.pref { boolean("language_migrated", false) }
 
     // https://developer.android.com/guide/topics/resources/app-languages#custom-storage
     fun migrate() {
         if (languageMigrated.get()) return
 
         // Handles switching all users from custom storage to system storage
-        val language = PreferencesRepository.language.get()
+        val language = preferencesRepository.language.get()
         if (language != null) {
             val tag = language.takeUnless { it.lowercase() == "system" } ?: ""
             setLocale(tag)
-            PreferencesRepository.language.set(null)
+            preferencesRepository.language.set(null)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

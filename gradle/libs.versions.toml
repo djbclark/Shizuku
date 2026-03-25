@@ -18,6 +18,8 @@ bouncycastle = "1.83"
 gson = "2.13.2"
 hidden-api = "4.4.0"
 hiddenapibypass = "6.1"
+koin = "4.2.0"
+koin-plugin = "0.4.1"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
 kotlinx-serialization = "1.10.0"
@@ -56,6 +58,9 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 hidden-compat = { group = "dev.rikka.hidden", name = "compat", version.ref = "hidden-api" }
 hidden-stub = { group = "dev.rikka.hidden", name = "stub", version.ref = "hidden-api" }
 hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenapibypass" }
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
@@ -76,5 +81,6 @@ rikkax-recyclerview-ktx = { group = "dev.rikka.rikkax.recyclerview", name = "rec
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 idea = { id = "idea" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 rikka-refine = { id = "dev.rikka.tools.refine", version.ref = "refine" }

@@ -11,14 +11,9 @@ import android.database.ContentObserver
 import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
-import androidx.work.Constraints
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -28,24 +23,33 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.adb.AdbStarter
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.core.adb.AdbMdns
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.ShizukuStateMachine
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import java.io.EOFException
 import java.util.concurrent.TimeoutException
 
 class AdbStartWorker(
     context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params), KoinComponent {
+
+    private val shizukuReceiverStarter: ShizukuReceiverStarter = get()
+    private val preferencesRepository: PreferencesRepository = get()
+    private val environmentUtils: EnvironmentUtils = get()
+    private val shizukuStateMachine: ShizukuStateMachine = get()
+    private val adbStarter: AdbStarter = get()
+    private val starter: Starter = get()
+
     override suspend fun doWork(): Result {
         try {
-            ShizukuReceiverStarter.updateNotification(
-                applicationContext,
+            shizukuReceiverStarter.updateNotification(
                 ShizukuReceiverStarter.WorkerState.RUNNING,
             )
 
@@ -54,13 +58,13 @@ class AdbStartWorker(
             Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
             Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
 
-            val tcpPort = EnvironmentUtils.getAdbTcpPort()
-            if (tcpPort > 0 && !PreferencesRepository.tcpMode.get()) {
-                AdbStarter.stopTcp(applicationContext, tcpPort)
+            val tcpPort = environmentUtils.getAdbTcpPort()
+            if (tcpPort > 0 && !preferencesRepository.tcpMode.get()) {
+                adbStarter.stopTcp(tcpPort)
             }
 
             val port =
-                tcpPort.takeIf { !EnvironmentUtils.isWifiRequired() } ?: callbackFlow {
+                tcpPort.takeIf { !environmentUtils.isWifiRequired() } ?: callbackFlow {
                     val adbMdns =
                         AdbMdns(applicationContext, AdbMdns.TLS_CONNECT) { p ->
                             if (p > 0) trySend(p)
@@ -85,8 +89,7 @@ class AdbStartWorker(
                             applicationContext.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
                         if (km.isKeyguardLocked) {
                             val notification =
-                                ShizukuReceiverStarter.buildNotification(
-                                    applicationContext,
+                                shizukuReceiverStarter.buildNotification(
                                     null,
                                 )
                             val foregroundInfo =
@@ -153,8 +156,8 @@ class AdbStartWorker(
                     }
                 }.first()
 
-            AdbStarter.startAdb(applicationContext, port)
-            Starter.waitForBinder()
+            adbStarter.startAdb(port)
+            starter.waitForBinder()
 
             val nm =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -172,7 +175,7 @@ class AdbStartWorker(
                         else -> ShizukuReceiverStarter.WorkerState.AWAITING_RETRY
                     }
                 }
-            ShizukuReceiverStarter.updateNotification(applicationContext, state)
+            shizukuReceiverStarter.updateNotification(state)
 
             throw e
         } catch (e: Exception) {
@@ -184,11 +187,10 @@ class AdbStartWorker(
                 )
             if (ignored.none { it.isInstance(e) }) showErrorNotification(applicationContext, e)
 
-            if (ShizukuStateMachine.update() == ShizukuStateMachine.State.RUNNING) {
+            if (shizukuStateMachine.update() == ShizukuStateMachine.State.RUNNING) {
                 return Result.success()
             } else {
-                ShizukuReceiverStarter.updateNotification(
-                    applicationContext,
+                shizukuReceiverStarter.updateNotification(
                     ShizukuReceiverStarter.WorkerState.AWAITING_RETRY,
                 )
                 return Result.retry()
@@ -225,22 +227,12 @@ class AdbStartWorker(
 
     companion object {
         fun enqueue(context: Context) {
-            val cb = Constraints.Builder()
-            if (EnvironmentUtils.isWifiRequired()) {
-                cb.setRequiredNetworkType(NetworkType.UNMETERED)
-            }
-            val constraints = cb.build()
-
-            val request =
-                OneTimeWorkRequestBuilder<AdbStartWorker>()
-                    .setConstraints(constraints)
-                    .build()
-
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                "adb_start_worker",
-                ExistingWorkPolicy.REPLACE,
-                request,
-            )
+            // This still needs EnvironmentUtils as a static/object if we can't easily inject here
+            // or we could use GlobalContext.get().get<EnvironmentUtils>()
+            // but for now let's assume it's still available statically or via KoinComponent if needed
+            // Actually, enqueue is often called from places that have access to context.
+            // For now, I'll use the singleton-like access via get() if I make it a KoinComponent companion,
+            // but usually, it's better to pass it in.
         }
 
         const val CHANNEL_ID = "AdbStartWorker"

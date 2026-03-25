@@ -1,20 +1,21 @@
 package moe.shizuku.manager.utils
 
+import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import rikka.shizuku.Shizuku
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-private val appContext = ShizukuApplication.appContext
-
-object ShizukuStateMachine {
+class ShizukuStateMachine(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository
+) {
 
     enum class State { STARTING, RUNNING, STOPPING, STOPPED, CRASHED }
 
@@ -22,12 +23,12 @@ object ShizukuStateMachine {
     private val listeners = CopyOnWriteArrayList<(State) -> Unit>()
 
     init {
-        Shizuku.addBinderReceivedListenerSticky(
-            Shizuku.OnBinderReceivedListener { set(State.RUNNING) }
-        )
-        Shizuku.addBinderDeadListener(
-            Shizuku.OnBinderDeadListener { setDead() }
-        )
+        Shizuku.addBinderReceivedListenerSticky { 
+            set(State.RUNNING) 
+        }
+        Shizuku.addBinderDeadListener { 
+            setDead() 
+        }
     }
 
     fun get(): State = state.get()
@@ -48,12 +49,12 @@ object ShizukuStateMachine {
             State.RUNNING -> State.CRASHED
             State.STOPPING -> {
                 try {
-                    val permissionGranted = appContext.hasWriteSecureSettings()
+                    val permissionGranted = context.hasWriteSecureSettings()
                     val shouldDisableUsbDebugging =
-                        permissionGranted && PreferencesRepository.autoDisableUsbDebugging.get()
+                        permissionGranted && preferencesRepository.autoDisableUsbDebugging.get()
                     if (shouldDisableUsbDebugging) {
                         Settings.Global.putInt(
-                            appContext.contentResolver,
+                            context.contentResolver,
                             Settings.Global.ADB_ENABLED,
                             0
                         )

@@ -1,12 +1,11 @@
 package moe.shizuku.manager.home
 
-import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +23,15 @@ import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.lifecycle.Resource
 import rikka.shizuku.Shizuku
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val appContext: Context = getApplication<Application>().applicationContext
+class HomeViewModel(
+    private val context: Context,
+    private val shizukuSystemApis: ShizukuSystemApis,
+    private val shizukuStateMachine: ShizukuStateMachine,
+    private val preferencesRepository: PreferencesRepository,
+    private val powerManagerHelper: PowerManagerHelper,
+    private val stateMachine: ShizukuStateMachine,
+    private val environmentUtils: EnvironmentUtils
+) : ViewModel() {
 
     private val _serviceStatus = MutableLiveData<Resource<ServiceStatus>>()
     val serviceStatus = _serviceStatus as LiveData<Resource<ServiceStatus>>
@@ -38,14 +43,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val shizukuPermission = "moe.shizuku.manager.permission.API_V23"
 
     private fun load(): ServiceStatus {
-        // In certain cases when user re-installs Shizuku with different package name (e.g., when using stealth mode), the system doesn't recognize the Shizuku permission.
-        // As a result, all permission operations (check/grant/revoke) will fail.
-        // This is fixed by rebooting the device.
-        // Run getPermissionGroupInfo() to trigger the exception. Then catch it and show a dialog prompting the user to reboot their device.
         try {
-            appContext.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
-            val permission = appContext.packageManager.getPermissionInfo(shizukuPermission, 0)
-            if (permission.packageName != appContext.packageName) {
+            context.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
+            val permission = context.packageManager.getPermissionInfo(shizukuPermission, 0)
+            if (permission.packageName != context.packageName) {
                 _events.trySend(HomeEvent.ShowUninstallDialog)
             }
         } catch (_: PackageManager.NameNotFoundException) {
@@ -56,7 +57,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             // disable authorized apps
         }
 
-        if (!ShizukuStateMachine.isRunning()) {
+        if (!stateMachine.isRunning()) {
             return ServiceStatus()
         }
 
@@ -74,10 +75,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val permissionTest =
             Shizuku.checkRemotePermission("android.permission.GRANT_RUNTIME_PERMISSIONS") == PackageManager.PERMISSION_GRANTED
 
-        // Before a526d6bb, server will not exit on uninstall, manager installed later will get not permission
-        // Run a random remote transaction here, report no permission as not running
-        ShizukuSystemApis.checkPermission(shizukuPermission, appContext.packageName, 0)
-        return ServiceStatus(uid, apiVersion, patchVersion, seContext, permissionTest)
+        val isRunning = uid != -1 && shizukuStateMachine.isRunning()
+        shizukuSystemApis.checkPermission(shizukuPermission, context.packageName, 0)
+        return ServiceStatus(uid, apiVersion, patchVersion, seContext, permissionTest, isRunning)
     }
 
     fun reload() {
@@ -113,9 +113,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun checkBatteryOptimization() {
-        if (EnvironmentUtils.isTelevision()) return
-        if (!PreferencesRepository.startOnBoot.get() && !PreferencesRepository.watchdog.get()) return
-        if (!PowerManagerHelper.isIgnoringBatteryOptimizations()) {
+        if (environmentUtils.isTelevision()) return
+        if (!preferencesRepository.startOnBoot.get() && !preferencesRepository.watchdog.get()) return
+        if (!powerManagerHelper.isIgnoringBatteryOptimizations()) {
             _events.trySend(HomeEvent.ShowBatteryOptimizationSnackbar)
         }
     }

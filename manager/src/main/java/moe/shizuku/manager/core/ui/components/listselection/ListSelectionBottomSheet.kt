@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.ui.components.StyledBottomSheet
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ListSelectionBottomSheet : StyledBottomSheet() {
 
@@ -31,7 +31,7 @@ class ListSelectionBottomSheet : StyledBottomSheet() {
         }
     }
 
-    private val viewModel: ListSelectionViewModel by viewModels({ requireParentFragment() })
+    private val viewModel: ListSelectionViewModel by viewModel(ownerProducer = { requireParentFragment() })
 
     private var items: List<ListSelectionItem>? = null
     private var selectedItem: Any? = null

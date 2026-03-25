@@ -1,20 +1,20 @@
 package moe.shizuku.manager.permission.ui.authorizedapps
 
-import android.app.Application
+import android.content.Context
 import android.content.pm.PackageInfo
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.shizuku.manager.authorization.AuthorizationManager
+import moe.shizuku.manager.permission.PermissionManager
 import rikka.lifecycle.Resource
 
-class AuthorizedAppsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val appContext = getApplication<Application>().applicationContext
+class AuthorizedAppsViewModel(
+    private val permissionManager: PermissionManager
+) : ViewModel() {
 
     private val _packages = MutableLiveData<Resource<List<PackageInfo>>>()
     val packages = _packages as LiveData<Resource<List<PackageInfo>>>
@@ -27,12 +27,9 @@ class AuthorizedAppsViewModel(application: Application) : AndroidViewModel(appli
             try {
                 val list: MutableList<PackageInfo> = ArrayList()
                 var count = 0
-                for (pi in AuthorizationManager.getPackages(
-                    exclude = listOf(appContext.packageName)
-                )) {
+                for (pi in permissionManager.getPackages()) {
                     list.add(pi)
-                    if (AuthorizationManager.granted(
-                            pi.packageName,
+                    if (permissionManager.granted(
                             pi.applicationInfo!!.uid
                         )
                     ) count++

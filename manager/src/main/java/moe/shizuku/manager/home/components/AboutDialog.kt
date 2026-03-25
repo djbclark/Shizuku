@@ -13,7 +13,9 @@ import moe.shizuku.manager.databinding.AboutDialogBinding
 import moe.shizuku.manager.updater.UpdateHelper
 
 class AboutDialog(
-    private val activity: ComponentActivity
+    private val activity: ComponentActivity,
+    private val updateHelper: UpdateHelper,
+    private val appIconCache: AppIconCache
 ) {
 
     fun show() {
@@ -23,7 +25,7 @@ class AboutDialog(
 
         binding.apply {
             icon.setImageBitmap(
-                AppIconCache.getOrLoadBitmap(
+                appIconCache.getOrLoadBitmap(
                     activity,
                     activity.applicationInfo,
                     Process.myUid() / 100000,
@@ -41,7 +43,7 @@ class AboutDialog(
 
             btnUpdate.setOnClickListener {
                 activity.lifecycleScope.launch {
-                    UpdateHelper.checkAndInstallUpdates()
+                    updateHelper.checkAndInstallUpdates()
                 }
             }
 

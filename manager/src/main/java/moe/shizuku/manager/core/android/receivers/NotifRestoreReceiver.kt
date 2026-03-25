@@ -4,11 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class NotifRestoreReceiver : BroadcastReceiver() {
+class NotifRestoreReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
-        ShizukuReceiverStarter.updateNotification(
-            context,
+        val shizukuReceiverStarter: ShizukuReceiverStarter = get()
+        shizukuReceiverStarter.updateNotification(
             ShizukuReceiverStarter.WorkerState.RUNNING
         )
     }

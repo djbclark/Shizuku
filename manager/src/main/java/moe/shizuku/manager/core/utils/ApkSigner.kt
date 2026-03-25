@@ -1,8 +1,8 @@
 package moe.shizuku.manager.core.utils
 
+import android.content.Context
 import android.content.pm.PackageManager
 import com.android.apksig.ApkSigner
-import moe.shizuku.manager.ShizukuApplication
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
@@ -23,14 +23,14 @@ import java.security.cert.X509Certificate
 import java.util.Date
 import java.util.Locale
 
-private val appContext = ShizukuApplication.appContext
+class ApkSigner(private val context: Context) {
 
-object ApkSigner {
-
-    private const val KEY_ALIAS = "key"
-    private const val KEY_PASS = "keypass"
-    private const val KEYSTORE_NAME = "signing-key.bks"
-    private const val KEYSTORE_PASS = "storepass"
+    companion object {
+        private const val KEY_ALIAS = "key"
+        private const val KEY_PASS = "keypass"
+        private const val KEYSTORE_NAME = "signing-key.bks"
+        private const val KEYSTORE_PASS = "storepass"
+    }
 
     init {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
@@ -69,7 +69,7 @@ object ApkSigner {
         }
 
     private fun getSelfSigningKey(): PrivateKeyEntry {
-        appContext.assets.open(KEYSTORE_NAME).use { input ->
+        context.assets.open(KEYSTORE_NAME).use { input ->
             keystoreFile.outputStream().use { output ->
                 input.copyTo(output)
             }
@@ -89,7 +89,7 @@ object ApkSigner {
     }
 
     val keystoreFile by lazy {
-        File(appContext.filesDir, KEYSTORE_NAME)
+        File(context.filesDir, KEYSTORE_NAME)
     }
 
     private fun generatePrivateKeyAndCert(): PrivateKeyCertificatePair {
@@ -150,8 +150,8 @@ object ApkSigner {
     )
 
     private fun getAppCertificate(): X509Certificate {
-        val info = appContext.packageManager.getPackageInfo(
-            appContext.packageName,
+        val info = context.packageManager.getPackageInfo(
+            context.packageName,
             PackageManager.GET_SIGNING_CERTIFICATES
         )
 

@@ -1,11 +1,13 @@
 package moe.shizuku.manager.intents.data
 
 import kotlinx.coroutines.flow.map
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.string
 
-object TokenRepository {
-    private val authToken by pref { string("auth_token", null) }
+class TokenRepository(
+    preferencesRepository: PreferencesRepository
+) {
+    private val authToken by preferencesRepository.pref { string("auth_token", null) }
 
     val authTokenFlow = authToken.flow.map {
         it ?: regenerateAuthToken()

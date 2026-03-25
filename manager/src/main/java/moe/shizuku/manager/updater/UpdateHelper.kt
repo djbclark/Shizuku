@@ -1,43 +1,41 @@
 package moe.shizuku.manager.updater
 
+import android.content.Context
 import android.util.Log
 import moe.shizuku.manager.R
-import moe.shizuku.manager.ShizukuApplication
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository.pref
 import moe.shizuku.manager.core.data.preferences.string
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.core.utils.changePackageName
-import moe.shizuku.manager.core.utils.getVersionName
-import moe.shizuku.manager.core.utils.installPackage
+import moe.shizuku.manager.core.utils.ApkUtils
 import moe.shizuku.manager.updater.data.ReleaseRepository
 import moe.shizuku.manager.updater.models.AppRelease
+import moe.shizuku.manager.updater.models.Version
 import java.io.File
-import kotlin.getValue
 
-object UpdateHelper {
-    private val app = ShizukuApplication.application
-    private val appContext = ShizukuApplication.appContext
-    private val repository = ReleaseRepository
-
+class UpdateHelper(
+    private val context: Context,
+    private val preferencesRepository: PreferencesRepository,
+    private val repository: ReleaseRepository,
+    private val apkUtils: ApkUtils
+) {
     private lateinit var latestRelease: AppRelease
-    private val lastPromptedVersion by pref { string("last_prompted_version", null) }
+    private val lastPromptedVersion by preferencesRepository.pref { string("last_prompted_version", null) }
 
     suspend fun checkAndInstallUpdates() {
         if (isUpdateAvailable()) {
             update()
         } else {
-            appContext.toast(R.string.update_latest_installed)
+            context.toast(R.string.update_latest_installed)
         }
     }
 
-    fun isCheckForUpdatesEnabled(): Boolean = PreferencesRepository.checkForUpdates.get()
+    fun isCheckForUpdatesEnabled(): Boolean = preferencesRepository.checkForUpdates.get()
 
     suspend fun isNewUpdateAvailable(): Boolean {
         val lastPromptedVersionStr = lastPromptedVersion.get()
         val lastPromptedVersion =
-            moe.shizuku.manager.updater.models.Version.parse(lastPromptedVersionStr ?: "")
-                ?: moe.shizuku.manager.updater.models.Version.parse(getVersionName())
+            Version.parse(lastPromptedVersionStr ?: "")
+                ?: Version.parse(apkUtils.getVersionName())
                 ?: return false
 
         return if (isUpdateAvailable()) latestRelease.version > lastPromptedVersion else false
@@ -45,15 +43,15 @@ object UpdateHelper {
 
     suspend fun isUpdateAvailable(): Boolean {
         return try {
-            val channel = PreferencesRepository.updateChannel.get()
+            val channel = preferencesRepository.updateChannel.get()
             val latest = repository.getLatestRelease(channel)
             latestRelease = latest
             val current =
-                moe.shizuku.manager.updater.models.Version.parse(getVersionName()) ?: return false
+                Version.parse(apkUtils.getVersionName()) ?: return false
             latest.version > current
         } catch (e: Exception) {
             Log.e("UpdateHelper", "Update check failed", e)
-            appContext.toast(R.string.update_check_failed)
+            context.toast(R.string.update_check_failed)
             false
         }
     }
@@ -67,39 +65,39 @@ object UpdateHelper {
     suspend fun update() {
         if (!::latestRelease.isInitialized && !isUpdateAvailable()) return
 
-        appContext.toast(R.string.update_downloading)
+        context.toast(R.string.update_downloading)
 
         try {
             val downloadedFile = repository.downloadRelease(latestRelease)
             val apk = processDownloadedApk(downloadedFile)
 
             if (apk == null) {
-                appContext.toast(R.string.update_download_failed)
+                context.toast(R.string.update_download_failed)
                 return
             }
 
-            appContext.installPackage(apk) { isSuccess, _ ->
-                val toastMsg = if (isSuccess) appContext.getString(R.string.update_success)
-                else appContext.getString(R.string.update_failed)
-                appContext.toast(toastMsg)
+            apkUtils.installPackage(apk) { isSuccess, _ ->
+                val toastMsg = if (isSuccess) context.getString(R.string.update_success)
+                else context.getString(R.string.update_failed)
+                context.toast(toastMsg)
             }
         } catch (e: Exception) {
             Log.e("UpdateHelper", "Update failed", e)
-            appContext.toast(R.string.update_failed)
+            context.toast(R.string.update_failed)
         }
     }
 
     private fun processDownloadedApk(file: File): File? {
-        val pm = appContext.packageManager
+        val pm = context.packageManager
         val apkPackageName = pm.getPackageArchiveInfo(file.path, 0)?.packageName
 
-        if (app.packageName != apkPackageName) {
+        if (context.packageName != apkPackageName) {
             return try {
                 Log.d(
                     "UpdateHelper",
-                    "Changing package name from $apkPackageName to ${app.packageName}"
+                    "Changing package name from $apkPackageName to ${context.packageName}"
                 )
-                file.changePackageName(app.packageName)
+                apkUtils.changePackageName(file, context.packageName)
             } catch (_: Exception) {
                 null
             }
