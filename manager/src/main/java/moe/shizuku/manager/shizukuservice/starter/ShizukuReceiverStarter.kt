@@ -16,15 +16,15 @@ import moe.shizuku.manager.core.android.receivers.NotifAttemptReceiver
 import moe.shizuku.manager.core.android.receivers.NotifCancelReceiver
 import moe.shizuku.manager.core.android.receivers.NotifRestoreReceiver
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
+import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.utils.EnvironmentUtils
+import moe.shizuku.manager.core.utils.UserHandleCompat
 import moe.shizuku.manager.shizukuservice.workers.AdbStartWorker
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.core.utils.UserHandleCompat
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 
 class ShizukuReceiverStarter(
     private val context: Context,
@@ -58,7 +58,7 @@ class ShizukuReceiverStarter(
             preferencesRepository.startMode.get() == StartMode.WADB
         ) {
             if (context.hasWriteSecureSettings()) {
-                AdbStartWorker.enqueue(context)
+                AdbStartWorker.enqueue(context, environmentUtils.isWifiRequired())
                 updateNotification(WorkerState.AWAITING_WIFI)
             } else {
                 showPermissionErrorNotification()

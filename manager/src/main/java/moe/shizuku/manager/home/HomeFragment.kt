@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.View.GONE
 import androidx.annotation.RequiresApi
@@ -18,8 +19,10 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
+import moe.shizuku.manager.core.android.settings.SystemSettingsPage
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.extensions.viewBinding
@@ -33,6 +36,7 @@ import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.shizukuservice.services.AdbPairingService
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -57,6 +61,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val powerManagerHelper: PowerManagerHelper by inject()
     private val updateHelper: UpdateHelper by inject()
     private val stateMachine: ShizukuStateMachine by inject()
+    private val adbStarter: AdbStarter by inject()
 
     private val binding by viewBinding(HomeFragmentBinding::bind)
 
@@ -181,7 +186,11 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private fun setupCards() = with(binding) {
         statusCard.apply {
             buttonStart.setOnClickListener {
+                start()
+            }
 
+            buttonStop.setOnClickListener {
+                stop()
             }
 
             if (environmentUtils.isTlsSupported() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -227,47 +236,47 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     }
 
     private fun HomeStatusCardBinding.update(status: ServiceStatus) {
-            val ok = status.isRunning
-            val isRoot = status.uid == 0
-            val apiVersion = status.apiVersion
-            val patchVersion = status.patchVersion
+        val ok = status.isRunning
+        val isRoot = status.uid == 0
+        val apiVersion = status.apiVersion
+        val patchVersion = status.patchVersion
+        if (ok) {
+            icon.setImageResource(R.drawable.ic_server_ok_24dp)
+        } else {
+            icon.setImageResource(R.drawable.ic_server_error_24dp)
+        }
+        val user = if (isRoot) "root" else "adb"
+        val title =
             if (ok) {
-                icon.setImageResource(R.drawable.ic_server_ok_24dp)
+                getString(R.string.status_running)
             } else {
-                icon.setImageResource(R.drawable.ic_server_error_24dp)
+                getString(R.string.status_stopped)
             }
-            val user = if (isRoot) "root" else "adb"
-            val title =
-                if (ok) {
-                    getString(R.string.status_running)
+        val versionStr =
+            getString(
+                R.string.status_version,
+                "$apiVersion.$patchVersion",
+                user,
+            )
+        val updateStr =
+            getString(
+                R.string.status_version_update,
+                "${Shizuku.getLatestServiceVersion()}.${ShizukuApiConstants.SERVER_PATCH_VERSION}",
+            )
+        val summary =
+            if (ok) {
+                if (apiVersion != Shizuku.getLatestServiceVersion() ||
+                    status.patchVersion != ShizukuApiConstants.SERVER_PATCH_VERSION
+                ) {
+                    "$versionStr. $updateStr"
                 } else {
-                    getString(R.string.status_stopped)
+                    versionStr
                 }
-            val versionStr =
-                getString(
-                    R.string.status_version,
-                    "$apiVersion.$patchVersion",
-                    user,
-                )
-            val updateStr =
-                getString(
-                    R.string.status_version_update,
-                    "${Shizuku.getLatestServiceVersion()}.${ShizukuApiConstants.SERVER_PATCH_VERSION}",
-                )
-            val summary =
-                if (ok) {
-                    if (apiVersion != Shizuku.getLatestServiceVersion() ||
-                        status.patchVersion != ShizukuApiConstants.SERVER_PATCH_VERSION
-                    ) {
-                        "$versionStr. $updateStr"
-                    } else {
-                        versionStr
-                    }
-                } else {
-                    ""
-                }
-            this.title.text = title
-            this.summary.text = summary
+            } else {
+                ""
+            }
+        this.title.text = title
+        this.summary.text = summary
     }
 
     private fun HomeSimpleCardBinding.setup(
@@ -297,6 +306,57 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         dialog.show()
     }
 
+    fun start() {
+        val cr = requireContext().contentResolver
+        if (requireContext().hasWriteSecureSettings()) {
+            Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
+            Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
+        }
+
+        val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
+        if (adbEnabled == 0) {
+            showWadbEnableUsbDebuggingDialog()
+            return
+        }
+
+        val tcpPort = environmentUtils.getAdbTcpPort()
+        val tcpMode = preferencesRepository.tcpMode.get()
+
+        // If ADB is NOT listening to a TCP port and the device doesn't support TLS, inform the user
+        if (tcpPort <= 0 && !environmentUtils.isTlsSupported()) {
+            showWadbNotEnabledDialog()
+            // Otherwise, just go straight to StartFragment and let it handle detection/searching
+        } else if (tcpPort <= 0) {
+            findNavController().navigate(R.id.navigate_to_start)
+            // If ADB IS listening to a TCP port but the user wants to close it and use TLS instead, close the TCP port and start
+        } else if (!tcpMode) {
+            lifecycleScope.launch {
+                adbStarter.stopTcp(tcpPort)
+            }
+            findNavController().navigate(R.id.navigate_to_start)
+            // Otherwise ADB IS listening to a TCP port and the user wants to keep it open. Start Shizuku via TCP
+        } else {
+            findNavController().navigate(R.id.navigate_to_start)
+        }
+    }
+
+    fun showWadbEnableUsbDebuggingDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(R.string.start_error_usb_debugging_disabled)
+            .setPositiveButton(R.string.developer_options) { _, _ ->
+                SystemSettingsPage.Developer.HighlightUsbDebugging.launch(requireContext())
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    fun showWadbNotEnabledDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(R.string.start_error_wireless_debugging_disabled)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
     private fun onPairClicked(context: Context) {
         if (environmentUtils.isTelevision()) {
@@ -309,7 +369,8 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
             findNavController().navigate(R.id.navigate_to_pairing)
         }
     }
-    private fun stopButton() {
+
+    private fun stop() {
         if (stateMachine.isRunning()) {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(R.string.stop_dialog_message)

@@ -1,6 +1,5 @@
 package moe.shizuku.manager.stealth.ui
 
-import android.content.Context
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
@@ -12,6 +11,7 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.appendRandomSuffix
 import moe.shizuku.manager.core.utils.ApkUtils
+import moe.shizuku.manager.core.utils.EnvironmentUtils
 import java.io.File
 
 sealed class UiState {
@@ -43,7 +43,7 @@ enum class ApkType {
 }
 
 class StealthViewModel(
-    private val context: Context,
+    private val environmentUtils: EnvironmentUtils,
     private val apkUtils: ApkUtils
 ) : ViewModel() {
 
@@ -53,9 +53,7 @@ class StealthViewModel(
     private var _packageName: String? = null
 
     private fun isShizukuHidden() =
-        runCatching {
-            context.packageManager.getPackageInfo(ApkUtils.ORIGINAL_PACKAGE_NAME, 0)
-        }.isFailure
+        !environmentUtils.isPackageInstalled(ApkUtils.ORIGINAL_PACKAGE_NAME)
 
     init {
         refresh()
@@ -65,7 +63,7 @@ class StealthViewModel(
         val action =
             if (isShizukuHidden()) {
                 Action.UNHIDE
-            } else if (context.packageName == ApkUtils.ORIGINAL_PACKAGE_NAME) {
+            } else if (environmentUtils.packageName == ApkUtils.ORIGINAL_PACKAGE_NAME) {
                 Action.HIDE
             } else {
                 Action.REHIDE
@@ -74,7 +72,7 @@ class StealthViewModel(
     }
 
     fun setPackageName(packageName: String? = null) {
-        _packageName = packageName ?: context.packageName.appendRandomSuffix()
+        _packageName = packageName ?: environmentUtils.packageName.appendRandomSuffix()
     }
 
     fun createApk(apkType: ApkType) {
@@ -86,7 +84,7 @@ class StealthViewModel(
                     when (apkType) {
                         ApkType.CLONE -> {
                             apkUtils.changePackageName(
-                                File(context.applicationInfo.sourceDir),
+                                apkUtils.getSelfApkFile(),
                                 _packageName!!,
                                 maybeCreateSigningKey = true
                             )
@@ -103,12 +101,6 @@ class StealthViewModel(
                 Log.e("StealthTutorialViewModel", "Error creating APK", e)
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        // WorkDir is now managed by ApkUtils if needed, or we can just clean up cache.
-        // For now, let's assume we don't need to manually delete workDir if it's in cache.
     }
 }
 

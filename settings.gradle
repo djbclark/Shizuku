@@ -20,6 +20,7 @@ dependencyResolutionManagement {
             url = "https://jitpack.io"
             content {
                 includeGroup("com.github.topjohnwu.libsu")
+                includeGroupByRegex("com\\.github\\.MuntashirAkon.*")
             }
         }
     }

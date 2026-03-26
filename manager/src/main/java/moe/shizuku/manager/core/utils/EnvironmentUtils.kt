@@ -14,6 +14,8 @@ class EnvironmentUtils(
     private val preferencesRepository: PreferencesRepository
 ) {
 
+    val packageName: String get() = context.packageName
+
     fun isWatch(): Boolean {
         return (context.getSystemService(UiModeManager::class.java).currentModeType
                 == Configuration.UI_MODE_TYPE_WATCH)
@@ -42,6 +44,19 @@ class EnvironmentUtils(
             preferencesRepository.tcpPort.get()
         return port
     }
+
+    fun isPermissionOwner(
+        permissionGroup: String,
+        permission: String
+    ): Result<Boolean> = runCatching {
+        context.packageManager.getPermissionGroupInfo(permissionGroup, 0)
+        val info = context.packageManager.getPermissionInfo(permission, 0)
+        info.packageName == context.packageName
+    }
+
+    fun isPackageInstalled(pkgName: String): Boolean = runCatching {
+        context.packageManager.getPackageInfo(pkgName, 0)
+    }.isSuccess
 
     companion object {
         fun isRooted(): Boolean {

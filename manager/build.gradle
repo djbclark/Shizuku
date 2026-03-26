@@ -149,12 +149,14 @@ dependencies {
 
     implementation libs.rikkax.appcompat
     implementation libs.rikkax.compatibility
-    implementation libs.rikkax.recyclerview.adapter
-    implementation libs.rikkax.recyclerview.ktx
     implementation libs.rikkax.lifecycle.resource.livedata
 
     implementation libs.arsclib
     implementation libs.boringssl
+
+    implementation(libs.libadb) {
+        exclude group: "org.bouncycastle", module: "bcprov-jdk15to18"
+    }
 
     implementation libs.bouncycastle.bcpkix
     implementation libs.kotlinx.serialization.json

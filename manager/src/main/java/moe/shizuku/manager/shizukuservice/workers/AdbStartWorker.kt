@@ -11,9 +11,14 @@ import android.database.ContentObserver
 import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -23,11 +28,11 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.core.adb.AdbMdns
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import org.koin.core.component.KoinComponent
@@ -226,13 +231,23 @@ class AdbStartWorker(
     }
 
     companion object {
-        fun enqueue(context: Context) {
-            // This still needs EnvironmentUtils as a static/object if we can't easily inject here
-            // or we could use GlobalContext.get().get<EnvironmentUtils>()
-            // but for now let's assume it's still available statically or via KoinComponent if needed
-            // Actually, enqueue is often called from places that have access to context.
-            // For now, I'll use the singleton-like access via get() if I make it a KoinComponent companion,
-            // but usually, it's better to pass it in.
+        fun enqueue(context: Context, isWifiRequired: Boolean) {
+            val cb = Constraints.Builder()
+            if (isWifiRequired) {
+                cb.setRequiredNetworkType(NetworkType.UNMETERED)
+            }
+            val constraints = cb.build()
+
+            val request =
+                OneTimeWorkRequestBuilder<AdbStartWorker>()
+                    .setConstraints(constraints)
+                    .build()
+
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                "adb_start_worker",
+                ExistingWorkPolicy.REPLACE,
+                request,
+            )
         }
 
         const val CHANNEL_ID = "AdbStartWorker"

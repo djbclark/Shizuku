@@ -1,6 +1,5 @@
 package moe.shizuku.manager.settings.ui
 
-import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +18,6 @@ import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.settings.models.SettingsEvent
@@ -171,13 +169,13 @@ class SettingsViewModel(
         preferencesRepository.updateChannel.set(value)
     }
 
-    fun onStopTcp(context: Context) {
+    fun onStopTcp() {
         viewModelScope.launch {
             adbStarter.stopTcp(environmentUtils.getAdbTcpPort())
             if (environmentUtils.getAdbTcpPort() <= 0) {
                 applyTcpModeChange(false)
             } else {
-                context.toast(R.string.tcp_error_closing)
+                _events.trySend(SettingsEvent.Snackbar(R.string.tcp_error_closing))
             }
         }
     }

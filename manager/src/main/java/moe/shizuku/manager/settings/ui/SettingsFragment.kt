@@ -39,7 +39,7 @@ import moe.shizuku.manager.core.data.preferences.Preference as ShizukuPreference
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModel()
     private val listSelectionViewModel: ListSelectionViewModel by viewModel()
-    
+
     private val preferencesRepository: PreferencesRepository by inject()
     private val localeHelper: LocaleHelper by inject()
     private val powerManagerHelper: PowerManagerHelper by inject()
@@ -286,7 +286,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.tcp_close_port)
             .setMessage(requireContext().getString(R.string.tcp_close_port_message))
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                viewModel.onStopTcp(requireContext())
+                viewModel.onStopTcp()
             }.setNegativeButton(android.R.string.cancel, null).show()
 
     override fun onCreateRecyclerView(

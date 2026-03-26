@@ -1,16 +1,14 @@
 package moe.shizuku.manager.shizukuservice.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.adb.AdbKeyException
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.extensions.showSnackbar
+import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.databinding.StartFragmentBinding
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.starter.Starter
@@ -21,37 +19,21 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLProtocolException
 
-class StartFragment : Fragment() {
-    private val startViewModel: StartViewModel by viewModel()
-    private val starter: Starter  by inject()
-
-    private var _binding: StartFragmentBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = StartFragmentBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+class StartFragment : Fragment(R.layout.start_fragment) {
+    private val viewModel: StartViewModel by viewModel()
+    private val binding by viewBinding(StartFragmentBinding::bind)
+    private val starter: Starter by inject()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_close_24)
-        }
-
-        startViewModel.output.observe(viewLifecycleOwner) {
+        viewModel.output.observe(viewLifecycleOwner) {
             val output = it.data!!.trim()
             if (output.endsWith(starter.serviceStartedMessage)) {
-                requireActivity().window?.decorView?.postDelayed({
-                    if (isAdded) findNavController().popBackStack()
+                requireView().postDelayed({
+                    findNavController().popBackStack()
                 }, 3000)
             } else if (it.status == Status.ERROR) {
                 val message = when (it.error) {
@@ -59,32 +41,14 @@ class StartFragment : Fragment() {
                     is NotRootedException -> R.string.start_error_root
                     is SocketTimeoutException, is ConnectException -> R.string.start_error_connection
                     is SSLProtocolException -> R.string.start_error_pairing_required
-                    else -> 0
+                    else -> null
                 }
 
-                if (message != 0) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setMessage(message)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
-                }
+                message?.let { msg -> showSnackbar(msg) }
             }
             binding.text1.text = output
         }
 
-        val port = arguments?.getInt("port", 0) ?: 0
-        val isRoot = arguments?.getBoolean("root", false) ?: false
-
-        startViewModel.start(isRoot, port)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    companion object {
-        const val EXTRA_IS_ROOT = "moe.shizuku.manager.extra.IS_ROOT"
-        const val EXTRA_PORT = "moe.shizuku.manager.extra.PORT"
+        viewModel.startService(requireContext())
     }
 }

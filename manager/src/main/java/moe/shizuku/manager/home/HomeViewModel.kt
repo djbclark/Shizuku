@@ -1,6 +1,5 @@
 package moe.shizuku.manager.home
 
-import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -24,7 +23,6 @@ import rikka.lifecycle.Resource
 import rikka.shizuku.Shizuku
 
 class HomeViewModel(
-    private val context: Context,
     private val shizukuSystemApis: ShizukuSystemApis,
     private val shizukuStateMachine: ShizukuStateMachine,
     private val preferencesRepository: PreferencesRepository,
@@ -43,15 +41,17 @@ class HomeViewModel(
     private val shizukuPermission = "moe.shizuku.manager.permission.API_V23"
 
     private fun load(): ServiceStatus {
-        try {
-            context.packageManager.getPermissionGroupInfo(shizukuPermissionGroup, 0)
-            val permission = context.packageManager.getPermissionInfo(shizukuPermission, 0)
-            if (permission.packageName != context.packageName) {
-                _events.trySend(HomeEvent.ShowUninstallDialog)
+        environmentUtils.isPermissionOwner(shizukuPermissionGroup, shizukuPermission)
+            .onSuccess { isOwner ->
+                if (!isOwner) {
+                    _events.trySend(HomeEvent.ShowUninstallDialog)
+                }
             }
-        } catch (_: PackageManager.NameNotFoundException) {
-            _events.trySend(HomeEvent.ShowRebootDialog)
-        }
+            .onFailure { e ->
+                if (e is PackageManager.NameNotFoundException) {
+                    _events.trySend(HomeEvent.ShowRebootDialog)
+                }
+            }
 
         if (Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)) {
             // disable authorized apps
@@ -76,7 +76,7 @@ class HomeViewModel(
             Shizuku.checkRemotePermission("android.permission.GRANT_RUNTIME_PERMISSIONS") == PackageManager.PERMISSION_GRANTED
 
         val isRunning = uid != -1 && shizukuStateMachine.isRunning()
-        shizukuSystemApis.checkPermission(shizukuPermission, context.packageName, 0)
+        shizukuSystemApis.checkPermission(shizukuPermission, environmentUtils.packageName, 0)
         return ServiceStatus(uid, apiVersion, patchVersion, seContext, permissionTest, isRunning)
     }
 

@@ -1,6 +1,7 @@
 package moe.shizuku.manager.shizukuservice.ui
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,8 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import moe.shizuku.manager.shizukuservice.starter.AdbStarter
+import moe.shizuku.manager.core.adb.AdbMdns
+import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
+import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.starter.Starter
 import rikka.lifecycle.Resource
 import kotlin.coroutines.resume
@@ -22,7 +25,8 @@ import kotlin.coroutines.resumeWithException
 
 class StartViewModel(
     private val adbStarter: AdbStarter,
-    private val starter: Starter
+    private val starter: Starter,
+    private val environmentUtils: EnvironmentUtils
 ) : ViewModel() {
 
     private val sb = StringBuilder()
@@ -35,22 +39,38 @@ class StartViewModel(
             log(error = throwable)
         }
 
-    private var started = false
-
-    fun start(
-        root: Boolean,
-        port: Int,
-    ) {
-        if (started) return
-        started = true
-
+    fun startService(context: Context) {
         viewModelScope.launch(handler) {
-            if (root) {
+            if (EnvironmentUtils.isRooted()) {
                 startRoot()
+                starter.waitForBinder { log(it) }
             } else {
-                adbStarter.startAdb(port) { log(it) }
+                val tcpPort = environmentUtils.getAdbTcpPort()
+                if (tcpPort > 0) {
+                    adbStarter.startAdb(tcpPort) { log(it) }
+                    starter.waitForBinder { log(it) }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    log("Searching for wireless debugging service...")
+                    var mdns: AdbMdns? = null
+                    val port = suspendCancellableCoroutine { cont ->
+                        mdns = AdbMdns(context, AdbMdns.TLS_CONNECT) { port ->
+                            if (port in 1..65535) {
+                                mdns?.stop()
+                                if (cont.isActive) cont.resume(port)
+                            }
+                        }
+                        mdns.start()
+                        cont.invokeOnCancellation {
+                            mdns.stop()
+                        }
+                    }
+                    log("Found port: $port")
+                    adbStarter.startAdb(port) { log(it) }
+                    starter.waitForBinder { log(it) }
+                } else {
+                    log("Adb TCP port not found and wireless debugging is not supported on this Android version.")
+                }
             }
-            starter.waitForBinder { log(it) }
         }
     }
 
@@ -74,11 +94,7 @@ class StartViewModel(
         return withContext(Dispatchers.IO) {
             if (!Shell.getShell().isRoot) {
                 Shell.getCachedShell()?.close()
-
-                if (!Shell.getShell().isRoot) {
-                    Shell.getCachedShell()?.close()
-                    throw NotRootedException()
-                }
+                throw NotRootedException()
             }
 
             suspendCancellableCoroutine { cont ->

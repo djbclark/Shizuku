@@ -34,6 +34,8 @@ class ApkUtils(
         }
     }
 
+    fun getSelfApkFile(): File = File(context.applicationInfo.sourceDir)
+
     fun changePackageName(apkFile: File, newPkgName: String, maybeCreateSigningKey: Boolean = false): File {
         Log.i(TAG, "Loading APK")
         val module = ApkModule.loadApkFile(apkFile)
