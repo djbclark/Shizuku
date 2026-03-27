@@ -1,4 +1,4 @@
-package moe.shizuku.manager.receiver
+package moe.shizuku.manager.shizukuservice
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -6,32 +6,25 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
-import com.topjohnwu.superuser.Shell
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.android.receivers.NotifAttemptReceiver
 import moe.shizuku.manager.core.android.receivers.NotifCancelReceiver
 import moe.shizuku.manager.core.android.receivers.NotifRestoreReceiver
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.UserHandleCompat
-import moe.shizuku.manager.shizukuservice.workers.AdbStartWorker
-import moe.shizuku.manager.starter.Starter
+import moe.shizuku.manager.shizukuservice.workers.BackgroundStartWorker
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class ShizukuReceiverStarter(
     private val context: Context,
-    private val preferencesRepository: PreferencesRepository,
     private val environmentUtils: EnvironmentUtils,
     private val shizukuStateMachine: ShizukuStateMachine,
-    private val starter: Starter,
+    private val shizukuServiceManager: ShizukuServiceManager,
     private val userHandleCompat: UserHandleCompat
 ) {
     companion object {
@@ -49,22 +42,18 @@ class ShizukuReceiverStarter(
     fun start(forceStart: Boolean = false) {
         if ((userHandleCompat.myUserId() > 0 || shizukuStateMachine.isRunning()) && !forceStart) return
 
-        if (preferencesRepository.startMode.get() == StartMode.ROOT) {
-            rootStart()
-        } else if ((
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || environmentUtils.isTelevision() ||
-                            environmentUtils.getAdbTcpPort() > 0
-                    ) &&
-            preferencesRepository.startMode.get() == StartMode.WADB
-        ) {
-            if (context.hasWriteSecureSettings()) {
-                AdbStartWorker.enqueue(context, environmentUtils.isWifiRequired())
+        when (shizukuServiceManager.canStart()) {
+            ShizukuServiceManager.CanStartResult.Success -> {
+                BackgroundStartWorker.enqueue(context, environmentUtils.isWifiRequired())
                 updateNotification(WorkerState.AWAITING_WIFI)
-            } else {
+            }
+
+            ShizukuServiceManager.CanStartResult.Error.UsbDebuggingDisabled,
+            ShizukuServiceManager.CanStartResult.Error.WirelessDebuggingDisabled -> {
                 showPermissionErrorNotification()
             }
-        } else {
-            Log.w(TAG, "Background start not supported")
+
+            else -> Log.w(TAG, "Background start not supported")
         }
     }
 
@@ -149,21 +138,6 @@ class ShizukuReceiverStarter(
         val msg = if (msgId != null) context.getString(msgId) else null
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.notify(NOTIFICATION_ID, buildNotification(msg))
-    }
-
-    private fun rootStart() {
-        if (!Shell.getShell().isRoot) {
-            Shell.getCachedShell()?.close()
-            return
-        }
-
-        try {
-            shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
-            Shell.cmd(starter.internalCommand).exec()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start Shizuku with root", e)
-            shizukuStateMachine.update()
-        }
     }
 
     private fun showPermissionErrorNotification() {

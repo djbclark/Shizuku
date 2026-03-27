@@ -9,7 +9,7 @@ import androidx.core.app.ServiceCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import moe.shizuku.manager.shizukuservice.ShizukuReceiverStarter
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
 import org.koin.android.ext.android.inject

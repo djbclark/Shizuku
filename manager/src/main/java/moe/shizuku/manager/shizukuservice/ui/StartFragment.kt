@@ -11,7 +11,7 @@ import moe.shizuku.manager.core.extensions.showSnackbar
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.databinding.StartFragmentBinding
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
-import moe.shizuku.manager.starter.Starter
+import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import rikka.lifecycle.Status
@@ -22,7 +22,7 @@ import javax.net.ssl.SSLProtocolException
 class StartFragment : Fragment(R.layout.start_fragment) {
     private val viewModel: StartViewModel by viewModel()
     private val binding by viewBinding(StartFragmentBinding::bind)
-    private val starter: Starter by inject()
+    private val shizukuServiceManager: ShizukuServiceManager by inject()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,7 +31,7 @@ class StartFragment : Fragment(R.layout.start_fragment) {
 
         viewModel.output.observe(viewLifecycleOwner) {
             val output = it.data!!.trim()
-            if (output.endsWith(starter.serviceStartedMessage)) {
+            if (output.endsWith(shizukuServiceManager.serviceStartedMessage)) {
                 requireView().postDelayed({
                     findNavController().popBackStack()
                 }, 3000)
@@ -49,6 +49,6 @@ class StartFragment : Fragment(R.layout.start_fragment) {
             binding.text1.text = output
         }
 
-        viewModel.startService(requireContext())
+        viewModel.startService()
     }
 }

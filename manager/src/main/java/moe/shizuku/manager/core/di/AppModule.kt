@@ -1,6 +1,5 @@
 package moe.shizuku.manager.core.di
 
-import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.permission.PermissionManager
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferenceSync
@@ -23,8 +22,8 @@ import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.ShizukuSystemApis
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.receiver.ShizukuReceiverStarter
-import moe.shizuku.manager.starter.Starter
+import moe.shizuku.manager.shizukuservice.ShizukuReceiverStarter
+import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import moe.shizuku.manager.core.utils.AppIconCache
 import moe.shizuku.manager.core.utils.ApkSigner
 import moe.shizuku.manager.core.utils.ApkUtils
@@ -46,13 +45,12 @@ val appModule = module {
     single<ThemeHelper>()
     single<EnvironmentUtils>()
     single<TokenRepository>()
-    single<AdbStarter>()
     single<UpdateHelper>()
     single<ShizukuStateMachine>()
     single<ShizukuSystemApis>()
     single<PermissionManager>()
     single<ShizukuReceiverStarter>()
-    single<Starter>()
+    single<ShizukuServiceManager>()
     single<AppIconCache>()
     single<ApkSigner>()
     single<ApkUtils>()

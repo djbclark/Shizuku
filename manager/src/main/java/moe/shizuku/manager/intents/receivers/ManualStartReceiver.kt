@@ -3,7 +3,7 @@ package moe.shizuku.manager.intents.receivers
 import android.content.Context
 import android.content.Intent
 import moe.shizuku.manager.BuildConfig
-import moe.shizuku.manager.receiver.ShizukuReceiverStarter
+import moe.shizuku.manager.shizukuservice.ShizukuReceiverStarter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 

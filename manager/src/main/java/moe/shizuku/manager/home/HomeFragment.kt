@@ -4,10 +4,10 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.view.View.GONE
 import androidx.annotation.RequiresApi
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -22,7 +22,6 @@ import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
-import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.extensions.viewBinding
@@ -34,9 +33,9 @@ import moe.shizuku.manager.databinding.HomeSimpleCardBinding
 import moe.shizuku.manager.databinding.HomeStatusCardBinding
 import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
+import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import moe.shizuku.manager.shizukuservice.models.ServiceStatus
 import moe.shizuku.manager.shizukuservice.services.AdbPairingService
-import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.shizukuservice.ui.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -61,7 +60,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val powerManagerHelper: PowerManagerHelper by inject()
     private val updateHelper: UpdateHelper by inject()
     private val stateMachine: ShizukuStateMachine by inject()
-    private val adbStarter: AdbStarter by inject()
+    private val shizukuServiceManager: ShizukuServiceManager by inject()
 
     private val binding by viewBinding(HomeFragmentBinding::bind)
 
@@ -185,8 +184,12 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
 
     private fun setupCards() = with(binding) {
         statusCard.apply {
-            buttonStart.setOnClickListener {
-                start()
+            buttonStart.apply {
+                val tcpPort = environmentUtils.getAdbTcpPort()
+                isVisible = tcpPort > 0 || environmentUtils.isTlsSupported()
+                setOnClickListener {
+                    start()
+                }
             }
 
             buttonStop.setOnClickListener {
@@ -306,54 +309,35 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         dialog.show()
     }
 
-    fun start() {
-        val cr = requireContext().contentResolver
-        if (requireContext().hasWriteSecureSettings()) {
-            Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
-            Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
+    fun start() = when (shizukuServiceManager.canStart()) {
+            ShizukuServiceManager.CanStartResult.Error.UsbDebuggingDisabled ->
+                showUsbDebuggingDisabledSnackbar()
+
+            ShizukuServiceManager.CanStartResult.Error.WirelessDebuggingDisabled ->
+                showWirelessDebuggingDisabledSnackbar()
+
+            ShizukuServiceManager.CanStartResult.Error.NotRooted ->
+                snackbar(R.string.start_error_root)
+
+            ShizukuServiceManager.CanStartResult.Error.TlsNotSupported ->
+                snackbar(R.string.start_error_tls_not_supported)
+
+            else -> findNavController().navigate(R.id.navigate_to_start)
         }
 
-        val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
-        if (adbEnabled == 0) {
-            showWadbEnableUsbDebuggingDialog()
-            return
-        }
-
-        val tcpPort = environmentUtils.getAdbTcpPort()
-        val tcpMode = preferencesRepository.tcpMode.get()
-
-        // If ADB is NOT listening to a TCP port and the device doesn't support TLS, inform the user
-        if (tcpPort <= 0 && !environmentUtils.isTlsSupported()) {
-            showWadbNotEnabledDialog()
-            // Otherwise, just go straight to StartFragment and let it handle detection/searching
-        } else if (tcpPort <= 0) {
-            findNavController().navigate(R.id.navigate_to_start)
-            // If ADB IS listening to a TCP port but the user wants to close it and use TLS instead, close the TCP port and start
-        } else if (!tcpMode) {
-            lifecycleScope.launch {
-                adbStarter.stopTcp(tcpPort)
+    private fun showWirelessDebuggingDisabledSnackbar() {
+        snackbar(R.string.start_error_wireless_debugging_disabled, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.enable) {
+                SystemSettingsPage.Developer.HighlightWirelessDebugging.launch(requireContext())
             }
-            findNavController().navigate(R.id.navigate_to_start)
-            // Otherwise ADB IS listening to a TCP port and the user wants to keep it open. Start Shizuku via TCP
-        } else {
-            findNavController().navigate(R.id.navigate_to_start)
-        }
-    }
-
-    fun showWadbEnableUsbDebuggingDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setMessage(R.string.start_error_usb_debugging_disabled)
-            .setPositiveButton(R.string.developer_options) { _, _ ->
-                SystemSettingsPage.Developer.HighlightUsbDebugging.launch(requireContext())
-            }
-            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
-    fun showWadbNotEnabledDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setMessage(R.string.start_error_wireless_debugging_disabled)
-            .setPositiveButton(android.R.string.ok, null)
+    private fun showUsbDebuggingDisabledSnackbar() {
+        snackbar(R.string.start_error_usb_debugging_disabled, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.enable) {
+                SystemSettingsPage.Developer.HighlightUsbDebugging.launch(requireContext())
+            }
             .show()
     }
 

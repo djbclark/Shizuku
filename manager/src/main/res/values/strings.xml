@@ -48,8 +48,7 @@
     <string name="start_error_wireless_debugging_disabled">Wireless debugging is not enabled.\nNote,
         before
         Android 11, to enable wireless debugging, computer connection is a must.</string>
-    <string name="start_error_usb_debugging_disabled">USB debugging is not enabled.\nPlease enable
-        it in \"Developer Options\".</string>
+    <string name="start_error_usb_debugging_disabled">USB debugging is disabled.</string>
     <string name="start_error_root">Root permission is not granted, or this device is not
         rooted.</string>
     <string name="start_already_starting">Shizuku is already starting in the background</string>
@@ -355,5 +354,6 @@
     <string name="help_privacy">Privacy policy</string>
     <string name="help_email">Email developer</string>
     <string name="help_troubleshooting">Troubleshooting</string>
+    <string name="start_error_tls_not_supported">To start Shizuku on-device, you must enable ADB over TCP using a second device</string>
 
 </resources>

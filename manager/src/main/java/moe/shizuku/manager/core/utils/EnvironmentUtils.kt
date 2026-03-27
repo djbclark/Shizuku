@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.SystemProperties
 import com.topjohnwu.superuser.Shell
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.data.preferences.StartMode
 
 class EnvironmentUtils(
     private val context: Context,
@@ -34,7 +35,8 @@ class EnvironmentUtils(
     }
 
     fun isWifiRequired(): Boolean {
-        return (getAdbTcpPort() <= 0 || !preferencesRepository.tcpMode.get())
+        return preferencesRepository.startMode.get() == StartMode.WADB
+                && (getAdbTcpPort() <= 0 || !preferencesRepository.tcpMode.get())
     }
 
     fun getAdbTcpPort(): Int {

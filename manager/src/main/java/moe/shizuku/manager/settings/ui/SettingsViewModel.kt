@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.shizukuservice.starter.AdbStarter
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.Preference
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -22,6 +21,7 @@ import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
+import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class SettingsViewModel(
@@ -29,7 +29,7 @@ class SettingsViewModel(
     private val localeHelper: LocaleHelper,
     private val powerManagerHelper: PowerManagerHelper,
     private val stateMachine: ShizukuStateMachine,
-    private val adbStarter: AdbStarter,
+    private val shizukuServiceManager: ShizukuServiceManager,
     private val environmentUtils: EnvironmentUtils
 ) : ViewModel() {
 
@@ -171,7 +171,7 @@ class SettingsViewModel(
 
     fun onStopTcp() {
         viewModelScope.launch {
-            adbStarter.stopTcp(environmentUtils.getAdbTcpPort())
+            shizukuServiceManager.stopTcp()
             if (environmentUtils.getAdbTcpPort() <= 0) {
                 applyTcpModeChange(false)
             } else {
