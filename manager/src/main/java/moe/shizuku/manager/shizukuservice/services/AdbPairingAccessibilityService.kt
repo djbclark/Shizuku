@@ -39,7 +39,7 @@ class AdbPairingAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
 
-        if (!(environmentUtils.isTelevision() && environmentUtils.isTlsSupported())) {
+        if (!(environmentUtils.isTelevision() && environmentUtils.hasWirelessDebugging())) {
             disableSelf()
             return
         }

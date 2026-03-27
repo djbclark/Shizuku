@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.SystemProperties
+import androidx.annotation.ChecksSdkIntAtLeast
 import com.topjohnwu.superuser.Shell
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.StartMode
@@ -28,11 +29,10 @@ class EnvironmentUtils(
                 context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
     }
 
-    fun isTlsSupported(): Boolean {
-        return if (isTelevision())
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.R)
+    fun hasWirelessDebugging(): Boolean = if (isTelevision())
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         else Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-    }
 
     fun isWifiRequired(): Boolean {
         return preferencesRepository.startMode.get() == StartMode.WADB
@@ -42,7 +42,7 @@ class EnvironmentUtils(
     fun getAdbTcpPort(): Int {
         var port = SystemProperties.getInt("service.adb.tcp.port", -1)
         if (port == -1) port = SystemProperties.getInt("persist.adb.tcp.port", -1)
-        if (port == -1 && isTelevision() && !isTlsSupported()) port =
+        if (port == -1 && isTelevision() && !hasWirelessDebugging()) port =
             preferencesRepository.tcpPort.get()
         return port
     }

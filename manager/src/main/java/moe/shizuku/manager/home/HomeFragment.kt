@@ -186,7 +186,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         statusCard.apply {
             buttonStart.apply {
                 val tcpPort = environmentUtils.getAdbTcpPort()
-                isVisible = tcpPort > 0 || environmentUtils.isTlsSupported()
+                isVisible = tcpPort > 0 || environmentUtils.hasWirelessDebugging()
                 setOnClickListener {
                     start()
                 }
@@ -196,7 +196,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                 stop()
             }
 
-            if (environmentUtils.isTlsSupported() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (environmentUtils.hasWirelessDebugging() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 buttonPair.setOnClickListener {
                     onPairClicked(requireContext())
                 }

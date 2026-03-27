@@ -48,8 +48,7 @@ class ShizukuReceiverStarter(
                 updateNotification(WorkerState.AWAITING_WIFI)
             }
 
-            ShizukuServiceManager.CanStartResult.Error.UsbDebuggingDisabled,
-            ShizukuServiceManager.CanStartResult.Error.WirelessDebuggingDisabled -> {
+            ShizukuServiceManager.CanStartResult.Error.WriteSecureSettingsNotGranted -> {
                 showPermissionErrorNotification()
             }
 

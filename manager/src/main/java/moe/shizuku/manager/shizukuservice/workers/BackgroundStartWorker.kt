@@ -15,9 +15,13 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.utils.step.StepStatus
+import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.shizukuservice.ShizukuReceiverStarter
 import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import moe.shizuku.manager.shizukuservice.models.StartStep
@@ -42,14 +46,22 @@ class BackgroundStartWorker(
                 ShizukuReceiverStarter.WorkerState.RUNNING,
             )
 
-            shizukuServiceManager.startSteps.collectLatest { steps ->
-                val authStep = steps.firstOrNull { it is StartStep.AwaitAuthorization }
-                if (authStep?.status == StepStatus.Running) {
-                    val foregroundInfo = ForegroundInfo(
-                        ShizukuReceiverStarter.NOTIFICATION_ID,
-                        shizukuReceiverStarter.buildNotification(null)
-                    )
-                    setForeground(foregroundInfo)
+            coroutineScope {
+                launch {
+                    val startSequence = shizukuServiceManager.startSequence
+                        .filterNotNull().first()
+
+                    startSequence.steps.collectLatest { steps ->
+                        val authStep =
+                            steps.find { it is StartStep.AwaitingAuthorization }
+                        if (authStep?.status == RunnableStatus.Running) {
+                            val foregroundInfo = ForegroundInfo(
+                                ShizukuReceiverStarter.NOTIFICATION_ID,
+                                shizukuReceiverStarter.buildNotification(null)
+                            )
+                            setForeground(foregroundInfo)
+                        }
+                    }
                 }
             }
 

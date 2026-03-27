@@ -23,6 +23,7 @@
     <string name="status_stopped">Stopped</string>
     <string name="status_version">Version %1$s, %2$s</string>
     <string name="status_version_update">Start again to update to version %1$s</string>
+    <string name="status_version_up_to_date">Version %1$s is up to date</string>
     <string name="status_adb_restricted">ADB is restricted</string>
     <string name="status_adb_restricted_message">Please disable \"%1$s\" in Developer Options. You
         may need to restart the service.</string>
@@ -52,6 +53,17 @@
     <string name="start_error_root">Root permission is not granted, or this device is not
         rooted.</string>
     <string name="start_already_starting">Shizuku is already starting in the background</string>
+
+    <!-- Start Steps -->
+    <string name="start_step_requesting_root">Requesting root</string>
+    <string name="start_step_enabling_debugging">Enabling debugging</string>
+    <string name="start_step_closing_tcp_port">Closing TCP port</string>
+    <string name="start_step_searching_for_port">Searching for port</string>
+    <string name="start_step_awaiting_authorization">Awaiting authorization</string>
+    <string name="start_step_connecting_to_port">Connecting to port</string>
+    <string name="start_step_opening_tcp_port">Opening TCP port</string>
+    <string name="start_step_executing_command">Executing command</string>
+    <string name="start_step_waiting_for_service">Waiting for service</string>
 
     <!-- Start - Background -->
     <string name="start_background">Starting Shizuku…</string>
@@ -355,5 +367,6 @@
     <string name="help_email">Email developer</string>
     <string name="help_troubleshooting">Troubleshooting</string>
     <string name="start_error_tls_not_supported">To start Shizuku on-device, you must enable ADB over TCP using a second device</string>
+    <string name="start_step_enabling_wireless_debugging">Enabling wireless debugging</string>
 
 </resources>

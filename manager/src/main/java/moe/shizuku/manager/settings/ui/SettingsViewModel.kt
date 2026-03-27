@@ -52,7 +52,7 @@ class SettingsViewModel(
     private fun calculateUiState(): SettingsUiState = with(preferencesRepository) {
         val isTelevision = environmentUtils.isTelevision()
         val isRooted = EnvironmentUtils.isRooted()
-        val isTcpModeVisible = environmentUtils.isTlsSupported()
+        val isTcpModeVisible = environmentUtils.hasWirelessDebugging()
 
         SettingsUiState(
             startModeValue = startMode.get(),
@@ -171,7 +171,7 @@ class SettingsViewModel(
 
     fun onStopTcp() {
         viewModelScope.launch {
-            shizukuServiceManager.stopTcp()
+            shizukuServiceManager.closeTcpPort()
             if (environmentUtils.getAdbTcpPort() <= 0) {
                 applyTcpModeChange(false)
             } else {

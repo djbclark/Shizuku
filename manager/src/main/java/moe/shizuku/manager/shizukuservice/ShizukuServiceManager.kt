@@ -36,7 +36,7 @@ import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
-import moe.shizuku.manager.core.utils.step.StepSequence
+import moe.shizuku.manager.core.utils.runnable.RunnableSequence
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.shizukuservice.models.StartStep
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -63,8 +63,8 @@ class ShizukuServiceManager(
     }
     val adbCommand by lazy { "adb shell $starterFilePath" }
 
-    private val _startSteps = MutableStateFlow<StepSequence<StartStep>?>(null)
-    val startSteps = _startSteps.asStateFlow()
+    private val _startSequence = MutableStateFlow<RunnableSequence<StartStep>?>(null)
+    val startSequence = _startSequence.asStateFlow()
 
     private var currentAdbPort: Int = 0
     private var currentAdbKey: AdbKey? = null
@@ -74,39 +74,50 @@ class ShizukuServiceManager(
 
         class Error {
             object NotRooted : CanStartResult()
+            object TlsNotSupported : CanStartResult()
+            object WriteSecureSettingsNotGranted : CanStartResult()
             object UsbDebuggingDisabled : CanStartResult()
             object WirelessDebuggingDisabled : CanStartResult()
-            object TlsNotSupported : CanStartResult()
         }
     }
 
-    fun canStart(): CanStartResult = when (preferencesRepository.startMode.get()) {
-        StartMode.ROOT -> {
-            if (EnvironmentUtils.isRooted()) CanStartResult.Success
-            else CanStartResult.Error.NotRooted
-        }
-
-        StartMode.WADB -> {
-            val cr = context.contentResolver
-            if (context.hasWriteSecureSettings()) {
-                Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
-                Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
-
-                if (environmentUtils.isWifiRequired() && environmentUtils.isTlsSupported()) {
-                    Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
-                }
+    fun canStart(inBackground: Boolean = false): CanStartResult =
+        when (preferencesRepository.startMode.get()) {
+            StartMode.ROOT -> {
+                if (EnvironmentUtils.isRooted()) CanStartResult.Success
+                else CanStartResult.Error.NotRooted
             }
 
-            val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
-            val adbWifiEnabled = Settings.Global.getInt(cr, "adb_wifi_enabled", 0)
-            val tcpPort = environmentUtils.getAdbTcpPort()
+            StartMode.WADB -> {
+                val tcpPort = environmentUtils.getAdbTcpPort()
+                if (tcpPort > 0) return CanStartResult.Success
 
-            return if (adbEnabled == 0) CanStartResult.Error.UsbDebuggingDisabled
-            else if (tcpPort <= 0 && !environmentUtils.isTlsSupported()) CanStartResult.Error.TlsNotSupported
-            else if (tcpPort <= 0 && adbWifiEnabled == 0) CanStartResult.Error.WirelessDebuggingDisabled
-            else CanStartResult.Success
+                if (!environmentUtils.hasWirelessDebugging())
+                    return CanStartResult.Error.TlsNotSupported
+
+                if (inBackground) {
+                    return if (context.hasWriteSecureSettings()) CanStartResult.Success
+                    else CanStartResult.Error.WriteSecureSettingsNotGranted
+                }
+
+                val cr = context.contentResolver
+                if (context.hasWriteSecureSettings()) {
+                    Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
+                    Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
+
+                    if (environmentUtils.isWifiRequired() && environmentUtils.hasWirelessDebugging()) {
+                        Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
+                    }
+                }
+
+                val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
+                val adbWifiEnabled = Settings.Global.getInt(cr, "adb_wifi_enabled", 0)
+
+                return if (adbEnabled == 0) CanStartResult.Error.UsbDebuggingDisabled
+                else if (adbWifiEnabled == 0) CanStartResult.Error.WirelessDebuggingDisabled
+                else CanStartResult.Success
+            }
         }
-    }
 
     suspend fun startService() {
         val steps = mutableListOf<StartStep>()
@@ -125,8 +136,21 @@ class ShizukuServiceManager(
                     steps.add(StartStep.CloseTcpPort(::closeTcpPort))
                 }
 
+                val cr = context.contentResolver
+                val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) > 0
+                val adbWifiEnabled = Settings.Global.getInt(cr, "adb_wifi_enabled", 0) > 0
+                val wifiRequired = environmentUtils.isWifiRequired()
+                val hasWirelessDebugging = environmentUtils.hasWirelessDebugging()
+
+                if (!adbEnabled) {
+                    steps.add(StartStep.EnableUsbDebugging(::enableUsbDebugging))
+                }
+
+                if (wifiRequired && hasWirelessDebugging && !adbWifiEnabled) {
+                    steps.add(StartStep.EnableWirelessDebugging(::enableWirelessDebugging))
+                }
+
                 steps.add(StartStep.SearchForPort(::searchForPort))
-                steps.add(StartStep.AwaitAuthorization(::awaitAuthorization))
                 steps.add(StartStep.ConnectToPort(::connectToPort))
 
                 if (tcpMode && currentTcpPort != targetTcpPort) {
@@ -138,8 +162,9 @@ class ShizukuServiceManager(
         steps.add(StartStep.ExecuteCommand(::executeCommand))
         steps.add(StartStep.WaitForService(::waitForService))
 
-        val startSequence = StepSequence(steps.toList())
-        _startSteps.value = startSequence
+        val startSequence = RunnableSequence(steps.toList())
+        _startSequence.value = startSequence
+        shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
         startSequence.run()
     }
 
@@ -152,22 +177,107 @@ class ShizukuServiceManager(
         }
     }
 
-    private suspend fun closeTcpPort() {
-        stopTcp()
-    }
-
-    private suspend fun searchForPort() {
-        if (environmentUtils.isWifiRequired()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                discoverPort(context)
-            } else {
-                currentAdbPort = environmentUtils.getAdbTcpPort()
-            }
+    private fun enableUsbDebugging() {
+        val cr = context.contentResolver
+        if (context.hasWriteSecureSettings()) {
+            Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
+            Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
         }
     }
 
-    private suspend fun awaitAuthorization() {
-        currentAdbPort = discoverPortWithAuth()
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun enableWirelessDebugging() = callbackFlow {
+        val cr = context.contentResolver
+        var awaitingAuth = false
+        var timeoutJob: Job? = null
+        var unlockReceiver: BroadcastReceiver? = null
+
+        fun finish() {
+            trySend(Unit)
+            close()
+        }
+
+        fun startTimeout() {
+            timeoutJob?.cancel()
+            timeoutJob = launch {
+                delay(15_000)
+                close(TimeoutException("Timed out during authorization"))
+            }
+        }
+
+        fun handleAuth() {
+            val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            if (km.isKeyguardLocked) {
+                val filter = IntentFilter(Intent.ACTION_USER_PRESENT)
+                unlockReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        if (intent.action == Intent.ACTION_USER_PRESENT) {
+                            context.unregisterReceiver(this)
+                            unlockReceiver = null
+                            Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
+                        }
+                    }
+                }
+                context.registerReceiver(unlockReceiver, filter)
+            } else {
+                awaitingAuth = true
+            }
+            timeoutJob?.cancel()
+        }
+
+        val observer = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                when (Settings.Global.getInt(cr, "adb_wifi_enabled", 0)) {
+                    0 -> {
+                        if (awaitingAuth) {
+                            close(SecurityException("Network is not authorized for wireless debugging"))
+                        } else {
+                            handleAuth()
+                        }
+                    }
+                    1 -> finish()
+                }
+            }
+        }
+
+        cr.registerContentObserver(
+            Settings.Global.getUriFor("adb_wifi_enabled"), false, observer
+        )
+
+        if (Settings.Global.getInt(cr, "adb_wifi_enabled", 0) == 1) {
+            finish()
+        } else {
+            Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
+            startTimeout()
+        }
+
+        awaitClose {
+            timeoutJob?.cancel()
+            cr.unregisterContentObserver(observer)
+            unlockReceiver?.let { context.unregisterReceiver(it) }
+        }
+    }.first()
+
+    private suspend fun searchForPort() {
+        currentAdbPort = environmentUtils.getAdbTcpPort()
+            .takeUnless { it <= 0 || environmentUtils.isWifiRequired() } ?:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) discoverPort()
+                else throw IllegalStateException("ADB port not found")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun discoverPort(): Int = suspendCancellableCoroutine { cont ->
+        var mdns: AdbMdns? = null
+        mdns = AdbMdns(context, AdbMdns.TLS_CONNECT) { port ->
+            if (port in 1..65535) {
+                mdns?.stop()
+                if (cont.isActive) cont.resume(port)
+            }
+        }
+        mdns.start()
+        cont.invokeOnCancellation {
+            mdns.stop()
+        }
     }
 
     private suspend fun connectToPort() {
@@ -210,7 +320,6 @@ class ShizukuServiceManager(
     }
 
     private suspend fun executeCommand() {
-        shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
         when (preferencesRepository.startMode.get()) {
             StartMode.ROOT -> {
                 suspendCancellableCoroutine { cont ->
@@ -240,105 +349,16 @@ class ShizukuServiceManager(
     }
 
     private suspend fun waitForService() {
-        waitForBinder()
-    }
-
-    suspend fun waitForBinder() {
         try {
             withTimeout(60_000) {
                 shizukuStateMachine.asFlow().first { it == ShizukuStateMachine.State.RUNNING }
             }
-        } catch (e: TimeoutCancellationException) {
+        } catch (_: TimeoutCancellationException) {
             throw TimeoutException("Failed to receive binder within 1 minute")
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    suspend fun discoverPort(context: Context): Int = suspendCancellableCoroutine { cont ->
-        var mdns: AdbMdns? = null
-        mdns = AdbMdns(context, AdbMdns.TLS_CONNECT) { port ->
-            if (port in 1..65535) {
-                mdns?.stop()
-                if (cont.isActive) cont.resume(port)
-            }
-        }
-        mdns.start()
-        cont.invokeOnCancellation {
-            mdns.stop()
-        }
-    }
-
-    suspend fun discoverPortWithAuth(): Int = callbackFlow {
-        val cr = context.contentResolver
-        val adbMdns = AdbMdns(context, AdbMdns.TLS_CONNECT) { p ->
-            if (p > 0) trySend(p)
-        }
-
-        var awaitingAuth = false
-        var timeoutJob: Job? = null
-        var unlockReceiver: BroadcastReceiver? = null
-
-        fun startDiscoveryWithTimeout() {
-            adbMdns.start()
-            timeoutJob?.cancel()
-            timeoutJob = launch {
-                delay(15_000)
-                close(TimeoutException("Timed out during mDNS port discovery"))
-            }
-        }
-
-        fun handleAuth() {
-            val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            if (km.isKeyguardLocked) {
-                val filter = IntentFilter(Intent.ACTION_USER_PRESENT)
-                unlockReceiver = object : BroadcastReceiver() {
-                    override fun onReceive(context: Context, intent: Intent) {
-                        if (intent.action == Intent.ACTION_USER_PRESENT) {
-                            context.unregisterReceiver(this)
-                            unlockReceiver = null
-                            Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
-                        }
-                    }
-                }
-                context.registerReceiver(unlockReceiver, filter)
-            } else {
-                awaitingAuth = true
-            }
-            timeoutJob?.cancel()
-            adbMdns.stop()
-        }
-
-        val observer = object : ContentObserver(null) {
-            override fun onChange(selfChange: Boolean) {
-                when (Settings.Global.getInt(cr, "adb_wifi_enabled", 0)) {
-                    0 -> {
-                        if (awaitingAuth) {
-                            close(SecurityException("Network is not authorized for wireless debugging"))
-                        } else {
-                            handleAuth()
-                        }
-                    }
-
-                    1 -> startDiscoveryWithTimeout()
-                }
-            }
-        }
-
-        Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
-        cr.registerContentObserver(
-            Settings.Global.getUriFor("adb_wifi_enabled"), false, observer
-        )
-        startDiscoveryWithTimeout()
-
-        awaitClose {
-            adbMdns.stop()
-            timeoutJob?.cancel()
-            cr.unregisterContentObserver(observer)
-            unlockReceiver?.let { context.unregisterReceiver(it) }
-        }
-    }.first()
-
-    suspend fun stopTcp() {
+    suspend fun closeTcpPort() {
         runCatching {
             val cr = context.contentResolver
             if (context.hasWriteSecureSettings()) {
