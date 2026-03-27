@@ -15,9 +15,12 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.utils.step.StepStatus
 import moe.shizuku.manager.shizukuservice.ShizukuReceiverStarter
 import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
+import moe.shizuku.manager.shizukuservice.models.StartStep
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -39,18 +42,18 @@ class BackgroundStartWorker(
                 ShizukuReceiverStarter.WorkerState.RUNNING,
             )
 
-            shizukuServiceManager.startService(
-                onShowForeground = { notification ->
+            shizukuServiceManager.startSteps.collectLatest { steps ->
+                val authStep = steps.firstOrNull { it is StartStep.AwaitAuthorization }
+                if (authStep?.status == StepStatus.Running) {
                     val foregroundInfo = ForegroundInfo(
                         ShizukuReceiverStarter.NOTIFICATION_ID,
-                        notification,
+                        shizukuReceiverStarter.buildNotification(null)
                     )
                     setForeground(foregroundInfo)
-                },
-                buildForegroundNotification = {
-                    shizukuReceiverStarter.buildNotification(null)
                 }
-            )
+            }
+
+            shizukuServiceManager.startService()
 
             val nm =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -58,26 +61,24 @@ class BackgroundStartWorker(
 
             return Result.success()
         } catch (e: CancellationException) {
-            val state =
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                    ShizukuReceiverStarter.WorkerState.AWAITING_RETRY
-                } else {
-                    when (stopReason) {
-                        WorkInfo.STOP_REASON_CONSTRAINT_CONNECTIVITY -> ShizukuReceiverStarter.WorkerState.AWAITING_WIFI
-                        WorkInfo.STOP_REASON_CANCELLED_BY_APP -> ShizukuReceiverStarter.WorkerState.STOPPED
-                        else -> ShizukuReceiverStarter.WorkerState.AWAITING_RETRY
-                    }
+            val state = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                ShizukuReceiverStarter.WorkerState.AWAITING_RETRY
+            } else {
+                when (stopReason) {
+                    WorkInfo.STOP_REASON_CONSTRAINT_CONNECTIVITY -> ShizukuReceiverStarter.WorkerState.AWAITING_WIFI
+                    WorkInfo.STOP_REASON_CANCELLED_BY_APP -> ShizukuReceiverStarter.WorkerState.STOPPED
+                    else -> ShizukuReceiverStarter.WorkerState.AWAITING_RETRY
                 }
+            }
             shizukuReceiverStarter.updateNotification(state)
 
             throw e
         } catch (e: Exception) {
-            val ignored =
-                listOf(
-                    EOFException::class,
-                    SecurityException::class,
-                    TimeoutException::class,
-                )
+            val ignored = listOf(
+                EOFException::class,
+                SecurityException::class,
+                TimeoutException::class,
+            )
             if (ignored.none { it.isInstance(e) }) showErrorNotification(applicationContext, e)
 
             if (shizukuStateMachine.update() == ShizukuStateMachine.State.RUNNING) {
@@ -95,25 +96,20 @@ class BackgroundStartWorker(
         context: Context,
         e: Exception,
     ) {
-        val channel =
-            NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.start_background),
-                NotificationManager.IMPORTANCE_LOW,
-            )
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            context.getString(R.string.start_background),
+            NotificationManager.IMPORTANCE_LOW,
+        )
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
 
         val nb = NotificationCompat.Builder(context, CHANNEL_ID)
 
-        val notification =
-            nb
-                .setSmallIcon(R.drawable.ic_system_icon)
-                .setContentTitle(context.getString(R.string.start_background_error))
-                .setContentText(e.message)
-                .setSilent(true)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(e.message))
-                .build()
+        val notification = nb.setSmallIcon(R.drawable.ic_system_icon)
+            .setContentTitle(context.getString(R.string.start_background_error))
+            .setContentText(e.message).setSilent(true)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(e.message)).build()
 
         nm.notify(NOTIFICATION_ID, notification)
     }
@@ -127,8 +123,7 @@ class BackgroundStartWorker(
             val constraints = cb.build()
 
             val request =
-                OneTimeWorkRequestBuilder<BackgroundStartWorker>()
-                    .setConstraints(constraints)
+                OneTimeWorkRequestBuilder<BackgroundStartWorker>().setConstraints(constraints)
                     .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(

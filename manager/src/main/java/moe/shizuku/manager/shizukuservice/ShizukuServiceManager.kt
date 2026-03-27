@@ -1,7 +1,6 @@
 package moe.shizuku.manager.shizukuservice
 
 import android.app.KeyguardManager
-import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -19,7 +18,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
@@ -38,6 +36,7 @@ import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.utils.EnvironmentUtils
+import moe.shizuku.manager.core.utils.step.StepSequence
 import moe.shizuku.manager.shizukuservice.models.NotRootedException
 import moe.shizuku.manager.shizukuservice.models.StartStep
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -56,23 +55,19 @@ class ShizukuServiceManager(
     private val shizukuStateMachine: ShizukuStateMachine
 ) {
 
-    private val starterFile = File(context.applicationInfo.nativeLibraryDir, "libshizuku.so")
+    private val starterFilePath by lazy {
+        File(context.applicationInfo.nativeLibraryDir, "libshizuku.so").absolutePath
+    }
+    private val internalCommand by lazy {
+        "$starterFilePath --apk=${context.applicationInfo.sourceDir}"
+    }
+    val adbCommand by lazy { "adb shell $starterFilePath" }
 
-    val userCommand: String = starterFile.absolutePath
-    val adbCommand = "adb shell $userCommand"
-    val internalCommand = "$userCommand --apk=${context.applicationInfo.sourceDir}"
-
-    val serviceStartedMessage =
-        "Service started, this window will be automatically closed in 3 seconds"
-
-    private val _startProcess = MutableStateFlow<ServiceStartProcess?>(null)
-    val startProcess: StateFlow<ServiceStartProcess?> = _startProcess.asStateFlow()
+    private val _startSteps = MutableStateFlow<StepSequence<StartStep>?>(null)
+    val startSteps = _startSteps.asStateFlow()
 
     private var currentAdbPort: Int = 0
     private var currentAdbKey: AdbKey? = null
-    private var logCallback: ((String) -> Unit)? = null
-    private var onShowForegroundCallback: (suspend (Notification) -> Unit)? = null
-    private var buildForegroundNotificationCallback: (() -> Notification)? = null
 
     sealed class CanStartResult {
         object Success : CanStartResult()
@@ -85,97 +80,70 @@ class ShizukuServiceManager(
         }
     }
 
-    fun canStart(): CanStartResult =
-        when (preferencesRepository.startMode.get()) {
-            StartMode.ROOT -> {
-                if (EnvironmentUtils.isRooted()) CanStartResult.Success
-                else CanStartResult.Error.NotRooted
-            }
-
-            StartMode.WADB -> {
-                val cr = context.contentResolver
-                if (context.hasWriteSecureSettings()) {
-                    Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
-                    Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
-
-                    if (environmentUtils.isWifiRequired() && environmentUtils.isTlsSupported()) {
-                        Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
-                    }
-                }
-
-                val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
-                val adbWifiEnabled = Settings.Global.getInt(cr, "adb_wifi_enabled", 0)
-                val tcpPort = environmentUtils.getAdbTcpPort()
-
-                return if (adbEnabled == 0)
-                    CanStartResult.Error.UsbDebuggingDisabled
-                else if (tcpPort <= 0 && !environmentUtils.isTlsSupported())
-                    CanStartResult.Error.TlsNotSupported
-                else if (tcpPort <= 0 && adbWifiEnabled == 0)
-                    CanStartResult.Error.WirelessDebuggingDisabled
-                else CanStartResult.Success
-            }
+    fun canStart(): CanStartResult = when (preferencesRepository.startMode.get()) {
+        StartMode.ROOT -> {
+            if (EnvironmentUtils.isRooted()) CanStartResult.Success
+            else CanStartResult.Error.NotRooted
         }
 
-    suspend fun startService(
-        log: ((String) -> Unit)? = null,
-        onShowForeground: (suspend (Notification) -> Unit)? = null,
-        buildForegroundNotification: (() -> Notification)? = null
-    ) {
-        logCallback = log
-        onShowForegroundCallback = onShowForeground
-        buildForegroundNotificationCallback = buildForegroundNotification
+        StartMode.WADB -> {
+            val cr = context.contentResolver
+            if (context.hasWriteSecureSettings()) {
+                Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
+                Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
 
-        val builder = ServiceStartProcess.Builder { runStep(it) }
-
-        when (preferencesRepository.startMode.get()) {
-            StartMode.ROOT -> {
-                builder.addStep(StartStep.RequestingRoot)
-                builder.addStep(StartStep.ExecutingCommand)
+                if (environmentUtils.isWifiRequired() && environmentUtils.isTlsSupported()) {
+                    Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
+                }
             }
 
-            StartMode.WADB -> {
-                val tcpPort = environmentUtils.getAdbTcpPort()
-                if (tcpPort > 0 && !preferencesRepository.tcpMode.get()) {
-                    builder.addStep(StartStep.ClosingTcpPort)
-                }
+            val adbEnabled = Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0)
+            val adbWifiEnabled = Settings.Global.getInt(cr, "adb_wifi_enabled", 0)
+            val tcpPort = environmentUtils.getAdbTcpPort()
 
-                builder.addStep(StartStep.SearchingForPort)
-
-                if (onShowForeground != null && buildForegroundNotification != null) {
-                    builder.addStep(StartStep.AwaitingAuthorization)
-                }
-
-                builder.addStep(StartStep.ConnectingToPort)
-
-                if (preferencesRepository.tcpMode.get()) {
-                    builder.addStep(StartStep.OpeningTcpPort)
-                }
-
-                builder.addStep(StartStep.ExecutingCommand)
-            }
-        }
-        builder.addStep(StartStep.WaitingForService)
-
-        val process = builder.build()
-        _startProcess.value = process
-        process.run()
-    }
-
-    private suspend fun runStep(step: StartStep) {
-        when (step) {
-            StartStep.RequestingRoot -> stepRequestingRoot()
-            StartStep.ClosingTcpPort -> stepClosingTcpPort()
-            StartStep.SearchingForPort -> stepSearchingForPort()
-            StartStep.AwaitingAuthorization -> stepAwaitingAuthorization()
-            StartStep.ConnectingToPort -> stepConnectingToPort()
-            StartStep.OpeningTcpPort -> stepOpeningTcpPort()
-            StartStep.ExecutingCommand -> stepExecutingCommand()
-            StartStep.WaitingForService -> stepWaitingForService()
+            return if (adbEnabled == 0) CanStartResult.Error.UsbDebuggingDisabled
+            else if (tcpPort <= 0 && !environmentUtils.isTlsSupported()) CanStartResult.Error.TlsNotSupported
+            else if (tcpPort <= 0 && adbWifiEnabled == 0) CanStartResult.Error.WirelessDebuggingDisabled
+            else CanStartResult.Success
         }
     }
 
-    private suspend fun stepRequestingRoot() {
+    suspend fun startService() {
+        val steps = mutableListOf<StartStep>()
+
+        when (preferencesRepository.startMode.get()) {
+            StartMode.ROOT -> {
+                steps.add(StartStep.RequestRoot(::requestRoot))
+            }
+
+            StartMode.WADB -> {
+                val tcpMode = preferencesRepository.tcpMode.get()
+                val targetTcpPort = preferencesRepository.tcpPort.get()
+                val currentTcpPort = environmentUtils.getAdbTcpPort()
+
+                if (currentTcpPort > 0 && !preferencesRepository.tcpMode.get()) {
+                    steps.add(StartStep.CloseTcpPort(::closeTcpPort))
+                }
+
+                steps.add(StartStep.SearchForPort(::searchForPort))
+                steps.add(StartStep.AwaitAuthorization(::awaitAuthorization))
+                steps.add(StartStep.ConnectToPort(::connectToPort))
+
+                if (tcpMode && currentTcpPort != targetTcpPort) {
+                    steps.add(StartStep.OpenTcpPort(::openTcpPort))
+                }
+            }
+        }
+
+        steps.add(StartStep.ExecuteCommand(::executeCommand))
+        steps.add(StartStep.WaitForService(::waitForService))
+
+        val startSequence = StepSequence(steps.toList())
+        _startSteps.value = startSequence
+        startSequence.run()
+    }
+
+    private suspend fun requestRoot() {
         withContext(Dispatchers.IO) {
             if (!Shell.getShell().isRoot) {
                 Shell.getCachedShell()?.close()
@@ -184,38 +152,25 @@ class ShizukuServiceManager(
         }
     }
 
-    private suspend fun stepClosingTcpPort() {
+    private suspend fun closeTcpPort() {
         stopTcp()
     }
 
-    private suspend fun stepSearchingForPort() {
+    private suspend fun searchForPort() {
         if (environmentUtils.isWifiRequired()) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            logCallback?.invoke("Searching for wireless debugging service...")
-            currentAdbPort = if (onShowForegroundCallback != null && buildForegroundNotificationCallback != null) {
-                // If we have foreground callbacks, we might need auth, but this step only does discovery
-                // However, the original logic combined them. Let's split if possible or just handle here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 discoverPort(context)
             } else {
-                discoverPort(context)
+                currentAdbPort = environmentUtils.getAdbTcpPort()
             }
-            logCallback?.invoke("Found port: $currentAdbPort")
-        } else {
-            currentAdbPort = environmentUtils.getAdbTcpPort()
-        }
         }
     }
 
-    private suspend fun stepAwaitingAuthorization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val onShow = onShowForegroundCallback ?: return
-            val buildNotif = buildForegroundNotificationCallback ?: return
-            currentAdbPort = discoverPortWithAuth(onShow, buildNotif)
-            logCallback?.invoke("Authorized and found port: $currentAdbPort")
-        }
+    private suspend fun awaitAuthorization() {
+        currentAdbPort = discoverPortWithAuth()
     }
 
-    private suspend fun stepConnectingToPort() {
+    private suspend fun connectToPort() {
         withContext(Dispatchers.IO) {
             currentAdbKey = runCatching {
                 AdbKey(PreferenceAdbKeyStore(preferencesRepository.prefs), "shizuku")
@@ -232,19 +187,16 @@ class ShizukuServiceManager(
                 throw IllegalStateException("ADB port not found")
             }
 
-            logCallback?.invoke("Connecting to port $currentAdbPort...")
             // Just test connection
             AdbClient("127.0.0.1", currentAdbPort, currentAdbKey!!).use { client ->
                 connectWithRetry(client)
-                logCallback?.invoke("Successfully connected to port $currentAdbPort")
             }
         }
     }
 
-    private suspend fun stepOpeningTcpPort() {
+    private suspend fun openTcpPort() {
         val tcpPort = preferencesRepository.tcpPort.get()
         if (currentAdbPort != tcpPort) {
-            logCallback?.invoke("\nRestarting in TCP mode port: $tcpPort")
             withContext(Dispatchers.IO) {
                 AdbClient("127.0.0.1", currentAdbPort, currentAdbKey!!).use { client ->
                     connectWithRetry(client)
@@ -257,23 +209,22 @@ class ShizukuServiceManager(
         }
     }
 
-    private suspend fun stepExecutingCommand() {
+    private suspend fun executeCommand() {
         shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
         when (preferencesRepository.startMode.get()) {
             StartMode.ROOT -> {
                 suspendCancellableCoroutine { cont ->
-                    Shell.cmd(internalCommand)
-                        .to(object : CallbackList<String?>() {
-                            override fun onAddElement(s: String?) {
-                                s?.let { logCallback?.invoke(it) }
-                            }
-                        }).submit {
-                            if (it.isSuccess) cont.resume(Unit)
-                            else {
-                                shizukuStateMachine.update()
-                                cont.resumeWithException(Exception("Failed to start with root"))
-                            }
+                    Shell.cmd(internalCommand).to(object : CallbackList<String?>() {
+                        override fun onAddElement(s: String?) {
+                            s?.let { TODO() }
                         }
+                    }).submit {
+                        if (it.isSuccess) cont.resume(Unit)
+                        else {
+                            shizukuStateMachine.update()
+                            cont.resumeWithException(Exception("Failed to start with root"))
+                        }
+                    }
                 }
             }
 
@@ -281,25 +232,22 @@ class ShizukuServiceManager(
                 withContext(Dispatchers.IO) {
                     AdbClient("127.0.0.1", currentAdbPort, currentAdbKey!!).use { client ->
                         connectWithRetry(client)
-                        client.command("shell:$internalCommand") { logCallback?.invoke(String(it)) }
+                        client.command("shell:$internalCommand") { TODO() }
                     }
                 }
             }
         }
     }
 
-    private suspend fun stepWaitingForService() {
-        waitForBinder(logCallback)
+    private suspend fun waitForService() {
+        waitForBinder()
     }
 
-    suspend fun waitForBinder(log: ((String) -> Unit)? = null) {
+    suspend fun waitForBinder() {
         try {
-            log?.invoke("\nWaiting for service. This may take up to 1 minute...")
             withTimeout(60_000) {
-                shizukuStateMachine.asFlow()
-                    .first { it == ShizukuStateMachine.State.RUNNING }
+                shizukuStateMachine.asFlow().first { it == ShizukuStateMachine.State.RUNNING }
             }
-            log?.invoke(serviceStartedMessage)
         } catch (e: TimeoutCancellationException) {
             throw TimeoutException("Failed to receive binder within 1 minute")
         }
@@ -320,10 +268,7 @@ class ShizukuServiceManager(
         }
     }
 
-    suspend fun discoverPortWithAuth(
-        onShowForeground: suspend (Notification) -> Unit,
-        buildForegroundNotification: () -> Notification
-    ): Int = callbackFlow {
+    suspend fun discoverPortWithAuth(): Int = callbackFlow {
         val cr = context.contentResolver
         val adbMdns = AdbMdns(context, AdbMdns.TLS_CONNECT) { p ->
             if (p > 0) trySend(p)
@@ -345,8 +290,6 @@ class ShizukuServiceManager(
         fun handleAuth() {
             val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             if (km.isKeyguardLocked) {
-                launch { onShowForeground(buildForegroundNotification()) }
-
                 val filter = IntentFilter(Intent.ACTION_USER_PRESENT)
                 unlockReceiver = object : BroadcastReceiver() {
                     override fun onReceive(context: Context, intent: Intent) {
@@ -383,9 +326,7 @@ class ShizukuServiceManager(
 
         Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
         cr.registerContentObserver(
-            Settings.Global.getUriFor("adb_wifi_enabled"),
-            false,
-            observer
+            Settings.Global.getUriFor("adb_wifi_enabled"), false, observer
         )
         startDiscoveryWithTimeout()
 
