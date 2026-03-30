@@ -2,6 +2,7 @@ package moe.shizuku.manager.core.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import moe.shizuku.manager.core.utils.EnvironmentUtils
 
 class PreferencesRepository(context: Context) {
 
@@ -20,7 +21,12 @@ class PreferencesRepository(context: Context) {
     // BEHAVIOR
     // -------------------------
 
-    val startMode by pref { enum("start_mode", StartMode.WADB) }
+    val startMode by pref {
+        enum(
+            "start_mode",
+            if (EnvironmentUtils.isRooted()) StartMode.ROOT else StartMode.WADB
+        )
+    }
     val startOnBoot by pref { boolean("start_on_boot", false) }
     val watchdog by pref { boolean("watchdog", false) }
 

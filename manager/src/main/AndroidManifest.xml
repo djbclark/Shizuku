@@ -115,7 +115,7 @@
         </activity>
 
         <service
-            android:name=".shizukuservice.services.AdbPairingService"
+            android:name=".privilegedservice.services.AdbPairingService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="shortService" />

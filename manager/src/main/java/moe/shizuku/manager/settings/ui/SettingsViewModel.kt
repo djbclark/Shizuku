@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.adb.AdbManager
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.Preference
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -18,10 +19,10 @@ import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.ui.helpers.LocaleHelper
-import moe.shizuku.manager.core.utils.EnvironmentUtils
+import moe.shizuku.manager.privilegedservice.StartOnBootManager
+import moe.shizuku.manager.privilegedservice.TcpModeManager
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
-import moe.shizuku.manager.shizukuservice.ShizukuServiceManager
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class SettingsViewModel(
@@ -29,8 +30,9 @@ class SettingsViewModel(
     private val localeHelper: LocaleHelper,
     private val powerManagerHelper: PowerManagerHelper,
     private val stateMachine: ShizukuStateMachine,
-    private val shizukuServiceManager: ShizukuServiceManager,
-    private val environmentUtils: EnvironmentUtils
+    private val tcpModeManager: TcpModeManager,
+    private val adbManager: AdbManager,
+    private val startOnBootManager: StartOnBootManager
 ) : ViewModel() {
 
     private val _events = Channel<SettingsEvent>()
@@ -50,13 +52,11 @@ class SettingsViewModel(
     )
 
     private fun calculateUiState(): SettingsUiState = with(preferencesRepository) {
-        val isTelevision = environmentUtils.isTelevision()
-        val isRooted = EnvironmentUtils.isRooted()
-        val isTcpModeVisible = environmentUtils.hasWirelessDebugging()
+        val isTcpModeVisible = adbManager.hasWirelessDebugging
 
         SettingsUiState(
             startModeValue = startMode.get(),
-            isStartOnBootToggleable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || isTelevision || isRooted,
+            isStartOnBootToggleable = startOnBootManager.canStartOnBoot,
             startOnBootValue = startOnBoot.get(),
             watchdogValue = watchdog.get(),
 
@@ -65,7 +65,7 @@ class SettingsViewModel(
             tcpModeValue = tcpMode.get(),
             isTcpPortVisible = isTcpModeVisible && tcpMode.get(),
             tcpPortValue = tcpPort.get(),
-            isLegacyPairingVisible = !isTelevision,
+            isLegacyPairingVisible = true, // TODO hide on TVs
 
             languageValue = localeHelper.getLocale(),
             themeValue = theme.get(),
@@ -92,8 +92,7 @@ class SettingsViewModel(
     fun onStartOnBootChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
             requestBatteryOptimization(preferencesRepository.startOnBoot)
-        }
-        else if (!environmentUtils.isTelevision() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        } else if (startOnBootManager.adbAuthNeverSaved) {
             _events.trySend(SettingsEvent.ShowStartOnBootBugDialog)
         } else {
             applyStartOnBootChange(newValue)
@@ -113,7 +112,7 @@ class SettingsViewModel(
     }
 
     fun onTcpModeChanged(newValue: Boolean) {
-        val isTcpModeActive = environmentUtils.getAdbTcpPort() > 0
+        val isTcpModeActive = adbManager.getTcpPort() > 0
 
         if (isTcpModeActive == newValue) {
             applyTcpModeChange(newValue)
@@ -142,7 +141,7 @@ class SettingsViewModel(
 
     fun onTcpPortChanged(input: String) {
         val newPort = input.toIntOrNull() ?: preferencesRepository.tcpPort.default
-        val currentPort = environmentUtils.getAdbTcpPort()
+        val currentPort = adbManager.getTcpPort()
         val needsRestart = (currentPort != newPort)
 
         if (stateMachine.isRunning() && needsRestart) {
@@ -171,8 +170,8 @@ class SettingsViewModel(
 
     fun onStopTcp() {
         viewModelScope.launch {
-            shizukuServiceManager.closeTcpPort()
-            if (environmentUtils.getAdbTcpPort() <= 0) {
+            tcpModeManager.closeTcpPort()
+            if (adbManager.getTcpPort() <= 0) {
                 applyTcpModeChange(false)
             } else {
                 _events.trySend(SettingsEvent.Snackbar(R.string.tcp_error_closing))
@@ -181,7 +180,7 @@ class SettingsViewModel(
     }
 
     private fun shouldRequestBatteryOptimization(settingsValue: Boolean) =
-        settingsValue && !powerManagerHelper.isIgnoringBatteryOptimizations() && !environmentUtils.isTelevision()
+        settingsValue && !powerManagerHelper.isIgnoringBatteryOptimizations()
 
     private fun requestBatteryOptimization(pref: Preference<*>) {
         pendingBatteryOptimization = pref

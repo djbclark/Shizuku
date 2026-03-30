@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Bundle
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
@@ -17,11 +16,10 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.data.preferences.Theme
-import moe.shizuku.manager.core.utils.EnvironmentUtils
+import moe.shizuku.manager.core.extensions.isWatch
 
 class ThemeHelper(
-    application: Application,
-    private val environmentUtils: EnvironmentUtils,
+    private val application: Application,
     private val preferencesRepository: PreferencesRepository
 ) {
 
@@ -37,7 +35,8 @@ class ThemeHelper(
     )
 
     fun applyTheme(activity: AppCompatActivity) {
-        val amoledBlack = preferencesRepository.amoledBlack.get() || environmentUtils.isWatch()
+        val amoledBlack =
+            preferencesRepository.amoledBlack.get() || application.applicationContext.isWatch
         val dynamicColor = preferencesRepository.dynamicColor.get()
 
         activity.setTheme(R.style.Theme_App)

@@ -45,14 +45,14 @@
 
     <fragment
         android:id="@+id/pairing_fragment"
-        android:name="moe.shizuku.manager.shizukuservice.ui.PairingFragment"
+        android:name="moe.shizuku.manager.privilegedservice.ui.PairingFragment"
         android:label="@string/pair"
         tools:layout="@layout/pairing_fragment"
         tools:targetApi="30" />
 
     <fragment
         android:id="@+id/start_fragment"
-        android:name="moe.shizuku.manager.shizukuservice.ui.StartFragment"
+        android:name="moe.shizuku.manager.privilegedservice.ui.StartFragment"
         android:label="@string/start"
         tools:layout="@layout/start_fragment" />
 

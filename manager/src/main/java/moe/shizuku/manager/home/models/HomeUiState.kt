@@ -1,6 +1,6 @@
 package moe.shizuku.manager.home.models
 
-import moe.shizuku.manager.shizukuservice.models.ServiceStatus
+import moe.shizuku.manager.privilegedservice.models.ServiceStatus
 import moe.shizuku.manager.watchdog.models.WatchdogState
 
 data class HomeUiState(

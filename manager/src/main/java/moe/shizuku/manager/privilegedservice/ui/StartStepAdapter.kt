@@ -1,0 +1,52 @@
+package moe.shizuku.manager.privilegedservice.ui
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import moe.shizuku.manager.core.utils.runnable.RunnableStatus
+import moe.shizuku.manager.databinding.ItemStartStepBinding
+import moe.shizuku.manager.privilegedservice.models.StartStep
+
+class StartStepAdapter : ListAdapter<StartStep, StartStepAdapter.ViewHolder>(DiffCallback()) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(
+            ItemStartStepBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    class ViewHolder(private val binding: ItemStartStepBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: StartStep) {
+            binding.label.setText(item.label)
+            binding.icon.setImageResource(item.icon)
+
+            val status = item.status.value
+            binding.statusPending.isVisible = status is RunnableStatus.Pending
+            binding.statusRunning.isVisible = status is RunnableStatus.Running
+            binding.statusCompleted.isVisible = status is RunnableStatus.Completed
+            binding.statusFailed.isVisible = status is RunnableStatus.Failed
+        }
+    }
+
+    private class DiffCallback : DiffUtil.ItemCallback<StartStep>() {
+        override fun areItemsTheSame(oldItem: StartStep, newItem: StartStep): Boolean {
+            return oldItem.javaClass == newItem.javaClass
+        }
+
+        override fun areContentsTheSame(oldItem: StartStep, newItem: StartStep): Boolean {
+            return oldItem.status.value == newItem.status.value
+        }
+    }
+}

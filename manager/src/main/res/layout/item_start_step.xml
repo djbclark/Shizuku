@@ -1,36 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
+    android:background="?attr/selectableItemBackground"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:paddingVertical="16dp">
 
+    <!-- The Icon -->
     <ImageView
         android:id="@+id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@null"
+        android:importantForAccessibility="no"
         android:tint="?android:textColorSecondary"
+        app:layout_constraintBottom_toBottomOf="@id/label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/label"
         tools:src="@drawable/ic_terminal_24" />
 
     <TextView
         android:id="@+id/label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="monospace"
+        android:textAppearance="?textAppearanceTitleMedium"
         android:textColor="?android:textColorPrimary"
+        app:layout_constraintEnd_toStartOf="@id/status_container"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Execute command" />
 
     <FrameLayout
+        android:id="@+id/status_container"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginStart="16dp">
+        app:layout_constraintBottom_toBottomOf="@id/label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/label">
 
         <View
             android:id="@+id/status_pending"
@@ -38,7 +49,7 @@
             android:layout_height="12dp"
             android:layout_gravity="center"
             android:background="@drawable/shape_circle_icon_background"
-            android:backgroundTint="#BDBDBD" />
+            android:backgroundTint="?colorSecondary" />
 
         <ProgressBar
             android:id="@+id/status_running"
@@ -51,20 +62,90 @@
             android:id="@+id/status_completed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@null"
             android:src="@drawable/ic_server_ok_24dp"
-            android:tint="#4CAF50"
+            android:tint="?colorPrimary"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/status_failed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@null"
             android:src="@drawable/ic_server_error_24dp"
-            android:tint="#F44336"
+            android:tint="?colorError"
             android:visibility="gone" />
-
     </FrameLayout>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/user_error_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textAppearance="?textAppearanceBodyMedium"
+        android:textColor="?colorError"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/label"
+        app:layout_constraintStart_toStartOf="@id/label"
+        app:layout_constraintTop_toBottomOf="@id/label"
+        tools:text="@string/start_error_pairing_required"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/action_button"
+        style="?attr/materialButtonTonalStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="0dp"
+        android:paddingVertical="4dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/label"
+        app:layout_constraintTop_toBottomOf="@id/user_error_message"
+        tools:text="Pair"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/expand_trigger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/label"
+        app:layout_constraintTop_toBottomOf="@id/action_button"
+        tools:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Error details"
+            android:textAppearance="?textAppearanceLabelSmall"
+            android:textColor="?android:textColorSecondary" />
+
+        <ImageView
+            android:id="@+id/expand_indicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_chevron_forward"
+            app:tint="?android:textColorSecondary" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/stack_trace"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorSurfaceVariant"
+        android:fontFamily="monospace"
+        android:padding="8dp"
+        android:textAppearance="?textAppearanceLabelSmall"
+        android:textColor="?colorOnSurfaceVariant"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/label"
+        app:layout_constraintTop_toBottomOf="@id/expand_trigger"
+        tools:text="java.net.ConnectException: Connection refused..."
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

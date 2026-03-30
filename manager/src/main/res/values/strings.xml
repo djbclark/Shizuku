@@ -39,24 +39,23 @@
     <string name="stop_dialog_message">Shizuku will be stopped.</string>
 
     <!-- Start -->
-    <string name="start_searching">Searching for wireless debugging service</string>
-    <string name="start_searching_message">If it\'s stuck searching, try toggling wireless debugging
-        off/on again.</string>
-    <string name="start_error_pairing_required">Please go through the pairing step first.</string>
+    <string name="start_error_pairing_required">Please pair with wireless debugging to continue.</string>
     <string name="start_error_connection">Can\'t connect to wireless debugging service.\n\nPlease
         ensure that Shizuku is whitelisted in all firewall, ad-block, VPN, or similar apps that can
         restrict network access.</string>
-    <string name="start_error_wireless_debugging_disabled">Wireless debugging is not enabled.\nNote,
-        before
-        Android 11, to enable wireless debugging, computer connection is a must.</string>
+    <string name="start_error_wireless_debugging_disabled">Wireless debugging is disabled.</string>
+    <string name="start_error_wifi_required">Wireless debugging not enabled. Wi-Fi is required.</string>
     <string name="start_error_usb_debugging_disabled">USB debugging is disabled.</string>
     <string name="start_error_root">Root permission is not granted, or this device is not
         rooted.</string>
-    <string name="start_already_starting">Shizuku is already starting in the background</string>
+    <string name="start_error_tls_not_supported">To start Shizuku on-device, you must enable ADB over TCP using a second device</string>
+    <string name="start_error_write_secure_settings">%1$s permission is not granted.</string>
+    <string name="start_error_authorization_required">Please authorize wireless debugging on this network to continue.</string>
 
     <!-- Start Steps -->
     <string name="start_step_requesting_root">Requesting root</string>
-    <string name="start_step_enabling_debugging">Enabling debugging</string>
+    <string name="start_step_enabling_debugging">Enabling USB debugging</string>
+    <string name="start_step_enabling_wireless_debugging">Enabling wireless debugging</string>
     <string name="start_step_closing_tcp_port">Closing TCP port</string>
     <string name="start_step_searching_for_port">Searching for port</string>
     <string name="start_step_awaiting_authorization">Awaiting authorization</string>
@@ -231,7 +230,7 @@
     <string name="update_latest_installed">The latest version is already installed</string>
     <string name="update_check_failed">Unable to check for updates</string>
     <string name="update">Update</string>
-    <string name="update_downloading">Downloading update...</string>
+    <string name="update_downloading">Downloading update…</string>
     <string name="update_download_failed">Failed to download update</string>
     <string name="update_success">Update successful</string>
     <string name="update_failed">Update failed</string>
@@ -319,20 +318,13 @@
 
     <!-- Help & Feedback -->
     <string name="help_and_feedback">Help &amp; Feedback</string>
-
-    <!-- Help & Feedback - Bug Report (WIP) -->
-    <string name="bug_report">Bug report</string>
-    <string name="bug_report_dialog_before_reporting">First, please do the following:</string>
-    <string name="bug_report_dialog_update">Check that you are using the ^1.</string>
-    <string name="bug_report_dialog_link_update">latest version</string>
-    <string name="bug_report_dialog_wiki">Read the ^1 and follow all relevant troubleshooting steps.</string>
-    <string name="bug_report_dialog_link_wiki">wiki</string>
-    <string name="bug_report_dialog_issues">Search through all ^1 to see if your bug has already
-        been reported.</string>
-    <string name="bug_report_dialog_link_issues">existing issues</string>
-    <string name="bug_report_dialog_method">Please submit an issue on ^1 if you have an account.</string>
-    <string name="bug_report_dialog_method_2">Otherwise, you can send an email.</string>
-    <string name="bug_report_dialog_button_email">Email</string>
+    <string name="help_user_guide">User guide</string>
+    <string name="help_bug_report">Report a bug</string>
+    <string name="help_feature_request">Request a feature</string>
+    <string name="help_translate">Contribute translations</string>
+    <string name="help_privacy">Privacy policy</string>
+    <string name="help_email">Email developer</string>
+    <string name="help_troubleshooting">Troubleshooting</string>
 
     <!-- Permission related, appears in system permission UI (WIP) -->
     <string name="permission_group_label" translatable="false">Shizuku</string>
@@ -359,14 +351,6 @@
     <string name="export_success">Export succeeded</string>
     <string name="export_failed">Export failed</string>
     <string name="close">Close</string>
-    <string name="help_user_guide">User guide</string>
-    <string name="help_bug_report">Report a bug</string>
-    <string name="help_feature_request">Request a feature</string>
-    <string name="help_translate">Contribute translations</string>
-    <string name="help_privacy">Privacy policy</string>
-    <string name="help_email">Email developer</string>
-    <string name="help_troubleshooting">Troubleshooting</string>
-    <string name="start_error_tls_not_supported">To start Shizuku on-device, you must enable ADB over TCP using a second device</string>
-    <string name="start_step_enabling_wireless_debugging">Enabling wireless debugging</string>
+    <string name="tcp_error_opening">Couldn\'t open TCP port</string>
 
 </resources>

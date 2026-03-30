@@ -62,8 +62,6 @@ sealed class SystemSettingsPage(
                 putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
             }
 
-        object NotificationSettings : Notifications()
-
         object NotificationChannel : Notifications() {
             override fun buildIntent(context: Context): Intent =
                 super.buildIntent(context).apply {
@@ -71,8 +69,6 @@ sealed class SystemSettingsPage(
                 }
         }
     }
-
-    object InternetPanel : SystemSettingsPage(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
 
     object Accessibility : SystemSettingsPage(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 

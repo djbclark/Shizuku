@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.net.toUri
+import moe.shizuku.manager.core.extensions.isTelevision
 
 class PowerManagerHelper(private val context: Context) {
 
@@ -14,7 +15,7 @@ class PowerManagerHelper(private val context: Context) {
     }
 
     fun isIgnoringBatteryOptimizations(): Boolean {
-        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        return context.isTelevision || powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     @SuppressLint("BatteryLife")

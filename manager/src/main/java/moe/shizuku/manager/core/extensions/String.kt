@@ -1,13 +1,5 @@
 package moe.shizuku.manager.core.extensions
 
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
-import android.text.TextUtils
-import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
-import android.view.View
-import android.widget.TextView
 import java.util.Locale
 
 fun String.appendRandomSuffix(n: Int = 5): String {
@@ -28,26 +20,3 @@ fun String.appendRandomSuffix(n: Int = 5): String {
 
 fun String.capitalize(locale: Locale): String =
     replaceFirstChar { it.uppercase(locale) }
-
-// TODO remove these extension functions
-fun String.asLink(url: String): CharSequence {
-    return SpannableString(this).apply {
-        setSpan(object : ClickableSpan() {
-            override fun onClick(v: View) {
-                v.context.openUrl(url)
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.isUnderlineText = true
-                ds.color = ds.linkColor
-            }
-        }, 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-}
-
-fun TextView.applyTemplateArgs(vararg args: CharSequence) {
-    val template = text as CharSequence
-    text = TextUtils.expandTemplate(template, *args)
-    movementMethod = LinkMovementMethod.getInstance()
-}

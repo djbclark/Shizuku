@@ -17,7 +17,7 @@ import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.ShizukuSystemApis
 import moe.shizuku.manager.home.models.HelpItem
 import moe.shizuku.manager.home.models.HomeEvent
-import moe.shizuku.manager.shizukuservice.models.ServiceStatus
+import moe.shizuku.manager.privilegedservice.models.ServiceStatus
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.lifecycle.Resource
 import rikka.shizuku.Shizuku
@@ -54,7 +54,7 @@ class HomeViewModel(
             }
 
         if (Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)) {
-            // disable authorized apps
+            // TODO disable authorized apps
         }
 
         if (!stateMachine.isRunning()) {
@@ -113,7 +113,6 @@ class HomeViewModel(
     }
 
     fun checkBatteryOptimization() {
-        if (environmentUtils.isTelevision()) return
         if (!preferencesRepository.startOnBoot.get() && !preferencesRepository.watchdog.get()) return
         if (!powerManagerHelper.isIgnoringBatteryOptimizations()) {
             _events.trySend(HomeEvent.ShowBatteryOptimizationSnackbar)
