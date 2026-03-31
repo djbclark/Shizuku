@@ -17,8 +17,6 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
@@ -45,10 +43,7 @@ class BackgroundStartWorker(
 
             coroutineScope {
                 launch {
-                    val startSequence = privilegedServiceManager.startSequence
-                        .filterNotNull().first()
-
-                    startSequence.steps.collectLatest { steps ->
+                    privilegedServiceManager.startSteps.collectLatest { steps ->
                         val authStep =
                             steps.find { it is StartStep.AwaitingAuthorization }
                         if (authStep?.status == RunnableStatus.Running) {

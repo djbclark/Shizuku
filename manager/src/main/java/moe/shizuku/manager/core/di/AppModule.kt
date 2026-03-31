@@ -66,7 +66,7 @@ val appModule = module {
     single<UserHandleCompat>()
     single<TcpModeManager>()
 
-    factory<AdbSession.AdbSessionFactory>()
+    factory<AdbSession.Factory>()
 
     viewModel<SettingsViewModel>()
     viewModel<ListSelectionViewModel>()

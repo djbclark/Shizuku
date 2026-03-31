@@ -6,9 +6,12 @@ import androidx.annotation.StringRes
 import com.topjohnwu.superuser.CallbackList
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -21,6 +24,7 @@ import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.core.utils.runnable.RunnableSequence
+import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.privilegedservice.models.NotRootedException
 import moe.shizuku.manager.privilegedservice.models.StartStep
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -29,13 +33,14 @@ import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PrivilegedServiceManager(
     private val context: Context,
     private val adbManager: AdbManager,
     private val tcpModeManager: TcpModeManager,
     private val preferencesRepository: PreferencesRepository,
     private val shizukuStateMachine: ShizukuStateMachine,
-    private val adbSessionFactory: AdbSession.AdbSessionFactory
+    private val adbSessionFactory: AdbSession.Factory
 ) {
     private val starterFilePath by lazy {
         File(context.applicationInfo.nativeLibraryDir, "libshizuku.so").absolutePath
@@ -45,8 +50,15 @@ class PrivilegedServiceManager(
     }
     val adbCommand by lazy { "adb shell $starterFilePath" }
 
-    private val _startSequence = MutableStateFlow<RunnableSequence<StartStep>?>(null)
-    val startSequence = _startSequence.asStateFlow()
+    private val _activeSequence = MutableStateFlow<RunnableSequence<StartStep>?>(null)
+
+    val startSteps: Flow<List<StartStep>> = _activeSequence.flatMapLatest {
+        it?.steps ?: flowOf(emptyList())
+    }
+
+    val startStatus: Flow<RunnableStatus> = _activeSequence.flatMapLatest {
+        it?.status ?: flowOf(RunnableStatus.Pending)
+    }
 
     private var activeSession: AdbSession? = null
 
@@ -116,9 +128,6 @@ class PrivilegedServiceManager(
         }.also { Log.i(TAG, "canStartResult: ${it::class.simpleName}") }
 
     suspend fun startService() {
-        val startSequence = buildStartSequence().also {
-            _startSequence.value = it
-        }
         shizukuStateMachine.set(ShizukuStateMachine.State.STARTING)
 
         if (preferencesRepository.startMode.get() == StartMode.WADB) {
@@ -128,11 +137,14 @@ class PrivilegedServiceManager(
         }
 
         try {
-            startSequence.run()
+            val sequence = buildStartSequence()
+            _activeSequence.value = sequence
+            sequence.run()
         } finally {
             shizukuStateMachine.update()
             activeSession?.close()
             activeSession = null
+            _activeSequence.value = null
         }
     }
 

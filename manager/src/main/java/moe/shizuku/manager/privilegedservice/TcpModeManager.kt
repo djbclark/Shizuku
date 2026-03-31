@@ -9,7 +9,7 @@ import java.net.SocketException
 
 class TcpModeManager(
     private val adbManager: AdbManager,
-    private val adbSessionFactory: AdbSession.AdbSessionFactory
+    private val adbSessionFactory: AdbSession.Factory
 ) {
 
     suspend fun openTcpPort(targetPort: Int) {

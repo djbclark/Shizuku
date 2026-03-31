@@ -4,18 +4,19 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.viewBinding
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.databinding.StartFragmentBinding
+import moe.shizuku.manager.privilegedservice.models.StartUiState
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StartFragment : Fragment(R.layout.start_fragment) {
@@ -31,30 +32,20 @@ class StartFragment : Fragment(R.layout.start_fragment) {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collectLatest { sequence ->
-                    if (sequence == null) return@collectLatest
-
-                    launch {
-                        sequence.steps.collect { steps ->
-                            adapter.submitList(steps)
-                            adapter.notifyDataSetChanged()
-                        }
-                    }
-
-                    launch {
-                        sequence.status.collect { status ->
-                            if (status is RunnableStatus.Completed) {
-                                delay(3000)
-                                if (isResumed) findNavController().popBackStack()
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        viewModel.uiState
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .onEach { handleState(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
         viewModel.startService()
+    }
+
+    private suspend fun handleState(state: StartUiState) {
+        adapter.submitList(state.steps)
+
+        if (state.status is RunnableStatus.Completed) {
+            delay(3000)
+            if (isResumed) findNavController().popBackStack()
+        }
     }
 }

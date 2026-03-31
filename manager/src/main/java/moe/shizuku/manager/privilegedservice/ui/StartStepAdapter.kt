@@ -8,9 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.databinding.ItemStartStepBinding
-import moe.shizuku.manager.privilegedservice.models.StartStep
+import moe.shizuku.manager.privilegedservice.models.StartStepUiModel
 
-class StartStepAdapter : ListAdapter<StartStep, StartStepAdapter.ViewHolder>(DiffCallback()) {
+class StartStepAdapter :
+    ListAdapter<StartStepUiModel, StartStepAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -28,11 +29,11 @@ class StartStepAdapter : ListAdapter<StartStep, StartStepAdapter.ViewHolder>(Dif
 
     class ViewHolder(private val binding: ItemStartStepBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: StartStep) {
+        fun bind(item: StartStepUiModel) {
             binding.label.setText(item.label)
             binding.icon.setImageResource(item.icon)
 
-            val status = item.status.value
+            val status = item.status
             binding.statusPending.isVisible = status is RunnableStatus.Pending
             binding.statusRunning.isVisible = status is RunnableStatus.Running
             binding.statusCompleted.isVisible = status is RunnableStatus.Completed
@@ -40,13 +41,19 @@ class StartStepAdapter : ListAdapter<StartStep, StartStepAdapter.ViewHolder>(Dif
         }
     }
 
-    private class DiffCallback : DiffUtil.ItemCallback<StartStep>() {
-        override fun areItemsTheSame(oldItem: StartStep, newItem: StartStep): Boolean {
-            return oldItem.javaClass == newItem.javaClass
+    private class DiffCallback : DiffUtil.ItemCallback<StartStepUiModel>() {
+        override fun areItemsTheSame(
+            oldItem: StartStepUiModel,
+            newItem: StartStepUiModel
+        ): Boolean {
+            return oldItem.label == newItem.label
         }
 
-        override fun areContentsTheSame(oldItem: StartStep, newItem: StartStep): Boolean {
-            return oldItem.status.value == newItem.status.value
+        override fun areContentsTheSame(
+            oldItem: StartStepUiModel,
+            newItem: StartStepUiModel
+        ): Boolean {
+            return oldItem.status == newItem.status
         }
     }
 }

@@ -2,13 +2,36 @@ package moe.shizuku.manager.privilegedservice.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
+import moe.shizuku.manager.privilegedservice.models.StartStepUiModel
+import moe.shizuku.manager.privilegedservice.models.StartUiState
 
 class StartViewModel(
     private val privilegedServiceManager: PrivilegedServiceManager
 ) : ViewModel() {
-    val uiState = privilegedServiceManager.startSequence
+    val uiState = combine(
+        privilegedServiceManager.startSteps,
+        privilegedServiceManager.startStatus
+    ) { steps, status ->
+        StartUiState(
+            steps = steps.map { step ->
+                StartStepUiModel(
+                    label = step.label,
+                    icon = step.icon,
+                    status = step.status.value
+                )
+            },
+            status = status
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = StartUiState()
+    )
 
     fun startService() = viewModelScope.launch {
         privilegedServiceManager.startService()
