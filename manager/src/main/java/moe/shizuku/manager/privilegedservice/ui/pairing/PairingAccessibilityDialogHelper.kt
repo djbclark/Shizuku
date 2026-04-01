@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.pairing
 
 import android.content.Context
 import android.os.Build
@@ -36,7 +36,12 @@ private fun Context.showPermissionDialog() {
     val permissionCommand = "adb shell cmd appops set $packageName $permissionName allow"
     val styledPermissionCommand =
         SpannableString(permissionCommand).apply {
-            setSpan(TypefaceSpan("monospace"), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(
+                TypefaceSpan("monospace"),
+                0,
+                length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
 
     MaterialAlertDialogBuilder(this)

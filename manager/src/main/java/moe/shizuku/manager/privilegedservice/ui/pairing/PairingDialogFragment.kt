@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.pairing
 
 import android.annotation.SuppressLint
 import android.app.Dialog

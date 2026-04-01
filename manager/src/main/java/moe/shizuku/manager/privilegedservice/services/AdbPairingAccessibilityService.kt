@@ -15,7 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.adb.AdbManager
+import moe.shizuku.manager.core.adb.AdbSettingsManager
 import moe.shizuku.manager.core.adb.client.AdbInvalidPairingCodeException
 import moe.shizuku.manager.core.adb.client.AdbKey
 import moe.shizuku.manager.core.adb.client.AdbKeyException
@@ -34,13 +34,13 @@ class AdbPairingAccessibilityService : AccessibilityService() {
     var password: String? = null
 
     private val handler = Handler(Looper.getMainLooper())
-    private val adbManager: AdbManager by inject()
+    private val adbSettingsManager: AdbSettingsManager by inject()
     private val preferencesRepository: PreferencesRepository by inject()
 
     override fun onServiceConnected() {
         super.onServiceConnected()
 
-        if (!isTelevision && !adbManager.hasWirelessDebugging) {
+        if (!isTelevision && !adbSettingsManager.hasWirelessDebugging) {
             disableSelf()
             return
         }

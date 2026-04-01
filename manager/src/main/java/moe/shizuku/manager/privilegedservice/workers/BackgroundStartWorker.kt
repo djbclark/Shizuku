@@ -41,9 +41,11 @@ class BackgroundStartWorker(
                 ShizukuReceiverStarter.WorkerState.RUNNING,
             )
 
+            val session = privilegedServiceManager.createStartSession()
+
             coroutineScope {
                 launch {
-                    privilegedServiceManager.startSteps.collectLatest { steps ->
+                    session.steps.collectLatest { steps ->
                         val authStep =
                             steps.find { it is StartStep.AwaitingAuthorization }
                         if (authStep?.status == RunnableStatus.Running) {
@@ -57,7 +59,7 @@ class BackgroundStartWorker(
                 }
             }
 
-            privilegedServiceManager.startService()
+            privilegedServiceManager.startService(session)
 
             val nm =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

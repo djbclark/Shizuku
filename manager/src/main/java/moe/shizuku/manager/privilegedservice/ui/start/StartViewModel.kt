@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.start
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,19 +7,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.privilegedservice.models.StartStepUiModel
+import moe.shizuku.manager.privilegedservice.models.StartStepItem
 import moe.shizuku.manager.privilegedservice.models.StartUiState
 
 class StartViewModel(
     private val privilegedServiceManager: PrivilegedServiceManager
 ) : ViewModel() {
+    private val session = privilegedServiceManager.createStartSession()
     val uiState = combine(
-        privilegedServiceManager.startSteps,
-        privilegedServiceManager.startStatus
+        session.steps,
+        session.status
     ) { steps, status ->
         StartUiState(
             steps = steps.map { step ->
-                StartStepUiModel(
+                StartStepItem(
                     label = step.label,
                     icon = step.icon,
                     status = step.status.value
@@ -34,6 +35,6 @@ class StartViewModel(
     )
 
     fun startService() = viewModelScope.launch {
-        privilegedServiceManager.startService()
+        privilegedServiceManager.startService(session)
     }
 }

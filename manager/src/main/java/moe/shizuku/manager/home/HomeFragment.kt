@@ -18,10 +18,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.adb.AdbManager
+import moe.shizuku.manager.core.adb.AdbPortHelper
+import moe.shizuku.manager.core.adb.AdbSettingsManager
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.android.settings.SystemSettingsPage
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.isTelevision
 import moe.shizuku.manager.core.extensions.openUrl
@@ -35,11 +37,11 @@ import moe.shizuku.manager.databinding.HomeStatusCardBinding
 import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager.CanStartResult.Error
-import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager.CanStartResult.Success
+import moe.shizuku.manager.privilegedservice.models.PreStartCheck.Failure
+import moe.shizuku.manager.privilegedservice.models.PreStartCheck.Success
 import moe.shizuku.manager.privilegedservice.models.ServiceStatus
 import moe.shizuku.manager.privilegedservice.services.AdbPairingService
-import moe.shizuku.manager.privilegedservice.ui.showAccessibilityDialog
+import moe.shizuku.manager.privilegedservice.ui.pairing.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import org.koin.android.ext.android.inject
@@ -63,7 +65,8 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val updateHelper: UpdateHelper by inject()
     private val stateMachine: ShizukuStateMachine by inject()
     private val privilegedServiceManager: PrivilegedServiceManager by inject()
-    private val adbManager: AdbManager by inject()
+    private val adbSettingsManager: AdbSettingsManager by inject()
+    private val adbPortHelper: AdbPortHelper by inject()
 
     private val binding by viewBinding(HomeFragmentBinding::bind)
 
@@ -188,8 +191,9 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private fun setupCards() = with(binding) {
         statusCard.apply {
             buttonStart.apply {
-                val tcpPort = adbManager.getTcpPort()
-                isVisible = tcpPort > 0 || adbManager.hasWirelessDebugging
+                isVisible = adbPortHelper.tcpPort > 0 ||
+                        adbSettingsManager.hasWirelessDebugging ||
+                        preferencesRepository.startMode.get() == StartMode.ROOT
                 setOnClickListener {
                     start()
                 }
@@ -199,7 +203,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                 stop()
             }
 
-            if (adbManager.hasWirelessDebugging) {
+            if (adbSettingsManager.hasWirelessDebugging) {
                 buttonPair.setOnClickListener {
                     onPairClicked(requireContext())
                 }
@@ -314,15 +318,15 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
 
     fun start() = when (val canStart = privilegedServiceManager.canStart()) {
         is Success -> findNavController().navigate(R.id.navigate_to_start)
-        is Error -> {
+        is Failure -> {
             snackbar(canStart.msgRes).run {
-                if (canStart == Error.WirelessDebuggingDisabled) {
+                if (canStart == Failure.WirelessDebuggingDisabled) {
                     setAction(R.string.enable) {
                         SystemSettingsPage.Developer.HighlightWirelessDebugging.launch(
                             requireContext()
                         )
                     }
-                } else if (canStart == Error.UsbDebuggingDisabled) {
+                } else if (canStart == Failure.UsbDebuggingDisabled) {
                     setAction(R.string.enable) {
                         SystemSettingsPage.Developer.HighlightUsbDebugging.launch(requireContext())
                     }

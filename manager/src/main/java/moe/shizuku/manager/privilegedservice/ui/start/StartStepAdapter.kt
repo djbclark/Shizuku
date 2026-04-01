@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.start
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.databinding.ItemStartStepBinding
-import moe.shizuku.manager.privilegedservice.models.StartStepUiModel
+import moe.shizuku.manager.privilegedservice.models.StartStepItem
 
 class StartStepAdapter :
-    ListAdapter<StartStepUiModel, StartStepAdapter.ViewHolder>(DiffCallback()) {
+    ListAdapter<StartStepItem, StartStepAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -29,7 +29,7 @@ class StartStepAdapter :
 
     class ViewHolder(private val binding: ItemStartStepBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: StartStepUiModel) {
+        fun bind(item: StartStepItem) {
             binding.label.setText(item.label)
             binding.icon.setImageResource(item.icon)
 
@@ -41,17 +41,17 @@ class StartStepAdapter :
         }
     }
 
-    private class DiffCallback : DiffUtil.ItemCallback<StartStepUiModel>() {
+    private class DiffCallback : DiffUtil.ItemCallback<StartStepItem>() {
         override fun areItemsTheSame(
-            oldItem: StartStepUiModel,
-            newItem: StartStepUiModel
+            oldItem: StartStepItem,
+            newItem: StartStepItem
         ): Boolean {
             return oldItem.label == newItem.label
         }
 
         override fun areContentsTheSame(
-            oldItem: StartStepUiModel,
-            newItem: StartStepUiModel
+            oldItem: StartStepItem,
+            newItem: StartStepItem
         ): Boolean {
             return oldItem.status == newItem.status
         }

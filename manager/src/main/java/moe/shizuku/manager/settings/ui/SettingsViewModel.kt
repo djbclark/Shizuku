@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.adb.AdbManager
+import moe.shizuku.manager.core.adb.AdbPortHelper
+import moe.shizuku.manager.core.adb.AdbSettingsManager
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.Preference
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -20,9 +21,9 @@ import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.privilegedservice.StartOnBootManager
-import moe.shizuku.manager.privilegedservice.TcpModeManager
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
+import moe.shizuku.manager.tcpmode.TcpManager
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class SettingsViewModel(
@@ -30,8 +31,9 @@ class SettingsViewModel(
     private val localeHelper: LocaleHelper,
     private val powerManagerHelper: PowerManagerHelper,
     private val stateMachine: ShizukuStateMachine,
-    private val tcpModeManager: TcpModeManager,
-    private val adbManager: AdbManager,
+    private val tcpManager: TcpManager,
+    private val adbSettingsManager: AdbSettingsManager,
+    private val adbPortHelper: AdbPortHelper,
     private val startOnBootManager: StartOnBootManager
 ) : ViewModel() {
 
@@ -52,7 +54,7 @@ class SettingsViewModel(
     )
 
     private fun calculateUiState(): SettingsUiState = with(preferencesRepository) {
-        val isTcpModeVisible = adbManager.hasWirelessDebugging
+        val isTcpModeVisible = adbSettingsManager.hasWirelessDebugging
 
         SettingsUiState(
             startModeValue = startMode.get(),
@@ -112,7 +114,7 @@ class SettingsViewModel(
     }
 
     fun onTcpModeChanged(newValue: Boolean) {
-        val isTcpModeActive = adbManager.getTcpPort() > 0
+        val isTcpModeActive = adbPortHelper.tcpPort > 0
 
         if (isTcpModeActive == newValue) {
             applyTcpModeChange(newValue)
@@ -141,7 +143,7 @@ class SettingsViewModel(
 
     fun onTcpPortChanged(input: String) {
         val newPort = input.toIntOrNull() ?: preferencesRepository.tcpPort.default
-        val currentPort = adbManager.getTcpPort()
+        val currentPort = adbPortHelper.tcpPort
         val needsRestart = (currentPort != newPort)
 
         if (stateMachine.isRunning() && needsRestart) {
@@ -170,8 +172,8 @@ class SettingsViewModel(
 
     fun onStopTcp() {
         viewModelScope.launch {
-            tcpModeManager.closeTcpPort()
-            if (adbManager.getTcpPort() <= 0) {
+            tcpManager.closeTcpPort()
+            if (adbPortHelper.tcpPort <= 0) {
                 applyTcpModeChange(false)
             } else {
                 _events.trySend(SettingsEvent.Snackbar(R.string.tcp_error_closing))

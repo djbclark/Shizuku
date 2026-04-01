@@ -1,7 +1,8 @@
 package moe.shizuku.manager.core.di
 
-import moe.shizuku.manager.core.adb.AdbManager
+import moe.shizuku.manager.core.adb.AdbPortHelper
 import moe.shizuku.manager.core.adb.AdbSession
+import moe.shizuku.manager.core.adb.AdbSettingsManager
 import moe.shizuku.manager.core.android.DeviceHelper
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
@@ -22,12 +23,12 @@ import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
 import moe.shizuku.manager.privilegedservice.ShizukuReceiverStarter
 import moe.shizuku.manager.privilegedservice.StartOnBootManager
-import moe.shizuku.manager.privilegedservice.TcpModeManager
-import moe.shizuku.manager.privilegedservice.ui.AdbPairingViewModel
-import moe.shizuku.manager.privilegedservice.ui.StartViewModel
+import moe.shizuku.manager.privilegedservice.ui.pairing.AdbPairingViewModel
+import moe.shizuku.manager.privilegedservice.ui.start.StartViewModel
 import moe.shizuku.manager.settings.ui.SettingsViewModel
 import moe.shizuku.manager.shell.ShellBinderRequestHandler
 import moe.shizuku.manager.stealth.ui.StealthViewModel
+import moe.shizuku.manager.tcpmode.TcpManager
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.updater.data.ReleaseRemoteDataSource
 import moe.shizuku.manager.updater.data.ReleaseRepository
@@ -60,11 +61,12 @@ val appModule = module {
     single<ApkSigner>()
     single<ApkUtils>()
     single<DeviceHelper>()
-    single<AdbManager>()
+    single<AdbSettingsManager>()
+    single<AdbPortHelper>()
     single<ShellBinderRequestHandler>()
     single<WatchdogNotifications>()
     single<UserHandleCompat>()
-    single<TcpModeManager>()
+    single<TcpManager>()
 
     factory<AdbSession.Factory>()
 

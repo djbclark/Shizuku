@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.start
 
 import android.os.Bundle
 import android.view.View

@@ -44,6 +44,8 @@ class AdbSession(
         val currentClient = _client
         if (currentClient != null) return currentClient
 
+        if (port <= 0) throw IllegalStateException("Port not set")
+
         val newClient = AdbClient("127.0.0.1", port, getKey())
         newClient.connectWithRetry()
         _client = newClient

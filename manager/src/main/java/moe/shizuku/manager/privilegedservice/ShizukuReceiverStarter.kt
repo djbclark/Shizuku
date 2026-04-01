@@ -15,6 +15,7 @@ import moe.shizuku.manager.core.android.receivers.NotifCancelReceiver
 import moe.shizuku.manager.core.android.receivers.NotifRestoreReceiver
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.utils.UserHandleCompat
+import moe.shizuku.manager.privilegedservice.models.PreStartCheck
 import moe.shizuku.manager.privilegedservice.workers.BackgroundStartWorker
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
@@ -39,13 +40,13 @@ class ShizukuReceiverStarter(
     fun start(forceStart: Boolean = false) {
         if ((userHandleCompat.myUserId() > 0 || shizukuStateMachine.isRunning()) && !forceStart) return
 
-        when (privilegedServiceManager.canStart()) {
-            PrivilegedServiceManager.CanStartResult.Success -> {
+        when (privilegedServiceManager.canStart(inBackground = true)) {
+            PreStartCheck.Success -> {
                 BackgroundStartWorker.enqueue(context, privilegedServiceManager.isWifiRequired)
                 updateNotification(WorkerState.AWAITING_WIFI)
             }
 
-            PrivilegedServiceManager.CanStartResult.Error.WriteSecureSettingsNotGranted -> {
+            PreStartCheck.Failure.WriteSecureSettingsNotGranted -> {
                 showPermissionErrorNotification()
             }
 

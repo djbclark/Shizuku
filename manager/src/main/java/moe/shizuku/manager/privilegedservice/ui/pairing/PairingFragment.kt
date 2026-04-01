@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui
+package moe.shizuku.manager.privilegedservice.ui.pairing
 
 import android.app.AppOpsManager
 import android.app.ForegroundServiceStartNotAllowedException

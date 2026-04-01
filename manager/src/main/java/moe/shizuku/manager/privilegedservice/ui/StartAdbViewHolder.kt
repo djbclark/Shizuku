@@ -1,4 +1,4 @@
-package moe.shizuku.manager.privilegedservice.ui.components
+package moe.shizuku.manager.privilegedservice.ui
 
 // import android.content.Intent
 // import android.view.View
