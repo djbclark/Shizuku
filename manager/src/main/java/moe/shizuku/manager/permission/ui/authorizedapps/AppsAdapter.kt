@@ -1,84 +1,84 @@
 package moe.shizuku.manager.permission.ui.authorizedapps
 
-import android.content.pm.PackageInfo
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import moe.shizuku.manager.databinding.AppListEmptyBinding
+import moe.shizuku.manager.R
+import moe.shizuku.manager.permission.models.AuthorizedAppsItem
 import moe.shizuku.manager.permission.ui.authorizedapps.components.AppViewHolder
-import moe.shizuku.manager.permission.ui.authorizedapps.components.EmptyViewHolder
 import moe.shizuku.manager.permission.ui.authorizedapps.components.ToggleAllViewHolder
 
 class AppsAdapter(
-    private val appViewHolderFactory: AppViewHolder.Factory,
-    private val toggleAllViewHolderFactory: ToggleAllViewHolder.Factory
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private val items = mutableListOf<Any>()
-
-    init {
-        setHasStableIds(true)
-    }
-
-    fun updateData(data: List<PackageInfo>) {
-        items.clear()
-        if (data.isEmpty()) {
-            items.add(Any())
-        } else {
-            items.add(HeaderMarker)
-            items.addAll(data)
+    private val onAppClicked: (AuthorizedAppsItem.App) -> Unit,
+    private val onToggleAllClicked: (Boolean) -> Unit
+) : ListAdapter<AuthorizedAppsItem, RecyclerView.ViewHolder>(DiffCallback) {
+    fun updateData(apps: List<AuthorizedAppsItem.App>, areAllGranted: Boolean) {
+        val items = mutableListOf<AuthorizedAppsItem>().apply {
+            if (apps.isNotEmpty()) {
+                add(AuthorizedAppsItem.ToggleAll(areAllGranted))
+                addAll(apps)
+            }
         }
-        notifyDataSetChanged()
+        submitList(items)
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return when (items[position]) {
-            is HeaderMarker -> TYPE_HEADER
-            is PackageInfo -> TYPE_APP
-            else -> TYPE_EMPTY
-        }
-    }
+    override fun getItemViewType(position: Int): Int =
+        getItem(position).viewType.ordinal
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val type = AuthorizedAppsItem.ViewType.entries.getOrNull(viewType)
+            ?: throw IllegalStateException()
+
         val inflater = LayoutInflater.from(parent.context)
-        return when (viewType) {
-            TYPE_HEADER -> toggleAllViewHolderFactory.create(parent, { items }) {
-                notifyItemRangeChanged(0, itemCount)
-            }
+        return when (type) {
+            AuthorizedAppsItem.ViewType.TOGGLE_ALL -> ToggleAllViewHolder(
+                inflater.inflate(R.layout.app_list_toggle_all, parent, false),
+                onToggleAllClicked
+            )
 
-            TYPE_APP -> appViewHolderFactory.create(parent) {
-                notifyItemRangeChanged(0, itemCount)
-            }
-
-            else -> EmptyViewHolder(
-                AppListEmptyBinding.inflate(inflater, parent, false)
+            AuthorizedAppsItem.ViewType.APP -> AppViewHolder(
+                inflater.inflate(R.layout.app_list_item, parent, false),
+                onAppClicked
             )
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = getItem(position)
         when (holder) {
-            is ToggleAllViewHolder -> holder.bind()
-            is AppViewHolder -> holder.bind(items[position] as PackageInfo)
+            is ToggleAllViewHolder -> holder.bind(item as AuthorizedAppsItem.ToggleAll)
+            is AppViewHolder -> holder.bind(getItem(position) as AuthorizedAppsItem.App)
         }
     }
-
-    override fun getItemCount(): Int = items.size
-
-    override fun getItemId(position: Int): Long {
-        val item = items[position]
-        return if (item is PackageInfo) {
-            item.packageName.hashCode().toLong()
-        } else {
-            item.hashCode().toLong()
-        }
-    }
-
-    object HeaderMarker
 
     companion object {
-        private const val TYPE_HEADER = 0
-        private const val TYPE_APP = 1
-        private const val TYPE_EMPTY = 2
+        private val DiffCallback = object : DiffUtil.ItemCallback<AuthorizedAppsItem>() {
+            override fun areItemsTheSame(
+                oldItem: AuthorizedAppsItem,
+                newItem: AuthorizedAppsItem
+            ): Boolean {
+                return when (oldItem) {
+                    is AuthorizedAppsItem.App if newItem is AuthorizedAppsItem.App -> {
+                        oldItem.appInfo.packageName == newItem.appInfo.packageName
+                    }
+
+                    is AuthorizedAppsItem.ToggleAll if newItem is AuthorizedAppsItem.ToggleAll -> {
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+            override fun areContentsTheSame(
+                oldItem: AuthorizedAppsItem,
+                newItem: AuthorizedAppsItem
+            ): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 }

@@ -1,0 +1,18 @@
+package moe.shizuku.manager.core.extensions
+
+import android.content.pm.ApplicationInfo
+import android.widget.ImageView
+import coil3.load
+import coil3.request.crossfade
+import coil3.request.placeholder
+import moe.shizuku.manager.R
+
+fun ImageView.setAppIcon(appInfo: ApplicationInfo) {
+    val icon = context.packageManager.getApplicationIcon(appInfo)
+    val placeholderDrawable = context.getDrawable(R.drawable.ic_app_placeholder)
+
+    load(icon) {
+        crossfade(true)
+        placeholder(placeholderDrawable)
+    }
+}

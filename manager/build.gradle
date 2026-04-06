@@ -21,9 +21,10 @@ android {
         }
     }
     buildFeatures {
+        aidl = true
         buildConfig = true
-        viewBinding = true
         prefab = true
+        viewBinding = true
     }
     androidResources {
         generateLocaleConfig = true
@@ -114,18 +115,20 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation libs.kotlinx.coroutines.core
-    implementation libs.kotlinx.coroutines.android
-
+    // Modules
     implementation project(":server")
     implementation project(":rish")
     implementation project(":starter")
     implementation project(":api")
     implementation project(":provider")
+    compileOnly project(":hidden-api")
 
-    implementation libs.hidden.compat
-    compileOnly libs.hidden.stub
+    // Kotlin
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.kotlinx.serialization.json
 
+    // AndroidX
     implementation libs.androidx.browser
     implementation libs.androidx.core.ktx
     implementation libs.androidx.documentfile
@@ -138,33 +141,41 @@ dependencies {
     implementation libs.androidx.preference.ktx
     implementation libs.androidx.work.runtime.ktx
 
+    // Koin
     implementation platform(libs.koin.bom)
     implementation libs.koin.android
     implementation libs.koin.annotations
     implementation libs.koin.core
 
-    implementation libs.apksig
+    // Material
     implementation libs.material
+
+    // Standard Libraries
     implementation libs.okhttp
-    implementation libs.libsu.core
+    implementation libs.coil
+    implementation libs.bouncycastle.bcpkix
 
-    implementation libs.rikkax.appcompat
-    implementation libs.rikkax.compatibility
-    implementation libs.rikkax.lifecycle.resource.livedata
-
-    implementation libs.arsclib
-    implementation libs.boringssl
-
+    // ADB
     implementation(libs.libadb) {
         exclude group: "org.bouncycastle", module: "bcprov-jdk15to18"
     }
 
-    implementation libs.bouncycastle.bcpkix
-    implementation libs.kotlinx.serialization.json
+    // APK
+    implementation libs.apksig
+    implementation libs.arsclib
+
+    // Root/Native/Hidden
+    implementation libs.libsu
     implementation libs.libcxx
     implementation libs.hiddenapibypass
+    implementation libs.boringssl
 
-    implementation libs.appiconloader
+    // Rikka (to remove)
+    implementation libs.rikkax.appcompat
+    implementation libs.rikkax.compatibility
+    implementation libs.rikkax.lifecycle.resource.livedata
+
+    // Debug
     debugImplementation libs.leakcanary.android
 }
 

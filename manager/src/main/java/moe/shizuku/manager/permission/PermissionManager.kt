@@ -1,11 +1,6 @@
 package moe.shizuku.manager.permission
 
-import android.content.pm.PackageInfo
-import android.os.Parcel
-import rikka.shizuku.server.ServerConstants
-import rikka.parcelablelist.ParcelableListSlice
 import rikka.shizuku.Shizuku
-import java.util.*
 
 class PermissionManager {
 
@@ -15,41 +10,15 @@ class PermissionManager {
         private const val MASK_PERMISSION = FLAG_ALLOWED or FLAG_DENIED
     }
 
-    private fun getApplications(): List<PackageInfo> {
-        val data = Parcel.obtain()
-        val reply = Parcel.obtain()
-        return try {
-            data.writeInterfaceToken("moe.shizuku.server.IShizukuService")
-            data.writeInt(-1)
-            try {
-                Shizuku.getBinder()!!.transact(ServerConstants.BINDER_TRANSACTION_getApplications, data, reply, 0)
-            } catch (e: Throwable) {
-                throw RuntimeException(e)
-            }
-            reply.readException()
-            @Suppress("UNCHECKED_CAST")
-            (ParcelableListSlice.CREATOR.createFromParcel(reply) as ParcelableListSlice<PackageInfo>).list!!
-        } finally {
-            reply.recycle()
-            data.recycle()
-        }
-    }
+    fun isGranted(uid: Int): Boolean =
+        (Shizuku.getFlagsForUid(uid, MASK_PERMISSION) and FLAG_ALLOWED) == FLAG_ALLOWED
 
-    fun getPackages(exclude: List<String> = emptyList()): List<PackageInfo> {
-        val packages: MutableList<PackageInfo> = ArrayList()
-        packages.addAll(getApplications())
-        return packages.filter { it.packageName !in exclude }
-    }
+    fun setGranted(uid: Int, grant: Boolean) =
+        if (grant) grant(uid) else revoke(uid)
 
-    fun granted(uid: Int): Boolean {
-        return (Shizuku.getFlagsForUid(uid, MASK_PERMISSION) and FLAG_ALLOWED) == FLAG_ALLOWED
-    }
-
-    fun grant(uid: Int) {
+    private fun grant(uid: Int) =
         Shizuku.updateFlagsForUid(uid, MASK_PERMISSION, FLAG_ALLOWED)
-    }
 
-    fun revoke(uid: Int) {
+    private fun revoke(uid: Int) =
         Shizuku.updateFlagsForUid(uid, MASK_PERMISSION, 0)
-    }
 }

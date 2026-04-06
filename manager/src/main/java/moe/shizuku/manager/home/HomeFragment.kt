@@ -64,7 +64,6 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val stateListener: (ShizukuStateMachine.State) -> Unit = {
         if (stateMachine.isRunning()) {
             homeModel.reload()
-            appsModel.load()
         } else if (stateMachine.isDead()) {
             homeModel.reload()
         }
@@ -102,21 +101,20 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                         homeModel.handleSelectionResult(it)
                     }
                 }
+                launch {
+                    appsModel.uiState.collect { state ->
+                        val grantedCount = state.apps.count { it.isGranted }
+                        binding.authorizedAppsCard.title.text = resources.getQuantityString(
+                            R.plurals.authorized_apps_count,
+                            grantedCount,
+                            grantedCount,
+                        )
+                    }
+                }
             }
         }
 
         homeModel.checkBatteryOptimization()
-
-        appsModel.grantedCount.observe(viewLifecycleOwner) {
-            if (it.status == Status.SUCCESS) {
-                val grantedCount = it.data ?: 0
-                binding.authorizedAppsCard.title.text = resources.getQuantityString(
-                    R.plurals.authorized_apps_count,
-                    grantedCount,
-                    grantedCount,
-                )
-            }
-        }
 
         lifecycleScope.launch {
             if (updateHelper.isCheckForUpdatesEnabled() && updateHelper.isNewUpdateAvailable()) {
@@ -341,7 +339,6 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     override fun onResume() {
         super.onResume()
         homeModel.reload()
-        appsModel.load()
     }
 
     override fun onDestroyView() {

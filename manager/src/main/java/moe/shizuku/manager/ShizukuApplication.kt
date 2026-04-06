@@ -3,8 +3,8 @@ package moe.shizuku.manager
 import android.app.Application
 import android.os.Build
 import com.topjohnwu.superuser.Shell
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.core.di.appModule
+import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -16,7 +16,7 @@ class ShizukuApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        
+
         startKoin {
             androidLogger()
             androidContext(this@ShizukuApplication)

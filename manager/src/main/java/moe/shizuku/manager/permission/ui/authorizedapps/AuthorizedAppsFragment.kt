@@ -2,31 +2,33 @@ package moe.shizuku.manager.permission.ui.authorizedapps
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
-import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.extensions.collectAsEvents
+import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.components.dialog
+import moe.shizuku.manager.core.ui.components.handleDialogResults
 import moe.shizuku.manager.databinding.AuthorizedAppsFragmentBinding
-import moe.shizuku.manager.permission.PermissionManager
-import moe.shizuku.manager.permission.ui.authorizedapps.components.AppViewHolder
-import moe.shizuku.manager.permission.ui.authorizedapps.components.ToggleAllViewHolder
-import org.koin.android.ext.android.inject
+import moe.shizuku.manager.permission.models.AuthorizedAppsEvent
+import moe.shizuku.manager.permission.models.AuthorizedAppsUiState
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import rikka.lifecycle.Status
-import java.util.Objects
 
 class AuthorizedAppsFragment : Fragment(R.layout.authorized_apps_fragment) {
 
     private val viewModel: AuthorizedAppsViewModel by viewModel()
-    private val appViewHolderFactory: AppViewHolder.Factory by inject()
-    private val toggleAllViewHolderFactory: ToggleAllViewHolder.Factory by inject()
+
     private val adapter by lazy {
         AppsAdapter(
-            appViewHolderFactory,
-            toggleAllViewHolderFactory
+            onAppClicked = { viewModel.toggleApp(it) },
+            onToggleAllClicked = { viewModel.toggleAll(it) }
         )
     }
 
@@ -35,44 +37,66 @@ class AuthorizedAppsFragment : Fragment(R.layout.authorized_apps_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.packages.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    it.data?.let { list ->
-                        adapter.updateData(list)
-                    }
-                }
+        binding.list.adapter = adapter
+        binding.list.applySystemBarsPadding(bottom = true)
 
-                Status.ERROR -> {
-                    if (isAdded) {
-                        findNavController().popBackStack()
-                        val tr = it.error
-                        toast(Objects.toString(tr, "unknown"))
-                        tr.printStackTrace()
-                    }
-                }
+        setupCollectors()
+    }
 
-                Status.LOADING -> {
+    private fun setupCollectors() {
+        handleDialogResults { key: AuthorizedAppsEvent.Dialog, success ->
+            if (!success) return@handleDialogResults
 
+            when (key) {
+                AuthorizedAppsEvent.Dialog.ADB_RESTRICTED -> {
+                    // TODO SystemSettingsPage.Developer.launch(requireContext())
                 }
             }
         }
-        viewModel.load()
 
-        val recyclerView = binding.list
-        recyclerView.adapter = adapter
-
-        recyclerView.applySystemBarsPadding(bottom = true)
-
-        adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
-            override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
-                viewModel.load(true)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.uiState.collectLatest { state ->
+                        handleUiState(state)
+                    }
+                }
+                launch {
+                    viewModel.events.collectAsEvents { event ->
+                        handleEvent(event)
+                    }
+                }
             }
-        })
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        adapter.notifyDataSetChanged()
+    private fun handleUiState(state: AuthorizedAppsUiState) {
+        binding.list.isVisible = !state.isAppListEmpty
+        binding.empty.root.isVisible = state.isAppListEmpty
+
+        if (!state.isAppListEmpty) {
+            adapter.updateData(state.apps, state.areAllAppsGranted)
+        }
+    }
+
+    private fun handleEvent(event: AuthorizedAppsEvent) {
+        when (event) {
+            AuthorizedAppsEvent.NotifyAdbRestricted -> {
+                showAdbRestrictedDialog()
+            }
+
+            is AuthorizedAppsEvent.ShowError -> {
+                snackbar(event.error)
+            }
+        }
+    }
+
+    private fun showAdbRestrictedDialog() {
+        dialog()
+            .setTitle(R.string.status_adb_restricted)
+            .setMessage(getString(R.string.status_adb_restricted_message, "PLACEHOLDER")) // TODO
+            .setPositiveButton(R.string.developer_options)
+            .addCancelButton()
+            .show(childFragmentManager, AuthorizedAppsEvent.Dialog.ADB_RESTRICTED)
     }
 }

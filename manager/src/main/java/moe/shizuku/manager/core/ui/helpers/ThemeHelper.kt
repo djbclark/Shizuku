@@ -3,6 +3,7 @@ package moe.shizuku.manager.core.ui.helpers
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
@@ -44,6 +45,7 @@ class ThemeHelper(
     }
 
     init {
+        Log.d("ThemeHelper", "init")
         application.registerActivityLifecycleCallbacks(object :
             Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

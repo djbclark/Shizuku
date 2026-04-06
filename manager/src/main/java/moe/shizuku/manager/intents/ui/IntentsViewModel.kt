@@ -21,7 +21,7 @@ class IntentsViewModel(
         tokenRepository.authTokenFlow
     ) { action, token ->
         IntentsUiState(
-            enabled = true,
+            enabled = true, // TODO link to shared preferences
             intentAction = action,
             authToken = token
         )

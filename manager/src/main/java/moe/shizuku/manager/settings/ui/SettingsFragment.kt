@@ -24,6 +24,7 @@ import moe.shizuku.manager.core.data.preferences.StartMode
 import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
+import moe.shizuku.manager.core.extensions.collectAsEvents
 import moe.shizuku.manager.core.extensions.showSnackbar
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionBottomSheet
@@ -132,7 +133,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     }
                 }
                 launch {
-                    viewModel.events.collect { event ->
+                    viewModel.events.collectAsEvents { event ->
                         handleEvent(event)
                     }
                 }

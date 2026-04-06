@@ -1,48 +1,129 @@
 package moe.shizuku.manager.permission.ui.authorizedapps
 
-import android.content.Context
-import android.content.pm.PackageInfo
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import moe.shizuku.manager.R
+import moe.shizuku.manager.core.android.DeviceUserHelper
 import moe.shizuku.manager.permission.PermissionManager
-import rikka.lifecycle.Resource
+import moe.shizuku.manager.permission.data.AuthorizedAppsRepository
+import moe.shizuku.manager.permission.models.AuthorizedAppsEvent
+import moe.shizuku.manager.permission.models.AuthorizedAppsItem
+import moe.shizuku.manager.permission.models.AuthorizedAppsUiState
+import rikka.shizuku.Shizuku
 
 class AuthorizedAppsViewModel(
-    private val permissionManager: PermissionManager
+    private val authorizedAppsRepository: AuthorizedAppsRepository,
+    private val permissionManager: PermissionManager,
+    private val deviceUserHelper: DeviceUserHelper
 ) : ViewModel() {
 
-    private val _packages = MutableLiveData<Resource<List<PackageInfo>>>()
-    val packages = _packages as LiveData<Resource<List<PackageInfo>>>
+    private val _uiState = MutableStateFlow(AuthorizedAppsUiState())
+    val uiState: StateFlow<AuthorizedAppsUiState> = _uiState.asStateFlow()
 
-    private val _grantedCount = MutableLiveData<Resource<Int>>()
-    val grantedCount = _grantedCount as LiveData<Resource<Int>>
+    private val _events = Channel<AuthorizedAppsEvent>()
+    val events = _events.receiveAsFlow()
 
-    fun load(onlyCount: Boolean = false) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val list: MutableList<PackageInfo> = ArrayList()
-                var count = 0
-                for (pi in permissionManager.getPackages()) {
-                    list.add(pi)
-                    if (permissionManager.granted(
-                            pi.applicationInfo!!.uid
-                        )
-                    ) count++
-                }
-                if (!onlyCount) _packages.postValue(Resource.success(list))
-                _grantedCount.postValue(Resource.success(count))
-            } catch (e: CancellationException) {
-
-            } catch (e: Throwable) {
-                _packages.postValue(Resource.error(e, null))
-                _grantedCount.postValue(Resource.error(e, 0))
-            }
+    init {
+        viewModelScope.launch {
+            _uiState.value = AuthorizedAppsUiState(apps = getAppList())
         }
     }
 
+    private suspend fun getAppList(): List<AuthorizedAppsItem.App> = withContext(Dispatchers.IO) {
+        val appList = authorizedAppsRepository.getAppsDeclaringPermission()
+        val myUserId = deviceUserHelper.myUserId
+
+        appList.map { app ->
+            val displayName = buildString {
+                append(app.label)
+                if (app.userId != myUserId) {
+                    append(" - ")
+                    append(deviceUserHelper.getUserName(app.userId))
+                }
+            }
+
+            AuthorizedAppsItem.App(
+                appInfo = app.info,
+                displayName = displayName,
+                packageName = app.packageName,
+                isGranted = runCatching {
+                    permissionManager.isGranted(app.uid)
+                }.getOrDefault(false)
+            )
+        }.sortedBy { it.displayName }
+    }
+
+    fun toggleApp(item: AuthorizedAppsItem.App) =
+        viewModelScope.launch(Dispatchers.IO) {
+            item.setGranted(!item.isGranted)
+                .onSuccess {
+                    val updatedApps = _uiState.value.apps.map { app ->
+                        if (app == item) app.copy(isGranted = !item.isGranted)
+                        else app
+                    }
+
+                    _uiState.value = _uiState.value.copy(apps = updatedApps)
+                }
+                .onFailure {
+                    if (it is SecurityException) handleSecurityException()
+                    else _events.trySend(
+                        AuthorizedAppsEvent.ShowError(R.string.authorized_apps_error_toggle)
+                    )
+                }
+        }
+
+    fun toggleAll(grant: Boolean) =
+        viewModelScope.launch(Dispatchers.IO) {
+            var anyFailed = false
+            var securityExceptionOccurred = false
+
+            val updatedApps = mutableListOf<AuthorizedAppsItem.App>()
+
+            for (app in uiState.value.apps) {
+                if (securityExceptionOccurred || app.isGranted == grant) {
+                    updatedApps.add(app)
+                    continue
+                }
+
+                app.setGranted(grant).onSuccess {
+                    updatedApps.add(app.copy(isGranted = grant))
+                }.onFailure {
+                    if (it is SecurityException) {
+                        securityExceptionOccurred = true
+                    } else {
+                        anyFailed = true
+                    }
+                    updatedApps.add(app)
+                }
+            }
+
+            _uiState.value = _uiState.value.copy(apps = updatedApps)
+
+            if (securityExceptionOccurred) {
+                handleSecurityException()
+            } else if (anyFailed) {
+                _events.trySend(AuthorizedAppsEvent.ShowError(R.string.authorized_apps_error_toggle_all))
+            }
+        }
+
+    private fun AuthorizedAppsItem.App.setGranted(grant: Boolean) = runCatching {
+        permissionManager.setGranted(appInfo.uid, grant)
+    }
+
+    private fun handleSecurityException() {
+        val uid = runCatching {
+            Shizuku.getUid()
+        }.getOrDefault(-1)
+        if (uid > 0) {
+            _events.trySend(AuthorizedAppsEvent.NotifyAdbRestricted)
+        }
+    }
 }

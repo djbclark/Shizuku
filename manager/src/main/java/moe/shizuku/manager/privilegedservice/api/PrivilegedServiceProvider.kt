@@ -1,4 +1,4 @@
-package moe.shizuku.manager
+package moe.shizuku.manager.privilegedservice.api
 
 import android.os.Bundle
 import android.util.Log
@@ -13,11 +13,11 @@ import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import org.koin.android.ext.android.inject
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuApiConstants.USER_SERVICE_ARG_TOKEN
+import rikka.shizuku.ShizukuApiConstants
 import rikka.shizuku.ShizukuProvider
 import rikka.shizuku.server.ktx.workerHandler
 
-class ShizukuManagerProvider : ShizukuProvider() {
+class PrivilegedServiceProvider : ShizukuProvider() {
 
     companion object {
         private const val EXTRA_BINDER = "moe.shizuku.privileged.api.intent.extra.BINDER"
@@ -38,7 +38,7 @@ class ShizukuManagerProvider : ShizukuProvider() {
     private fun handleSendUserService(extras: Bundle): Bundle? = runCatching {
         extras.classLoader = BinderContainer::class.java.classLoader
 
-        val token = extras.getString(USER_SERVICE_ARG_TOKEN) ?: return null
+        val token = extras.getString(ShizukuApiConstants.USER_SERVICE_ARG_TOKEN) ?: return null
 
         val binder = BundleCompat.getParcelable(
             extras, EXTRA_BINDER, BinderContainer::class.java
@@ -48,7 +48,8 @@ class ShizukuManagerProvider : ShizukuProvider() {
             withTimeout(5000) {
                 stateMachine.asFlow().first { it == ShizukuStateMachine.State.RUNNING }
 
-                val serviceArgs = Bundle().apply { putString(USER_SERVICE_ARG_TOKEN, token) }
+                val serviceArgs =
+                    Bundle().apply { putString(ShizukuApiConstants.USER_SERVICE_ARG_TOKEN, token) }
                 Shizuku.attachUserService(binder, serviceArgs)
 
                 Bundle().apply {

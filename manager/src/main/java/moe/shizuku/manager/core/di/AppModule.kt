@@ -1,9 +1,12 @@
 package moe.shizuku.manager.core.di
 
+import moe.shizuku.manager.autostart.AutoStartManager
+import moe.shizuku.manager.autostart.StartOnBootManager
 import moe.shizuku.manager.core.adb.AdbPortHelper
 import moe.shizuku.manager.core.adb.AdbSession
 import moe.shizuku.manager.core.adb.AdbSettingsManager
-import moe.shizuku.manager.core.android.DeviceHelper
+import moe.shizuku.manager.core.android.DeviceUserHelper
+import moe.shizuku.manager.core.android.KeyguardHelper
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
@@ -11,18 +14,15 @@ import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.core.ui.helpers.ThemeHelper
 import moe.shizuku.manager.core.utils.ApkSigner
 import moe.shizuku.manager.core.utils.ApkUtils
-import moe.shizuku.manager.core.utils.AppIconCache
 import moe.shizuku.manager.core.utils.EnvironmentUtils
-import moe.shizuku.manager.permission.ShizukuSystemApis
-import moe.shizuku.manager.core.utils.UserHandleCompat
 import moe.shizuku.manager.home.HomeViewModel
 import moe.shizuku.manager.intents.data.TokenRepository
 import moe.shizuku.manager.intents.ui.IntentsViewModel
 import moe.shizuku.manager.permission.PermissionManager
+import moe.shizuku.manager.permission.data.AuthorizedAppsRepository
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.autostart.AutoStartManager
-import moe.shizuku.manager.autostart.StartOnBootManager
+import moe.shizuku.manager.privilegedservice.api.UserServiceManager
 import moe.shizuku.manager.privilegedservice.ui.pairing.AdbPairingViewModel
 import moe.shizuku.manager.privilegedservice.ui.start.StartViewModel
 import moe.shizuku.manager.settings.ui.SettingsViewModel
@@ -35,52 +35,51 @@ import moe.shizuku.manager.updater.data.ReleaseRepository
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.WatchdogManager
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
-import moe.shizuku.manager.permission.ui.authorizedapps.components.AppViewHolder
-import moe.shizuku.manager.permission.ui.authorizedapps.components.ToggleAllViewHolder
-import moe.shizuku.manager.permission.ui.authorizedapps.AppsAdapter
+import org.koin.core.module.dsl.createdAtStart
+import org.koin.core.module.dsl.withOptions
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
 
 val appModule = module {
-    single<PreferencesRepository>()
-    single<PowerManagerHelper>()
-    single<WatchdogManager>()
-    single<StartOnBootManager>()
-    single<ReleaseRemoteDataSource>()
-    single<ReleaseRepository>()
-    single<LocaleHelper>()
-    single<ThemeHelper>()
-    single<EnvironmentUtils>()
-    single<TokenRepository>()
-    single<UpdateHelper>()
-    single<ShizukuStateMachine>()
-    single<ShizukuSystemApis>()
-    single<PermissionManager>()
-    single<AutoStartManager>()
-    single<PrivilegedServiceManager>()
-    single<AppIconCache>()
+    single<AdbPortHelper>()
+    single<AdbSettingsManager>()
     single<ApkSigner>()
     single<ApkUtils>()
-    single<DeviceHelper>()
-    single<AdbSettingsManager>()
-    single<AdbPortHelper>()
+    single<AuthorizedAppsRepository>()
+    single<AutoStartManager>()
+    single<DeviceUserHelper>()
+    single<EnvironmentUtils>()
+    single<KeyguardHelper>()
+    single<LocaleHelper>()
+    single<PermissionManager>()
+    single<PowerManagerHelper>()
+    single<PreferencesRepository>()
+    single<PrivilegedServiceManager>()
+    single<ReleaseRemoteDataSource>()
+    single<ReleaseRepository>()
     single<ShellBinderRequestHandler>()
-    single<WatchdogNotifications>()
-    single<UserHandleCompat>()
+    single<ShizukuStateMachine>()
+    single<StartOnBootManager>()
     single<TcpManager>()
+    single<ThemeHelper>() withOptions {
+        createdAtStart()
+    }
+    single<TokenRepository>()
+    single<UpdateHelper>()
+    single<UserServiceManager>()
+    single<WatchdogManager>()
+    single<WatchdogNotifications>()
 
-    factory<AppViewHolder.Factory>()
-    factory<ToggleAllViewHolder.Factory>()
     factory<AdbSession.Factory>()
 
-    viewModel<SettingsViewModel>()
-    viewModel<ListSelectionViewModel>()
+    viewModel<AdbPairingViewModel>()
+    viewModel<AuthorizedAppsViewModel>()
     viewModel<HomeViewModel>()
+    viewModel<IntentsViewModel>()
+    viewModel<ListSelectionViewModel>()
+    viewModel<SettingsViewModel>()
     viewModel<StartViewModel>()
     viewModel<StealthViewModel>()
-    viewModel<AuthorizedAppsViewModel>()
-    viewModel<IntentsViewModel>()
-    viewModel<AdbPairingViewModel>()
 }

@@ -352,5 +352,7 @@
     <string name="export_failed">Export failed</string>
     <string name="close">Close</string>
     <string name="tcp_error_opening">Couldn\'t open TCP port</string>
+    <string name="authorized_apps_error_toggle_all">Failed to toggle some apps.</string>
+    <string name="authorized_apps_error_toggle">Couldn\'t toggle permission</string>
 
 </resources>

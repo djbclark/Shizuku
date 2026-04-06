@@ -32,14 +32,11 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.system.Os;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -82,36 +79,11 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
                 packageName = dirName;
             }
 
-            LOGGER.i("Manager package name is " + packageName);
+            LOGGER.d("Manager package name is " + packageName);
         } catch (Throwable tr) {
             LOGGER.w("Couldn't get manager package name from CLASSPATH", tr);
         }
         MANAGER_APPLICATION_ID = packageName;
-    }
-
-
-    public static void main(String[] args) {
-        DdmHandleAppName.setAppName("shizuku_server", 0);
-        RishConfig.setLibraryPath(System.getProperty("shizuku.library.path"));
-
-        Looper.prepareMainLooper();
-        new ShizukuService();
-        Looper.loop();
-    }
-
-    private static void waitSystemService(String name) {
-        while (ServiceManager.getService(name) == null) {
-            try {
-                LOGGER.i("service " + name + " is not started, wait 1s.");
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                LOGGER.w(e.getMessage(), e);
-            }
-        }
-    }
-
-    public static ApplicationInfo getManagerApplicationInfo() {
-        return PackageManagerApis.getApplicationInfoNoThrow(MANAGER_APPLICATION_ID, 0, 0);
     }
 
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -120,7 +92,6 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
     private final ShizukuClientManager clientManager;
     private final ShizukuConfigManager configManager;
     private final int managerAppId;
-
     public ShizukuService() {
         super();
 
@@ -157,6 +128,141 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
             sendBinderToClient();
             sendBinderToManager();
         });
+    }
+
+    public static void main(String[] args) {
+        DdmHandleAppName.setAppName("shizuku_server", 0);
+        RishConfig.setLibraryPath(System.getProperty("shizuku.library.path"));
+
+        Looper.prepareMainLooper();
+        new ShizukuService();
+        Looper.loop();
+    }
+
+    private static void waitSystemService(String name) {
+        while (ServiceManager.getService(name) == null) {
+            try {
+                LOGGER.i("service " + name + " is not started, wait 1s.");
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                LOGGER.w(e.getMessage(), e);
+            }
+        }
+    }
+
+    public static ApplicationInfo getManagerApplicationInfo() {
+        return PackageManagerApis.getApplicationInfoNoThrow(MANAGER_APPLICATION_ID, 0, 0);
+    }
+
+    private static void sendBinderToClient(Binder binder, int userId) {
+        try {
+            Stream<PackageInfo> packages =
+                    PackageManagerApis.getInstalledPackagesNoThrow(
+                                    PackageManager.GET_PERMISSIONS, userId
+                            )
+                            .stream()
+                            .filter(pi -> pi != null && pi.requestedPermissions != null)
+                            .filter(pi -> ArraysKt.contains(pi.requestedPermissions, PERMISSION));
+
+            LOGGER.i("sending binders");
+            packages
+                    .parallel()
+                    .forEach(pi -> {
+                        sendBinderToUserApp(binder, pi.packageName, userId);
+                    });
+            LOGGER.i("sent binders");
+        } catch (Throwable tr) {
+            LOGGER.e("exception when call getInstalledPackages", tr);
+        }
+    }
+
+    private static void sendBinderToManager(Binder binder) {
+        for (int userId : UserManagerApis.getUserIdsNoThrow()) {
+            sendBinderToManager(binder, userId);
+        }
+    }
+
+    static void sendBinderToManager(Binder binder, int userId) {
+        boolean success = sendBinderToUserApp(binder, MANAGER_APPLICATION_ID, userId);
+        if (!success) {
+            // For unknown reason, sometimes this could happens
+            // Kill Shizuku app and try again could work
+            try {
+                LOGGER.e("kill %s in user %d and try again", MANAGER_APPLICATION_ID, userId);
+                ActivityManagerApis.forceStopPackageNoThrow(MANAGER_APPLICATION_ID, userId);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                }
+                success = sendBinderToUserApp(binder, MANAGER_APPLICATION_ID, userId);
+                if (success) {
+                    LOGGER.e("retry succeeded");
+                } else {
+                    LOGGER.e("retry failed");
+                }
+            } catch (Throwable tr) {
+                LOGGER.e(tr, "retry failed");
+            }
+        }
+    }
+
+    static boolean sendBinderToUserApp(Binder binder, String packageName, int userId) {
+        try {
+            DeviceIdleControllerApis.addPowerSaveTempWhitelistApp(packageName, 30 * 1000, userId,
+                    316/* PowerExemptionManager#REASON_SHELL */, "shell");
+        } catch (Throwable tr) {
+            LOGGER.e(tr, "Failed to add %d:%s to power save temp whitelist", userId, packageName);
+        }
+
+        String name = packageName + ".shizuku";
+        IContentProvider provider = null;
+
+        /*
+         When we pass IBinder through binder (and really crossed process), the receive side (here is system_server process)
+         will always get a new instance of android.os.BinderProxy.
+
+         In the implementation of getContentProviderExternal and removeContentProviderExternal, received
+         IBinder is used as the key of a HashMap. But hashCode() is not implemented by BinderProxy, so
+         removeContentProviderExternal will never work.
+
+         Luckily, we can pass null. When token is token, count will be used.
+         */
+        IBinder token = null;
+
+        try {
+            provider = ActivityManagerApis.getContentProviderExternal(name, userId, token, name);
+            if (provider == null) {
+                LOGGER.e("provider is null %s %d", name, userId);
+                return false;
+            }
+            if (!provider.asBinder().pingBinder()) {
+                LOGGER.e("provider is dead %s %d", name, userId);
+                return false;
+            }
+
+            Bundle extra = new Bundle();
+            extra.putParcelable("moe.shizuku.privileged.api.intent.extra.BINDER", new BinderContainer(binder));
+
+            Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
+            if (reply != null) {
+                LOGGER.i("send binder to user app %s in user %d", packageName, userId);
+                return true;
+            } else {
+                LOGGER.w("failed to send binder to user app %s in user %d", packageName, userId);
+                return false;
+            }
+        } catch (Throwable tr) {
+            LOGGER.e(tr, "failed to send binder to user app %s in user %d", packageName, userId);
+            return false;
+        } finally {
+            if (provider != null) {
+                try {
+                    ActivityManagerApis.removeContentProviderExternal(name, token);
+                } catch (Throwable tr) {
+                    LOGGER.w(tr, "removeContentProviderExternal");
+                }
+            }
+        }
     }
 
     @Override
@@ -372,7 +478,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         }
     }
 
-    private int  getFlagsForUidInternal(int uid, int mask, boolean allowRuntimePermission) {
+    private int getFlagsForUidInternal(int uid, int mask, boolean allowRuntimePermission) {
         ShizukuConfig.PackageEntry entry = configManager.find(uid);
         if (entry != null) {
             return entry.flags & mask;
@@ -513,118 +619,8 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         }
     }
 
-    private static void sendBinderToClient(Binder binder, int userId) {
-        try {
-            Stream<PackageInfo> packages =
-                PackageManagerApis.getInstalledPackagesNoThrow(
-                    PackageManager.GET_PERMISSIONS, userId
-                )
-                .stream()
-                .filter(pi -> pi != null && pi.requestedPermissions != null)
-                .filter(pi -> ArraysKt.contains(pi.requestedPermissions, PERMISSION));
-
-            LOGGER.i("sending binders");
-            packages
-                .parallel()
-                .forEach(pi -> {
-                    sendBinderToUserApp(binder, pi.packageName, userId);
-                });
-            LOGGER.i("sent binders");
-        } catch (Throwable tr) {
-            LOGGER.e("exception when call getInstalledPackages", tr);
-        }
-    }
-
     void sendBinderToManager() {
         sendBinderToManager(this);
-    }
-
-    private static void sendBinderToManager(Binder binder) {
-        for (int userId : UserManagerApis.getUserIdsNoThrow()) {
-            sendBinderToManager(binder, userId);
-        }
-    }
-
-    static void sendBinderToManager(Binder binder, int userId) {
-        boolean success = sendBinderToUserApp(binder, MANAGER_APPLICATION_ID, userId);
-        if (!success) {
-            // For unknown reason, sometimes this could happens
-            // Kill Shizuku app and try again could work
-            try {
-                LOGGER.e("kill %s in user %d and try again", MANAGER_APPLICATION_ID, userId);
-                ActivityManagerApis.forceStopPackageNoThrow(MANAGER_APPLICATION_ID, userId);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {}
-                success = sendBinderToUserApp(binder, MANAGER_APPLICATION_ID, userId);
-                if (success) {
-                    LOGGER.e("retry succeeded");
-                } else {
-                    LOGGER.e("retry failed");
-                }
-            } catch (Throwable tr) {
-                LOGGER.e(tr, "retry failed");
-            }
-        }
-    }
-
-    static boolean sendBinderToUserApp(Binder binder, String packageName, int userId) {
-        try {
-            DeviceIdleControllerApis.addPowerSaveTempWhitelistApp(packageName, 30 * 1000, userId,
-                    316/* PowerExemptionManager#REASON_SHELL */, "shell");
-        } catch (Throwable tr) {
-            LOGGER.e(tr, "Failed to add %d:%s to power save temp whitelist", userId, packageName);
-        }
-
-        String name = packageName + ".shizuku";
-        IContentProvider provider = null;
-
-        /*
-         When we pass IBinder through binder (and really crossed process), the receive side (here is system_server process)
-         will always get a new instance of android.os.BinderProxy.
-
-         In the implementation of getContentProviderExternal and removeContentProviderExternal, received
-         IBinder is used as the key of a HashMap. But hashCode() is not implemented by BinderProxy, so
-         removeContentProviderExternal will never work.
-
-         Luckily, we can pass null. When token is token, count will be used.
-         */
-        IBinder token = null;
-
-        try {
-            provider = ActivityManagerApis.getContentProviderExternal(name, userId, token, name);
-            if (provider == null) {
-                LOGGER.e("provider is null %s %d", name, userId);
-                return false;
-            }
-            if (!provider.asBinder().pingBinder()) {
-                LOGGER.e("provider is dead %s %d", name, userId);
-                return false;
-            }
-
-            Bundle extra = new Bundle();
-            extra.putParcelable("moe.shizuku.privileged.api.intent.extra.BINDER", new BinderContainer(binder));
-
-            Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
-            if (reply != null) {
-                LOGGER.i("send binder to user app %s in user %d", packageName, userId);
-                return true;
-            } else {
-                LOGGER.w("failed to send binder to user app %s in user %d", packageName, userId);
-                return false;
-            }
-        } catch (Throwable tr) {
-            LOGGER.e(tr, "failed to send binder to user app %s in user %d", packageName, userId);
-            return false;
-        } finally {
-            if (provider != null) {
-                try {
-                    ActivityManagerApis.removeContentProviderExternal(name, token);
-                } catch (Throwable tr) {
-                    LOGGER.w(tr, "removeContentProviderExternal");
-                }
-            }
-        }
     }
 
     // ------ Sui only ------

@@ -8,7 +8,7 @@ import android.content.IntentFilter
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-class DeviceHelper(private val context: Context) {
+class KeyguardHelper(private val context: Context) {
     val isKeyguardLocked: Boolean
         get() {
             val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager

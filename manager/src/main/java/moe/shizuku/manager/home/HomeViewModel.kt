@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.core.android.settings.PowerManagerHelper
 import moe.shizuku.manager.core.data.preferences.PreferencesRepository
 import moe.shizuku.manager.core.utils.EnvironmentUtils
-import moe.shizuku.manager.permission.ShizukuSystemApis
 import moe.shizuku.manager.home.models.HelpItem
 import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.privilegedservice.models.ServiceStatus
@@ -56,7 +55,8 @@ class HomeViewModel(
         }
 
         // TODO disable authorized apps when running unsupported version
-        val unsupportedVersion = Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)
+        val unsupportedVersion =
+            Shizuku.isPreV11() || (Shizuku.getVersion() == 11 && Shizuku.getServerPatchVersion() < 3)
         val uid = Shizuku.getUid()
         val apiVersion = Shizuku.getVersion()
         val patchVersion = Shizuku.getServerPatchVersion().let { if (it < 0) 0 else it }
