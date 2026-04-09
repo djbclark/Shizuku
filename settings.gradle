@@ -10,6 +10,18 @@ pluginManagement {
     }
 }
 
+plugins {
+    id "com.android.settings" version "9.1.0"
+}
+
+android {
+    compileSdk = 36
+    minSdk = 24
+    targetSdk = 36
+    ndkVersion = "29.0.14206865"
+    buildToolsVersion = "36.0.0"
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -28,35 +40,4 @@ dependencyResolutionManagement {
 
 include ":server", ":starter", ":shell", ":manager", ":hidden-api"
 
-def root = "api"
-
-def propFile = file("local.properties")
-def props = new Properties()
-
-if (propFile.canRead()) {
-    props.load(new FileInputStream(propFile))
-
-    if (props != null) {
-        if (props["api.useLocal"] == "true") {
-            root = props["api.dir"]
-        }
-    }
-}
-
-include ":aidl"
-project(":aidl").projectDir = file("$root${File.separator}aidl")
-
-include ":rish"
-project(":rish").projectDir = file("$root${File.separator}rish")
-
-include ":shared"
-project(":shared").projectDir = file("$root${File.separator}shared")
-
-include ":api"
-project(":api").projectDir = file("$root${File.separator}api")
-
-include ":provider"
-project(":provider").projectDir = file("$root${File.separator}provider")
-
-include ":server-shared"
-project(":server-shared").projectDir = file("$root${File.separator}server-shared")
+includeBuild("api")

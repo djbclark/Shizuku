@@ -116,11 +116,13 @@ configurations.configureEach {
 dependencies {
     // Modules
     implementation project(":server")
-    implementation project(":rish")
     implementation project(":starter")
-    implementation project(":api")
-    implementation project(":provider")
     compileOnly project(":hidden-api")
+
+    // API Submodule
+    implementation(libs.api)
+    implementation(libs.api.provider)
+    implementation(libs.api.rish)
 
     // Kotlin
     implementation libs.kotlinx.coroutines.core

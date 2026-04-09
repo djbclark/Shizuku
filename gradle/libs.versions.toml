@@ -18,11 +18,11 @@ coil = "3.4.0"
 gson = "2.13.2"
 hidden-api = "4.4.0"
 hiddenapibypass = "6.1"
-koin = "4.2.0"
+koin = "4.2.1"
 koin-plugin = "0.6.2"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
-kotlinx-serialization = "1.10.0"
+kotlinx-serialization = "1.11.0"
 leakcanary = "2.14"
 libcxx = "29.0.14206865"
 libsu = "6.0.0"
@@ -47,6 +47,12 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidx-preference" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
+api = { group = "dev.rikka.shizuku", name = "api" }
+api-aidl = { group = "dev.rikka.shizuku", name = "aidl" }
+api-rish = { group = "dev.rikka.shizuku", name = "rish" }
+api-provider = { group = "dev.rikka.shizuku", name = "provider" }
+api-server-shared = { group = "dev.rikka.shizuku", name = "server-shared" }
+api-shared = { group = "dev.rikka.shizuku", name = "shared" }
 apksig = { group = "com.android.tools.build", name = "apksig", version.ref = "apksig" }
 arsclib = { group = "io.github.reandroid", name = "ARSCLib", version.ref = "arsclib" }
 boringssl = { group = "io.github.vvb2060.ndk", name = "boringssl", version.ref = "boringssl" }

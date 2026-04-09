@@ -14,11 +14,14 @@ android {
 }
 
 dependencies {
-    implementation project(":shared")
-    implementation project(":server-shared")
-    compileOnly project(":provider")
+    implementation(libs.api.server.shared)
+    implementation(libs.api.shared)
+    compileOnly(libs.api.provider)
+
     implementation libs.androidx.annotation
+
+    implementation libs.refine.runtime
+
     implementation libs.hidden.compat
     compileOnly libs.hidden.stub
-    implementation libs.refine.runtime
 }
