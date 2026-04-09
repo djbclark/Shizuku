@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
-import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.home.models.HelpItem
 import moe.shizuku.manager.home.models.HomeEvent
+import moe.shizuku.manager.permission.PermissionManager
 import moe.shizuku.manager.privilegedservice.models.ServiceStatus
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import rikka.lifecycle.Resource
 import rikka.shizuku.Shizuku
 
@@ -25,7 +25,7 @@ class HomeViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val powerManagerHelper: PowerManagerHelper,
     private val stateMachine: ShizukuStateMachine,
-    private val environmentUtils: EnvironmentUtils
+    private val permissionManager: PermissionManager
 ) : ViewModel() {
 
     private val _serviceStatus = MutableLiveData<Resource<ServiceStatus>>()
@@ -34,11 +34,8 @@ class HomeViewModel(
     private val _events = Channel<HomeEvent>()
     val events = _events.receiveAsFlow()
 
-    private val shizukuPermissionGroup = "moe.shizuku.manager.permission-group.API"
-    private val shizukuPermission = "moe.shizuku.manager.permission.API_V23"
-
     private fun load(): ServiceStatus {
-        environmentUtils.isPermissionOwner(shizukuPermissionGroup, shizukuPermission)
+        permissionManager.isPermissionOwner()
             .onSuccess { isOwner ->
                 if (!isOwner) {
                     _events.trySend(HomeEvent.ShowUninstallDialog)

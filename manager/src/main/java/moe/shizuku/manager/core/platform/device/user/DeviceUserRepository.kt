@@ -1,4 +1,4 @@
-package moe.shizuku.manager.core.platform.deviceuser
+package moe.shizuku.manager.core.platform.device.user
 
 import android.content.pm.UserInfo
 import android.system.Os

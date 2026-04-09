@@ -38,8 +38,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_outline_info_24"
-                    android:tint="?colorOnSecondaryContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnSecondaryContainer" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -73,8 +73,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_help_outline_24dp"
-                    android:tint="?colorOnSecondaryContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnSecondaryContainer" />
 
                 <TextView
                     style="@style/TutorialText"
@@ -105,8 +105,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_warning_24"
-                    android:tint="?colorOnErrorContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnErrorContainer" />
 
                 <TextView
                     style="@style/TutorialText"
@@ -131,14 +131,13 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
-                android:padding="4dp"
                 android:src="@drawable/ic_numeric_1_circle_outline_24"
-                android:tint="?android:textColorSecondary"
-                android:tintMode="src_in" />
+                android:tintMode="src_in"
+                app:tint="?android:textColorSecondary" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -173,14 +172,13 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
-                android:padding="4dp"
                 android:src="@drawable/ic_numeric_2_circle_outline_24"
-                android:tint="?android:textColorSecondary"
-                android:tintMode="src_in" />
+                android:tintMode="src_in"
+                app:tint="?android:textColorSecondary" />
 
             <TextView
                 style="@style/TutorialText"
@@ -199,14 +197,13 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:importantForAccessibility="no"
-                android:padding="4dp"
                 android:src="@drawable/ic_numeric_3_circle_outline_24"
-                android:tint="?android:textColorSecondary"
-                android:tintMode="src_in" />
+                android:tintMode="src_in"
+                app:tint="?android:textColorSecondary" />
 
             <TextView
                 style="@style/TutorialText"

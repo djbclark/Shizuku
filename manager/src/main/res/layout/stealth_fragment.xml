@@ -37,8 +37,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_warning_24"
-                    android:tint="?colorOnErrorContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnErrorContainer" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -77,8 +77,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_help_outline_24dp"
-                    android:tint="?colorOnSecondaryContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnSecondaryContainer" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -116,8 +116,8 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_help_outline_24dp"
-                    android:tint="?colorOnSecondaryContainer"
-                    android:tintMode="src_in" />
+                    android:tintMode="src_in"
+                    app:tint="?colorOnSecondaryContainer" />
 
                 <TextView
                     style="@style/TutorialText"

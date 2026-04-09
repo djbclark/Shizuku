@@ -4,11 +4,12 @@ import moe.shizuku.manager.autostart.AutoStartManager
 import moe.shizuku.manager.autostart.StartOnBootManager
 import moe.shizuku.manager.core.locale.data.LocaleMigrator
 import moe.shizuku.manager.core.locale.data.LocaleRepository
+import moe.shizuku.manager.core.locale.data.LocaleXmlDataSource
 import moe.shizuku.manager.core.platform.KeyguardHelper
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSession
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
-import moe.shizuku.manager.core.platform.deviceuser.DeviceUserRepository
+import moe.shizuku.manager.core.platform.device.user.DeviceUserRepository
 import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
 import moe.shizuku.manager.core.platform.userservice.UserServiceRepository
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
@@ -33,7 +34,7 @@ import moe.shizuku.manager.tcpmode.TcpManager
 import moe.shizuku.manager.updater.UpdateHelper
 import moe.shizuku.manager.updater.data.ReleaseRemoteDataSource
 import moe.shizuku.manager.updater.data.ReleaseRepository
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.WatchdogManager
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
 import org.koin.core.module.dsl.createdAtStart
@@ -55,6 +56,7 @@ val appModule = module {
     single<KeyguardHelper>()
     single<LocaleMigrator>()
     single<LocaleRepository>()
+    single<LocaleXmlDataSource>()
     single<PermissionManager>()
     single<PowerManagerHelper>()
     single<PreferencesRepository>()

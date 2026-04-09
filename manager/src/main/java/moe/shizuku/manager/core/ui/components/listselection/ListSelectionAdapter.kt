@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.RadioButtonListItemBinding
 
 class ListSelectionAdapter(

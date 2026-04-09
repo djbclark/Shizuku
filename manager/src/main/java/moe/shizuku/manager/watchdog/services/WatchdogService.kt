@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import moe.shizuku.manager.autostart.AutoStartManager
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
 import org.koin.android.ext.android.inject
 

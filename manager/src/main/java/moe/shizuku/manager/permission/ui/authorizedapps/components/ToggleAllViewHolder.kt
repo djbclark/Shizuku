@@ -2,7 +2,7 @@ package moe.shizuku.manager.permission.ui.authorizedapps.components
 
 import androidx.recyclerview.widget.RecyclerView
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.AppListToggleAllBinding
 import moe.shizuku.manager.permission.models.AuthorizedAppsItem
 

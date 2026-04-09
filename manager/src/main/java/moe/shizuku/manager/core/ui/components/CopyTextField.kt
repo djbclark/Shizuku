@@ -5,7 +5,7 @@ import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import moe.shizuku.manager.core.extensions.copyToClipboard
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.CopyTextFieldBinding
 
 class CopyTextField @JvmOverloads constructor(

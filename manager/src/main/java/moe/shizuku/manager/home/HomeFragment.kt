@@ -21,7 +21,7 @@ import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.isTelevision
 import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.snackbar
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
 import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
@@ -39,7 +39,7 @@ import moe.shizuku.manager.privilegedservice.models.PreStartCheck.Success
 import moe.shizuku.manager.privilegedservice.models.ServiceStatus
 import moe.shizuku.manager.privilegedservice.ui.pairing.showAccessibilityDialog
 import moe.shizuku.manager.updater.UpdateHelper
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import rikka.lifecycle.Status

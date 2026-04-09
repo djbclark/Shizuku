@@ -121,7 +121,7 @@
             android:foregroundServiceType="shortService" />
 
         <service
-            android:name=".adb.AdbPairingAccessibilityService"
+            android:name=".privilegedservice.services.AdbPairingAccessibilityService"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             tools:ignore="AccessibilityPolicy">

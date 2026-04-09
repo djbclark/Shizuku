@@ -15,10 +15,10 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:importantForAccessibility="no"
-        android:tint="?android:textColorSecondary"
         app:layout_constraintBottom_toBottomOf="@id/label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/label"
+        app:tint="?android:textColorSecondary"
         tools:src="@drawable/ic_terminal_24" />
 
     <TextView
@@ -63,16 +63,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/ic_server_ok_24dp"
-            android:tint="?colorPrimary"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="?colorPrimary" />
 
         <ImageView
             android:id="@+id/status_failed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/ic_server_error_24dp"
-            android:tint="?colorError"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="?colorError" />
     </FrameLayout>
 
     <TextView

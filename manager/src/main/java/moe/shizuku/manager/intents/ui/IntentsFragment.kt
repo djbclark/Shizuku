@@ -11,7 +11,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.IntentsFragmentBinding
 import moe.shizuku.manager.intents.models.IntentsUiState
 import org.koin.androidx.viewmodel.ext.android.viewModel

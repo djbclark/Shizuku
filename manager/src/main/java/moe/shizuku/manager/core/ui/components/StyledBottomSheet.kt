@@ -12,7 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.setNavBarScrim
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.StyledBottomSheetBinding
 
 abstract class StyledBottomSheet : BottomSheetDialogFragment(R.layout.styled_bottom_sheet) {

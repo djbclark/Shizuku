@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.openUrl
 import moe.shizuku.manager.core.extensions.setAppIcon
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.AboutDialogBinding
 import moe.shizuku.manager.updater.UpdateHelper
 import org.koin.android.ext.android.inject

@@ -17,9 +17,9 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.showSnackbar
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.platform.device.RomInfo
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.TerminalAppsFragmentBinding
-import rikka.compatibility.DeviceCompatibility
 import java.io.IOException
 
 private const val SH_NAME = "rish"
@@ -41,7 +41,7 @@ class TerminalAppsFragment : Fragment(R.layout.terminal_apps_fragment) {
         binding.apply {
             root.applySystemBarsPadding(bottom = true, start = true, end = true)
 
-            miui.isVisible = DeviceCompatibility.isMiui()
+            miui.isVisible = RomInfo.isMiui
 
             button1.setOnClickListener { openFolderPicker.launch(null) }
             command2.text = COPY_CMD

@@ -1,4 +1,4 @@
-package moe.shizuku.manager.utils
+package moe.shizuku.manager.privilegedservice.data
 
 import android.content.Context
 import android.provider.Settings

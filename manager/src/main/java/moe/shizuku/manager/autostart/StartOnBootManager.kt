@@ -36,7 +36,7 @@ class StartOnBootManager(
         get() {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ||
                     context.isTelevision ||
-                    EnvironmentUtils.Companion.isRooted()
+                    EnvironmentUtils.isRooted()
         }
 
     val adbAuthNeverSaved: Boolean

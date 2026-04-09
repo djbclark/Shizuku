@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.core.platform.adb.client.AdbInvalidPairingCodeException
 import moe.shizuku.manager.core.platform.adb.client.AdbKey
 import moe.shizuku.manager.core.platform.adb.client.AdbKeyException

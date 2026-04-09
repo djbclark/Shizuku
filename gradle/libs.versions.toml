@@ -1,6 +1,6 @@
 [versions]
 agp = "9.1.0"
-androidx-annotation = "1.9.1"
+androidx-annotation = "1.10.0"
 androidx-browser = "1.10.0"
 androidx-core = "1.18.0"
 androidx-documentfile = "1.1.0"
@@ -19,7 +19,7 @@ gson = "2.13.2"
 hidden-api = "4.4.0"
 hiddenapibypass = "6.1"
 koin = "4.2.0"
-koin-plugin = "0.4.1"
+koin-plugin = "0.6.2"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
 kotlinx-serialization = "1.10.0"
@@ -29,8 +29,6 @@ libsu = "6.0.0"
 material = "1.14.0-alpha10"
 okhttp = "5.3.2"
 refine = "4.4.0"
-rikkax-appcompat = "1.6.1"
-rikkax-compatibility = "2.0.0"
 rikkax-lifecycle = "1.0.1"
 rikkax-parcelablelist = "2.0.1"
 libadb = "3.1.1"
@@ -74,8 +72,6 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 refine-annotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "refine" }
 refine-annotation-processor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "refine" }
 refine-runtime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "refine" }
-rikkax-appcompat = { group = "dev.rikka.rikkax.appcompat", name = "appcompat", version.ref = "rikkax-appcompat" }
-rikkax-compatibility = { group = "dev.rikka.rikkax.compatibility", name = "compatibility", version.ref = "rikkax-compatibility" }
 rikkax-lifecycle-resource-livedata = { group = "dev.rikka.rikkax.lifecycle", name = "lifecycle-resource-livedata", version.ref = "rikkax-lifecycle" }
 rikkax-parcelablelist = { group = "dev.rikka.rikkax.parcelablelist", name = "parcelablelist", version.ref = "rikkax-parcelablelist" }
 

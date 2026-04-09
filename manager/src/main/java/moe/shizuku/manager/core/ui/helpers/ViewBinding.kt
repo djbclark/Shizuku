@@ -1,4 +1,4 @@
-package moe.shizuku.manager.core.extensions
+package moe.shizuku.manager.core.ui.helpers
 
 import android.view.LayoutInflater
 import android.view.View

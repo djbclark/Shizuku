@@ -21,7 +21,7 @@ import moe.shizuku.manager.core.utils.runnable.RunnableSequence
 import moe.shizuku.manager.privilegedservice.models.PreStartCheck
 import moe.shizuku.manager.privilegedservice.models.StartStep
 import moe.shizuku.manager.tcpmode.TcpManager
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import rikka.shizuku.Shizuku
 import java.io.File
 import kotlin.coroutines.resume

@@ -25,7 +25,7 @@ import moe.shizuku.manager.core.extensions.applySystemBarsMargin
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.dp
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.StealthFragmentBinding
 import moe.shizuku.manager.core.utils.ApkUtils
 import org.koin.android.ext.android.inject
@@ -60,9 +60,7 @@ class StealthFragment : Fragment(R.layout.stealth_fragment) {
                         fab.setOnClickListener { onClick(action) }
                     }
 
-                    is UiState.Loading -> {
-                        null
-                    }
+                    is UiState.Loading -> {}
 
                     is UiState.Pending -> {
                         try {

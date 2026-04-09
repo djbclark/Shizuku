@@ -110,7 +110,6 @@ tasks.withType(CompileArtProfileTask.class).configureEach {
     enabled = false
 }
 configurations.configureEach {
-    exclude group: "androidx.appcompat", module: "appcompat"
     exclude group: "androidx.profileinstaller", module: "profileinstaller"
 }
 
@@ -177,8 +176,6 @@ dependencies {
     implementation libs.boringssl
 
     // Rikka TODO remove
-    implementation libs.rikkax.appcompat
-    implementation libs.rikkax.compatibility
     implementation libs.rikkax.lifecycle.resource.livedata
 
     // Debug

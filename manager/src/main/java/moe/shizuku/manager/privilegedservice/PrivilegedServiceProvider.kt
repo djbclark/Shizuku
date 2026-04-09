@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import moe.shizuku.api.BinderContainer
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import org.koin.android.ext.android.inject
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuApiConstants

@@ -25,7 +25,7 @@ import moe.shizuku.manager.core.preferences.models.UpdateChannel
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.tcpmode.TcpManager
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,

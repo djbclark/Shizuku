@@ -17,10 +17,10 @@ import androidx.fragment.app.Fragment
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.platform.device.RomInfo
 import moe.shizuku.manager.core.platform.settings.SystemSettingsHelper
 import moe.shizuku.manager.databinding.PairingFragmentBinding
 import moe.shizuku.manager.privilegedservice.services.AdbPairingService
-import rikka.compatibility.DeviceCompatibility
 
 @RequiresApi(Build.VERSION_CODES.R)
 class PairingFragment : Fragment() {
@@ -49,9 +49,7 @@ class PairingFragment : Fragment() {
         }
 
         binding.apply {
-            if (DeviceCompatibility.isMiui()) {
-                miui.isVisible = true
-            }
+            miui.isVisible = RomInfo.isMiui
 
             developerOptions.setOnClickListener {
                 SystemSettingsHelper.launchOrHighlightWirelessDebugging(requireContext())

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- To translators: you can leave your here -->
+    <!-- Home - Status -->
+    <!-- Home - Adb -->
+    <!-- Home - Wireless Adb -->
+    <!-- Adb -->
+    <string name="adb_pairing_requires_multi_window">Harap pindah ke mode layar pisah (split-screen)
+        terlebih dahulu.</string>
+    <string name="adb_pairing_requires_multi_window_reason">Sistem mengharuskan dialog pemasangan
+        selalu terlihat. Menggunakan mode layar terpisah adalah satu-satunya cara agar aplikasi ini
+        dan dialog sistem terlihat secara bersamaan.</string>
+    <string name="adb_error_key_store">Tidak dapat membuat kunci untuk debugging nirkabel.\nIni
+        mungkin karena mekanisme KeyStore perangkat ini rusak.</string>
+    <string name="enable">Memungkinkan</string>
+    <!-- Home - Root -->
+    <!-- Home - Application management -->
+    <!-- Home - Automation -->
+    <!-- Home - Learn more -->
+    <!-- Home - Adb permissions limited -->
+    <!-- Application management -->
+    <!-- Terminal -->
+    <string name="terminal_tutorial_miui">Pengguna telah melaporkan bahwa MIUI merusak Storage
+        Access Framework yang digunakan oleh fungsi ekspor.</string>
+    <string name="terminal_tutorial_miui_2">Jika Anda menggunakan MIUI, Anda mungkin harus
+        mengekstrak file dari folder aset di APK Shizuku.</string>
+    <string name="terminal_tutorial_1">Ekspor file ke folder baru.</string>
+    <string name="terminal_tutorial_2">Gunakan aplikasi terminal Anda untuk menyalin file ke
+        direktori file privatnya.</string>
+    <string name="terminal_tutorial_3">Buka shell dengan perintah berikut:</string>
+    <!-- Settings -->
+    <string name="settings_start_on_boot">Mulai saat boot</string>
+    <string name="settings_start_on_boot_summary">Membutuhkan Android 11+ atau root</string>
+    <string name="settings_start_on_boot_bug">Karena bug di Android 11-12, debugging nirkabel tidak
+        mengingat jaringan yang diotorisasi.\n\nAnda perlu mengotorisasi ulang jaringan setiap kali
+        melakukan boot ulang dengan mengetuk \"Izinkan\" saat dialog otorisasi muncul.</string>
+    <string name="settings_watchdog">Penjaga</string>
+    <string name="settings_watchdog_summary">Mulai ulang Shizuku secara otomatis jika macet</string>
+    <string name="settings_tcp_mode">modus TCP</string>
+    <string name="settings_tcp_mode_summary">"Memungkinkan Shizuku untuk memulai ulang tanpa Wi-Fi.
+        (Shizuku harus sudah memulai sekali sejak di-reboot)"</string>
+    <string name="settings_tcp_port">Pelabuhan TCP</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_legacy_pairing">Pasangan warisan</string>
+    <string name="settings_legacy_pairing_summary">Masukkan kode pemasangan dalam dialog, bukan
+        notifikasi</string>
+    <!-- Bug Report Dialog -->
+    <!-- Snackbar -->
+    <!-- Toast -->
+    <!-- Dark Mode Setting Override -->
+    <!-- About -->
+    <!-- Start -->
+    <!-- Stop -->
+    <!-- Notification -->
+    <!-- Permission related, appears in system permission UI -->
+    <string name="permission_label">mengakses Shizuku</string>
+    <string name="permission_description">Izinkan aplikasi menggunakan Shizuku.</string>
+    <string name="permission_warning_template"><![CDATA[Izinkan <b>%1$s</b> untuk %2$s\?]]></string>
+    <!-- Starter -->
+    <!-- WADB Starter -->
+    <!-- Watchdog -->
+    <string name="watchdog_running">Watchdog sedang berjalan</string>
+    <!-- Misc -->
+    <!-- Messages for legacy -->
+</resources>

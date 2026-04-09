@@ -1,4 +1,4 @@
-package moe.shizuku.manager.adb
+package moe.shizuku.manager.privilegedservice.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint

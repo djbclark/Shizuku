@@ -10,7 +10,7 @@ import moe.shizuku.manager.R
 
 fun Fragment.openUrl(url: String) = requireContext().openUrl(url)
 
-fun Context.openUrl(url: String, ) {
+fun Context.openUrl(url: String) {
     val uri = url.toUri()
 
     runCatching {
@@ -23,7 +23,7 @@ fun Context.openUrl(url: String, ) {
     }
 }
 
-private fun Context.launchCustomTab(uri: Uri, ) = CustomTabsIntent
+private fun Context.launchCustomTab(uri: Uri) = CustomTabsIntent
     .Builder()
     .setShowTitle(true)
     .build()

@@ -1,5 +1,6 @@
 package moe.shizuku.manager.core.utils
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -90,8 +91,8 @@ class ApkUtils(
 
         manifest.apply {
             setPackageName(pkgName)
-            setVersionCode(1)
-            setVersionName("1.0.0")
+            versionCode = 1
+            versionName = "1.0.0"
             setApplicationLabel(appName.getResourceId())
             setIconResourceId(appIcon.getResourceId())
             setTargetSdkVersion(context.applicationInfo.targetSdkVersion)
@@ -131,6 +132,7 @@ class ApkUtils(
         return "$safeLabel-${getVersionName()}"
     }
 
+    @SuppressLint("RequestInstallPackagesPolicy")
     fun installPackage(apk: File, cb: ((Boolean, String?) -> Unit)? = null) {
         val installer = context.packageManager.packageInstaller
 

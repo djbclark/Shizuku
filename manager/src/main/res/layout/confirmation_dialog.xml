@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,8 +13,8 @@
         android:layout_gravity="center"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_system_icon"
-        android:tint="?android:colorAccent"
-        android:tintMode="src_in" />
+        android:tintMode="src_in"
+        app:tint="?android:colorAccent" />
 
     <TextView
         android:id="@android:id/title"

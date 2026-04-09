@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.update
-import moe.shizuku.manager.core.platform.deviceuser.DeviceUserRepository
+import moe.shizuku.manager.core.platform.device.user.DeviceUserRepository
 import moe.shizuku.manager.core.platform.userservice.UserServiceRepository
 import moe.shizuku.manager.permission.PermissionManager
 import moe.shizuku.manager.permission.models.AuthorizedAppsItem

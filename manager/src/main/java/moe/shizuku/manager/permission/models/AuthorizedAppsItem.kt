@@ -1,7 +1,7 @@
 package moe.shizuku.manager.permission.models
 
 import android.content.pm.ApplicationInfo
-import moe.shizuku.manager.core.platform.deviceuser.DeviceUser
+import moe.shizuku.manager.core.platform.device.user.DeviceUser
 
 sealed class AuthorizedAppsItem(val viewType: ViewType) {
     data class ToggleAll(val areAllGranted: Boolean) : AuthorizedAppsItem(ViewType.TOGGLE_ALL)

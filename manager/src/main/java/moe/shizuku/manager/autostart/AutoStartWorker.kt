@@ -22,7 +22,7 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
 import moe.shizuku.manager.privilegedservice.models.StartStep
-import moe.shizuku.manager.utils.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import java.io.EOFException
 import java.util.concurrent.TimeoutException
 
@@ -49,7 +49,7 @@ class AutoStartWorker(
                             steps.find { it is StartStep.AwaitingAuthorization }
                         if (authStep?.status == RunnableStatus.Running) {
                             val foregroundInfo = ForegroundInfo(
-                                AutoStartManager.Companion.NOTIFICATION_ID,
+                                AutoStartManager.NOTIFICATION_ID,
                                 autoStartManager.buildNotification(null)
                             )
                             setForeground(foregroundInfo)
@@ -62,7 +62,7 @@ class AutoStartWorker(
 
             val nm =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nm.cancel(AutoStartManager.Companion.NOTIFICATION_ID)
+            nm.cancel(AutoStartManager.NOTIFICATION_ID)
 
             return Result.success()
         } catch (e: CancellationException) {
@@ -70,8 +70,8 @@ class AutoStartWorker(
                 AutoStartManager.WorkerState.AWAITING_RETRY
             } else {
                 when (stopReason) {
-                    WorkInfo.Companion.STOP_REASON_CONSTRAINT_CONNECTIVITY -> AutoStartManager.WorkerState.AWAITING_WIFI
-                    WorkInfo.Companion.STOP_REASON_CANCELLED_BY_APP -> AutoStartManager.WorkerState.STOPPED
+                    WorkInfo.STOP_REASON_CONSTRAINT_CONNECTIVITY -> AutoStartManager.WorkerState.AWAITING_WIFI
+                    WorkInfo.STOP_REASON_CANCELLED_BY_APP -> AutoStartManager.WorkerState.STOPPED
                     else -> AutoStartManager.WorkerState.AWAITING_RETRY
                 }
             }
@@ -131,7 +131,7 @@ class AutoStartWorker(
                 OneTimeWorkRequestBuilder<AutoStartWorker>().setConstraints(constraints)
                     .build()
 
-            WorkManager.Companion.getInstance(context).enqueueUniqueWork(
+            WorkManager.getInstance(context).enqueueUniqueWork(
                 "adb_start_worker",
                 ExistingWorkPolicy.REPLACE,
                 request,

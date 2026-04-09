@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.databinding.StartFragmentBinding
 import moe.shizuku.manager.privilegedservice.models.StartUiState

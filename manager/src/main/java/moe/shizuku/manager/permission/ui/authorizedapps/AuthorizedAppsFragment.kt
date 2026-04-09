@@ -13,7 +13,7 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.collectAsEvents
 import moe.shizuku.manager.core.extensions.snackbar
-import moe.shizuku.manager.core.extensions.viewBinding
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.core.ui.components.dialog
 import moe.shizuku.manager.core.ui.components.handleDialogResults
 import moe.shizuku.manager.databinding.AuthorizedAppsFragmentBinding

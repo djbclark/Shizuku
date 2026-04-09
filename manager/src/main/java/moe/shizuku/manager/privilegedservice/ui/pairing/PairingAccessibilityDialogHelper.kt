@@ -9,7 +9,7 @@ import android.text.TextUtils
 import android.text.style.TypefaceSpan
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
-import moe.shizuku.manager.adb.AdbPairingAccessibilityService
+import moe.shizuku.manager.privilegedservice.services.AdbPairingAccessibilityService
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
 import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
 
