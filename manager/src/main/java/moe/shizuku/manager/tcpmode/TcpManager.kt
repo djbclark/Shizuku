@@ -5,11 +5,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
-import moe.shizuku.manager.core.adb.AdbPortHelper
-import moe.shizuku.manager.core.adb.AdbSession
-import moe.shizuku.manager.core.adb.AdbSettingsManager
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.extensions.TAG
+import moe.shizuku.manager.core.platform.adb.AdbPortHelper
+import moe.shizuku.manager.core.platform.adb.AdbSession
+import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
 import moe.shizuku.manager.tcpmode.models.TcpState
 import java.io.EOFException
 import java.net.SocketException

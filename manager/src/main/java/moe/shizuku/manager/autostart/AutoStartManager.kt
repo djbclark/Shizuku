@@ -13,8 +13,8 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.autostart.receivers.NotifAttemptReceiver
 import moe.shizuku.manager.autostart.receivers.NotifCancelReceiver
 import moe.shizuku.manager.autostart.receivers.NotifRestoreReceiver
-import moe.shizuku.manager.core.android.DeviceUserHelper
 import moe.shizuku.manager.core.extensions.TAG
+import moe.shizuku.manager.core.platform.deviceuser.DeviceUserRepository
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
 import moe.shizuku.manager.privilegedservice.models.PreStartCheck
 import moe.shizuku.manager.utils.ShizukuStateMachine
@@ -23,7 +23,7 @@ class AutoStartManager(
     private val context: Context,
     private val shizukuStateMachine: ShizukuStateMachine,
     private val privilegedServiceManager: PrivilegedServiceManager,
-    private val deviceUserHelper: DeviceUserHelper
+    private val deviceUserRepository: DeviceUserRepository
 ) {
     companion object {
         const val NOTIFICATION_ID = 1447
@@ -38,7 +38,7 @@ class AutoStartManager(
     }
 
     fun start(forceStart: Boolean = false) {
-        if ((deviceUserHelper.myUserId > 0 || shizukuStateMachine.isRunning()) && !forceStart) return
+        if ((deviceUserRepository.getCurrentUser().id > 0 || shizukuStateMachine.isRunning()) && !forceStart) return
 
         when (privilegedServiceManager.canStart(inBackground = true)) {
             PreStartCheck.Success -> {

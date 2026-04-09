@@ -34,7 +34,9 @@ class StartViewModel(
         initialValue = StartUiState()
     )
 
-    fun startService() = viewModelScope.launch {
-        privilegedServiceManager.startService(session)
+    fun startService() {
+        viewModelScope.launch {
+            privilegedServiceManager.startService(session)
+        }
     }
 }

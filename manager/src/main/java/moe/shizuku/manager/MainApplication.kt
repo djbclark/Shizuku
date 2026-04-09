@@ -4,7 +4,7 @@ import android.app.Application
 import android.os.Build
 import com.topjohnwu.superuser.Shell
 import moe.shizuku.manager.core.di.appModule
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
+import moe.shizuku.manager.core.locale.data.LocaleMigrator
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -12,7 +12,7 @@ import org.koin.core.context.startKoin
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 class MainApplication : Application() {
-    private val localeHelper: LocaleHelper by inject()
+    private val localeMigrator: LocaleMigrator by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -35,6 +35,6 @@ class MainApplication : Application() {
             System.loadLibrary("adb")
         }
 
-        localeHelper.migrate()
+        localeMigrator.migrate()
     }
 }

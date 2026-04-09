@@ -3,8 +3,8 @@ package moe.shizuku.manager.updater
 import android.content.Context
 import android.util.Log
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.string
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.string
 import moe.shizuku.manager.core.extensions.toast
 import moe.shizuku.manager.core.utils.ApkUtils
 import moe.shizuku.manager.updater.data.ReleaseRepository
@@ -19,7 +19,12 @@ class UpdateHelper(
     private val apkUtils: ApkUtils
 ) {
     private lateinit var latestRelease: AppRelease
-    private val lastPromptedVersion by preferencesRepository.pref { string("last_prompted_version", null) }
+    private val lastPromptedVersion by preferencesRepository.pref {
+        string(
+            "last_prompted_version",
+            null
+        )
+    }
 
     suspend fun checkAndInstallUpdates() {
         if (isUpdateAvailable()) {

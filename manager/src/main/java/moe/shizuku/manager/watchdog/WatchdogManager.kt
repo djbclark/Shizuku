@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.watchdog.models.WatchdogState
 import moe.shizuku.manager.watchdog.services.WatchdogService

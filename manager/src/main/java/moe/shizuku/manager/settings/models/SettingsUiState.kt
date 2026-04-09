@@ -1,9 +1,9 @@
 package moe.shizuku.manager.settings.models
 
-import moe.shizuku.manager.core.data.preferences.StartMode
-import moe.shizuku.manager.core.data.preferences.Theme
-import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
+import moe.shizuku.manager.core.locale.models.LocaleEntry
+import moe.shizuku.manager.core.preferences.models.StartMode
+import moe.shizuku.manager.core.preferences.models.Theme
+import moe.shizuku.manager.core.preferences.models.UpdateChannel
 
 data class SettingsUiState(
     val startModeValue: StartMode,
@@ -18,7 +18,7 @@ data class SettingsUiState(
     val tcpPortValue: Int,
     val isLegacyPairingVisible: Boolean,
 
-    val languageValue: LocaleHelper.LocaleEntry,
+    val languageValue: LocaleEntry,
     val themeValue: Theme,
     val isAmoledBlackVisible: Boolean,
     val isDynamicColorVisible: Boolean,

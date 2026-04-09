@@ -14,10 +14,10 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import moe.shizuku.manager.core.android.settings.SystemSettingsHelper
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.toast
+import moe.shizuku.manager.core.platform.settings.SystemSettingsHelper
 import moe.shizuku.manager.databinding.PairingFragmentBinding
 import moe.shizuku.manager.privilegedservice.services.AdbPairingService
 import rikka.compatibility.DeviceCompatibility

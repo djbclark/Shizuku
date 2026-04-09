@@ -11,16 +11,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.adb.AdbPortHelper
-import moe.shizuku.manager.core.adb.AdbSettingsManager
-import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.preferences.Preference
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.StartMode
-import moe.shizuku.manager.core.data.preferences.Theme
-import moe.shizuku.manager.core.data.preferences.UpdateChannel
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.autostart.StartOnBootManager
+import moe.shizuku.manager.core.locale.data.LocaleRepository
+import moe.shizuku.manager.core.locale.models.LocaleEntry
+import moe.shizuku.manager.core.platform.adb.AdbPortHelper
+import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
+import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
+import moe.shizuku.manager.core.preferences.data.Preference
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.preferences.models.StartMode
+import moe.shizuku.manager.core.preferences.models.Theme
+import moe.shizuku.manager.core.preferences.models.UpdateChannel
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.tcpmode.TcpManager
@@ -28,7 +29,7 @@ import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,
-    private val localeHelper: LocaleHelper,
+    private val localeRepository: LocaleRepository,
     private val powerManagerHelper: PowerManagerHelper,
     private val stateMachine: ShizukuStateMachine,
     private val tcpManager: TcpManager,
@@ -44,7 +45,7 @@ class SettingsViewModel(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         preferencesRepository.all,
-        localeHelper.localeFlow
+        localeRepository.localeFlow
     ) { _, _ ->
         calculateUiState()
     }.stateIn(
@@ -69,7 +70,7 @@ class SettingsViewModel(
             tcpPortValue = tcpPort.get(),
             isLegacyPairingVisible = true, // TODO hide on TVs
 
-            languageValue = localeHelper.getLocale(),
+            languageValue = localeRepository.getLocale(),
             themeValue = theme.get(),
             isAmoledBlackVisible = theme.get() != Theme.LIGHT,
             isDynamicColorVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
@@ -81,7 +82,7 @@ class SettingsViewModel(
     fun handleSelectionResult(value: Any) {
         when (value) {
             is StartMode -> onStartModeChanged(value)
-            is LocaleHelper.LocaleEntry -> onLanguageChanged(value)
+            is LocaleEntry -> onLanguageChanged(value)
             is Theme -> onThemeChanged(value)
             is UpdateChannel -> onUpdateChannelChanged(value)
         }
@@ -156,8 +157,8 @@ class SettingsViewModel(
         preferencesRepository.tcpPort.set(newValue)
     }
 
-    private fun onLanguageChanged(newValue: LocaleHelper.LocaleEntry) {
-        localeHelper.setLocale(newValue)
+    private fun onLanguageChanged(newValue: LocaleEntry) {
+        localeRepository.setLocale(newValue)
     }
 
     private fun onThemeChanged(value: Theme) {

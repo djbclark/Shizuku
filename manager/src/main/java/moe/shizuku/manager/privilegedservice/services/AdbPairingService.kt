@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.NavDeepLinkBuilder
 import com.google.android.material.color.MaterialColors
@@ -22,16 +21,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.adb.client.AdbInvalidPairingCodeException
-import moe.shizuku.manager.core.adb.client.AdbKey
-import moe.shizuku.manager.core.adb.client.AdbKeyException
-import moe.shizuku.manager.core.adb.client.AdbMdns
-import moe.shizuku.manager.core.adb.client.AdbPairingClient
-import moe.shizuku.manager.core.adb.client.PreferenceAdbKeyStore
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.toast
-import moe.shizuku.manager.home.HomeFragment
+import moe.shizuku.manager.core.platform.adb.client.AdbInvalidPairingCodeException
+import moe.shizuku.manager.core.platform.adb.client.AdbKey
+import moe.shizuku.manager.core.platform.adb.client.AdbKeyException
+import moe.shizuku.manager.core.platform.adb.client.AdbMdns
+import moe.shizuku.manager.core.platform.adb.client.AdbPairingClient
+import moe.shizuku.manager.core.platform.adb.client.PreferenceAdbKeyStore
 import org.koin.android.ext.android.inject
 import java.net.ConnectException
 

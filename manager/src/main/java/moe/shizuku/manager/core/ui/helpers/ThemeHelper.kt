@@ -3,7 +3,6 @@ package moe.shizuku.manager.core.ui.helpers
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
@@ -13,10 +12,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.Theme
 import moe.shizuku.manager.core.extensions.isNightMode
 import moe.shizuku.manager.core.extensions.isWatch
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.preferences.models.Theme
 
 class ThemeHelper(
     private val application: Application,
@@ -45,7 +44,6 @@ class ThemeHelper(
     }
 
     init {
-        Log.d("ThemeHelper", "init")
         application.registerActivityLifecycleCallbacks(object :
             Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

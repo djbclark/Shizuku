@@ -10,8 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
 import moe.shizuku.manager.core.utils.EnvironmentUtils
 import moe.shizuku.manager.home.models.HelpItem
 import moe.shizuku.manager.home.models.HomeEvent

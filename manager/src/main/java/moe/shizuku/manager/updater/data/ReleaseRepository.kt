@@ -1,7 +1,7 @@
 package moe.shizuku.manager.updater.data
 
 import android.content.Context
-import moe.shizuku.manager.core.data.preferences.UpdateChannel
+import moe.shizuku.manager.core.preferences.models.UpdateChannel
 import moe.shizuku.manager.updater.models.AppRelease
 import moe.shizuku.manager.updater.models.Version
 import java.io.File

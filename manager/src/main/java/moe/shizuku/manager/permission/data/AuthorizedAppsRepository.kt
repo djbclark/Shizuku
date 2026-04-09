@@ -1,52 +1,69 @@
 package moe.shizuku.manager.permission.data
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.util.Log
-import moe.shizuku.manager.core.android.DeviceUserHelper
-import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.permission.models.App
-import moe.shizuku.manager.privilegedservice.api.UserServiceManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.update
+import moe.shizuku.manager.core.platform.deviceuser.DeviceUserRepository
+import moe.shizuku.manager.core.platform.userservice.UserServiceRepository
+import moe.shizuku.manager.permission.PermissionManager
+import moe.shizuku.manager.permission.models.AuthorizedAppsItem
 
 class AuthorizedAppsRepository(
     private val context: Context,
-    private val deviceUserHelper: DeviceUserHelper,
-    private val userServiceManager: UserServiceManager
+    private val deviceUserRepository: DeviceUserRepository,
+    private val userServiceRepository: UserServiceRepository,
+    private val permissionManager: PermissionManager
 ) {
+    // StateFlow so we can cache the app list across screens, as it's an expensive operation
+    private val _appsList = MutableStateFlow<List<AuthorizedAppsItem.App>?>(null)
+    val appsList = _appsList.asStateFlow()
+        .onSubscription {
+            if (_appsList.value == null) {
+                refresh()
+            }
+        }
 
-    suspend fun getAppsDeclaringPermission(allUsers: Boolean = true): List<App> {
-        val appsList = if (allUsers) {
-            getInstalledAppsForAllUsers()
+    val grantedCount = _appsList.asStateFlow().filterNotNull().map { list ->
+        list.count { it.isGranted }
+    }.distinctUntilChanged()
+
+    suspend fun refresh(allUsers: Boolean = true) {
+        val users = if (allUsers) {
+            deviceUserRepository.getUsers().values
         } else {
-            getInstalledAppsForUser(deviceUserHelper.myUserId)
+            listOf(deviceUserRepository.getCurrentUser())
         }
 
-        Log.d(TAG, "getApplicationLabels")
-        return appsList.map {
-            App(
-                info = it,
-                label = context.packageManager.getApplicationLabel(it).toString()
-            )
-        }.also {
-            Log.d(TAG, "Finished getAppsDeclaringPermission")
-        }
+        _appsList.value = users.flatMap { user ->
+            userServiceRepository.getService().getInstalledApplicationsAsUser(user.id)
+                .map { appInfo ->
+                    AuthorizedAppsItem.App(
+                        appInfo = appInfo,
+                        isGranted = runCatching {
+                            permissionManager.isGranted(appInfo.uid)
+                        }.getOrDefault(false),
+                        user = user,
+                        label = context.packageManager.getApplicationLabel(appInfo).toString()
+                    )
+                }
+        }.sortedBy { it.displayName }
     }
 
-    private suspend fun getInstalledAppsForAllUsers(): MutableList<ApplicationInfo> {
-        val users = deviceUserHelper.getUsers().keys
-        val appsList = mutableListOf<ApplicationInfo>()
-
-        for (user in users) {
-            Log.d(TAG, "getInstalledAppsForUser $user")
-            val userApps = getInstalledAppsForUser(user)
-            appsList.addAll(userApps)
+    fun updatePermission(app: AuthorizedAppsItem.App, granted: Boolean) = runCatching {
+        permissionManager.setGranted(app.uid, granted)
+    }.onSuccess {
+        _appsList.update { currentList ->
+            currentList?.map {
+                if (it == app) {
+                    it.copy(isGranted = granted)
+                } else it
+            }
         }
-
-        return appsList
     }
-
-    private suspend fun getInstalledAppsForUser(userId: Int) =
-        userServiceManager.getService()
-            .getInstalledApplicationsAsUser(userId)
 
 }

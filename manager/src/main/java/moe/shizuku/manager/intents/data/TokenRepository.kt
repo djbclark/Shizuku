@@ -1,8 +1,8 @@
 package moe.shizuku.manager.intents.data
 
 import kotlinx.coroutines.flow.map
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.string
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.preferences.data.string
 
 class TokenRepository(
     preferencesRepository: PreferencesRepository

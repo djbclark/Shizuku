@@ -70,12 +70,23 @@ class AuthorizedAppsFragment : Fragment(R.layout.authorized_apps_fragment) {
         }
     }
 
-    private fun handleUiState(state: AuthorizedAppsUiState) {
-        binding.list.isVisible = !state.isAppListEmpty
-        binding.empty.root.isVisible = state.isAppListEmpty
+    private fun handleUiState(state: AuthorizedAppsUiState) = with(binding) {
+        when (state) {
+            is AuthorizedAppsUiState.Loading -> {
+                list.isVisible = false
+                empty.root.isVisible = false
 
-        if (!state.isAppListEmpty) {
-            adapter.updateData(state.apps, state.areAllAppsGranted)
+                // TODO implement loading screen
+            }
+
+            is AuthorizedAppsUiState.Result -> {
+                list.isVisible = !state.isAppListEmpty
+                empty.root.isVisible = state.isAppListEmpty
+
+                if (!state.isAppListEmpty) {
+                    adapter.updateData(state.apps, state.areAllAppsGranted)
+                }
+            }
         }
     }
 

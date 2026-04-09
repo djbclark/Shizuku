@@ -2,15 +2,17 @@ package moe.shizuku.manager.core.di
 
 import moe.shizuku.manager.autostart.AutoStartManager
 import moe.shizuku.manager.autostart.StartOnBootManager
-import moe.shizuku.manager.core.adb.AdbPortHelper
-import moe.shizuku.manager.core.adb.AdbSession
-import moe.shizuku.manager.core.adb.AdbSettingsManager
-import moe.shizuku.manager.core.android.DeviceUserHelper
-import moe.shizuku.manager.core.android.KeyguardHelper
-import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
+import moe.shizuku.manager.core.locale.data.LocaleMigrator
+import moe.shizuku.manager.core.locale.data.LocaleRepository
+import moe.shizuku.manager.core.platform.KeyguardHelper
+import moe.shizuku.manager.core.platform.adb.AdbPortHelper
+import moe.shizuku.manager.core.platform.adb.AdbSession
+import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
+import moe.shizuku.manager.core.platform.deviceuser.DeviceUserRepository
+import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
+import moe.shizuku.manager.core.platform.userservice.UserServiceRepository
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.core.ui.helpers.ThemeHelper
 import moe.shizuku.manager.core.utils.ApkSigner
 import moe.shizuku.manager.core.utils.ApkUtils
@@ -22,7 +24,6 @@ import moe.shizuku.manager.permission.PermissionManager
 import moe.shizuku.manager.permission.data.AuthorizedAppsRepository
 import moe.shizuku.manager.permission.ui.authorizedapps.AuthorizedAppsViewModel
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.privilegedservice.api.UserServiceManager
 import moe.shizuku.manager.privilegedservice.ui.pairing.AdbPairingViewModel
 import moe.shizuku.manager.privilegedservice.ui.start.StartViewModel
 import moe.shizuku.manager.settings.ui.SettingsViewModel
@@ -49,10 +50,11 @@ val appModule = module {
     single<ApkUtils>()
     single<AuthorizedAppsRepository>()
     single<AutoStartManager>()
-    single<DeviceUserHelper>()
+    single<DeviceUserRepository>()
     single<EnvironmentUtils>()
     single<KeyguardHelper>()
-    single<LocaleHelper>()
+    single<LocaleMigrator>()
+    single<LocaleRepository>()
     single<PermissionManager>()
     single<PowerManagerHelper>()
     single<PreferencesRepository>()
@@ -68,7 +70,7 @@ val appModule = module {
     }
     single<TokenRepository>()
     single<UpdateHelper>()
-    single<UserServiceManager>()
+    single<UserServiceRepository>()
     single<WatchdogManager>()
     single<WatchdogNotifications>()
 

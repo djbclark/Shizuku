@@ -18,31 +18,31 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.android.settings.PowerManagerHelper
-import moe.shizuku.manager.core.data.preferences.PreferencesRepository
-import moe.shizuku.manager.core.data.preferences.StartMode
-import moe.shizuku.manager.core.data.preferences.Theme
-import moe.shizuku.manager.core.data.preferences.UpdateChannel
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.collectAsEvents
 import moe.shizuku.manager.core.extensions.showSnackbar
 import moe.shizuku.manager.core.extensions.snackbar
+import moe.shizuku.manager.core.locale.data.LocaleRepository
+import moe.shizuku.manager.core.platform.settings.PowerManagerHelper
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.preferences.models.StartMode
+import moe.shizuku.manager.core.preferences.models.Theme
+import moe.shizuku.manager.core.preferences.models.UpdateChannel
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionBottomSheet
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
-import moe.shizuku.manager.core.ui.helpers.LocaleHelper
 import moe.shizuku.manager.settings.models.SettingsEvent
 import moe.shizuku.manager.settings.models.SettingsUiState
 import moe.shizuku.manager.settings.ui.components.TextInputDialog
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import moe.shizuku.manager.core.data.preferences.Preference as ShizukuPreference
+import moe.shizuku.manager.core.preferences.data.Preference as ShizukuPreference
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModel()
     private val listSelectionViewModel: ListSelectionViewModel by viewModel()
 
     private val preferencesRepository: PreferencesRepository by inject()
-    private val localeHelper: LocaleHelper by inject()
+    private val localeRepository: LocaleRepository by inject()
     private val powerManagerHelper: PowerManagerHelper by inject()
 
     // -------------------
@@ -232,7 +232,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         ListSelectionBottomSheet.show(
             childFragmentManager,
             title = R.string.settings_language,
-            items = localeHelper.getLocaleEntries(),
+            items = localeRepository.getLocaleEntries(),
             selectedItem = viewModel.uiState.value.languageValue
         )
 

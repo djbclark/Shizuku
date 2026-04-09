@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.navigation.NavDeepLinkBuilder
 import moe.shizuku.manager.R
-import moe.shizuku.manager.core.android.settings.SystemSettingsPage
+import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
 import moe.shizuku.manager.watchdog.services.WatchdogService
 
 class WatchdogNotifications(private val context: Context) {
@@ -88,7 +88,8 @@ class WatchdogNotifications(private val context: Context) {
         )
 
         val disableIntent =
-            SystemSettingsPage.Notifications.NotificationChannel(CHANNEL_ID_CRASH).buildIntent(context)
+            SystemSettingsPage.Notifications.NotificationChannel(CHANNEL_ID_CRASH)
+                .buildIntent(context)
         val disablePendingIntent = PendingIntent.getActivity(
             context, 0, disableIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,

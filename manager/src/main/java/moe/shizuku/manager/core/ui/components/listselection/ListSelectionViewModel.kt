@@ -13,7 +13,9 @@ class ListSelectionViewModel : ViewModel() {
     private val _results = Channel<Any>(capacity = Channel.BUFFERED)
     val results = _results.receiveAsFlow()
 
-    fun select(value: Any) = viewModelScope.launch {
-        _results.send(value)
+    fun select(value: Any) {
+        viewModelScope.launch {
+            _results.send(value)
+        }
     }
 }
