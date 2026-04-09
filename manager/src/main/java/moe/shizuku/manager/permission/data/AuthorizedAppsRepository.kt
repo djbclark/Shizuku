@@ -1,13 +1,16 @@
 package moe.shizuku.manager.permission.data
 
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.update
+import moe.shizuku.manager.core.extensions.getAppLabel
 import moe.shizuku.manager.core.platform.device.user.DeviceUserRepository
 import moe.shizuku.manager.core.platform.userservice.UserServiceRepository
 import moe.shizuku.manager.permission.PermissionManager
@@ -21,14 +24,14 @@ class AuthorizedAppsRepository(
 ) {
     // StateFlow so we can cache the app list across screens, as it's an expensive operation
     private val _appsList = MutableStateFlow<List<AuthorizedAppsItem.App>?>(null)
-    val appsList = _appsList.asStateFlow()
+    val appsList: SharedFlow<List<AuthorizedAppsItem.App>?> = _appsList.asStateFlow()
         .onSubscription {
             if (_appsList.value == null) {
                 refresh()
             }
         }
 
-    val grantedCount = _appsList.asStateFlow().filterNotNull().map { list ->
+    val grantedCount: Flow<Int> = _appsList.asStateFlow().filterNotNull().map { list ->
         list.count { it.isGranted }
     }.distinctUntilChanged()
 
@@ -48,13 +51,13 @@ class AuthorizedAppsRepository(
                             permissionManager.isGranted(appInfo.uid)
                         }.getOrDefault(false),
                         user = user,
-                        label = context.packageManager.getApplicationLabel(appInfo).toString()
+                        label = context.getAppLabel(appInfo)
                     )
                 }
         }.sortedBy { it.displayName }
     }
 
-    fun updatePermission(app: AuthorizedAppsItem.App, granted: Boolean) = runCatching {
+    fun updatePermission(app: AuthorizedAppsItem.App, granted: Boolean): Result<Unit> = runCatching {
         permissionManager.setGranted(app.uid, granted)
     }.onSuccess {
         _appsList.update { currentList ->

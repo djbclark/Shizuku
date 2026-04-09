@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -39,7 +40,7 @@ class SettingsViewModel(
 ) : ViewModel() {
 
     private val _events = Channel<SettingsEvent>()
-    val events = _events.receiveAsFlow()
+    val events: Flow<SettingsEvent> = _events.receiveAsFlow()
 
     private var pendingBatteryOptimization: Preference<*>? = null
 

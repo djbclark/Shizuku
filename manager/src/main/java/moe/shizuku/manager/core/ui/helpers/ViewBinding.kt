@@ -36,32 +36,32 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
 
 @Suppress("UnusedReceiverParameter")
 @JvmName("fragmentViewBindingBind")
-fun <T : ViewBinding> Fragment.viewBinding(factory: (View) -> T) =
+fun <T : ViewBinding> Fragment.viewBinding(factory: (View) -> T): FragmentViewBindingDelegate<T> =
     FragmentViewBindingDelegate { it.requireView().let(factory) }
 
 @Suppress("UnusedReceiverParameter")
 @JvmName("fragmentViewBindingInflate")
 fun <T : ViewBinding> Fragment.viewBinding(
     factory: (LayoutInflater) -> T
-) = FragmentViewBindingDelegate { it.layoutInflater.let(factory) }
+): FragmentViewBindingDelegate<T> = FragmentViewBindingDelegate { it.layoutInflater.let(factory) }
 
 inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
     crossinline factory: (LayoutInflater) -> T
-) = lazy(LazyThreadSafetyMode.NONE) {
+): Lazy<T> = lazy(LazyThreadSafetyMode.NONE) {
     factory(layoutInflater)
 }
 
-fun <T : ViewBinding> RecyclerView.ViewHolder.viewBinding(factory: (View) -> T) =
+fun <T : ViewBinding> RecyclerView.ViewHolder.viewBinding(factory: (View) -> T): Lazy<T> =
     lazy(LazyThreadSafetyMode.NONE) { factory(itemView) }
 
 inline fun <T : ViewBinding> ViewGroup.viewBinding(
     crossinline factory: (LayoutInflater, ViewGroup) -> T,
-) = lazy(LazyThreadSafetyMode.NONE) {
+): Lazy<T> = lazy(LazyThreadSafetyMode.NONE) {
     factory(LayoutInflater.from(context), this)
 }
 
 inline fun <T : ViewBinding> ViewGroup.viewBinding(
     crossinline factory: (LayoutInflater, ViewGroup, Boolean) -> T,
-) = lazy(LazyThreadSafetyMode.NONE) {
+): Lazy<T> = lazy(LazyThreadSafetyMode.NONE) {
     factory(LayoutInflater.from(context), this, true)
 }

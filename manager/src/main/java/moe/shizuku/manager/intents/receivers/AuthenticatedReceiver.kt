@@ -90,9 +90,8 @@ abstract class AuthenticatedReceiver : BroadcastReceiver(), KoinComponent {
         nm.notify(NOTIFICATION_ID, notification)
     }
 
-    @Suppress("unused")
     abstract fun onAuthenticated(
         context: Context,
-        intent: Intent,
+        intent: Intent
     )
 }

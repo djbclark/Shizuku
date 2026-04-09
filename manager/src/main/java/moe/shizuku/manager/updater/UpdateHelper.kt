@@ -20,10 +20,7 @@ class UpdateHelper(
 ) {
     private lateinit var latestRelease: AppRelease
     private val lastPromptedVersion by preferencesRepository.pref {
-        string(
-            "last_prompted_version",
-            null
-        )
+        string("last_prompted_version")
     }
 
     suspend fun checkAndInstallUpdates() {
@@ -46,7 +43,7 @@ class UpdateHelper(
         return if (isUpdateAvailable()) latestRelease.version > lastPromptedVersion else false
     }
 
-    suspend fun isUpdateAvailable(): Boolean {
+    private suspend fun isUpdateAvailable(): Boolean {
         return try {
             val channel = preferencesRepository.updateChannel.get()
             val latest = repository.getLatestRelease(channel)

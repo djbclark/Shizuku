@@ -26,7 +26,7 @@ class AutoStartManager(
     private val deviceUserRepository: DeviceUserRepository
 ) {
     companion object {
-        const val NOTIFICATION_ID = 1447
+        const val NOTIFICATION_ID: Int = 1447
         private const val CHANNEL_ID = "AdbStartWorker"
     }
 

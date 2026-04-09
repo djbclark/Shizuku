@@ -17,10 +17,10 @@ import moe.shizuku.manager.watchdog.services.WatchdogService
 class WatchdogNotifications(private val context: Context) {
 
     companion object {
-        const val ID_WATCHDOG = 1001
-        const val ID_CRASH = 1002
-        const val CHANNEL_ID_WATCHDOG = "shizuku_watchdog"
-        const val CHANNEL_ID_CRASH = "crash_reports"
+        const val ID_WATCHDOG: Int = 1001
+        const val ID_CRASH: Int = 1002
+        const val CHANNEL_ID_WATCHDOG: String = "shizuku_watchdog"
+        const val CHANNEL_ID_CRASH: String = "crash_reports"
     }
 
     private fun createChannels() {

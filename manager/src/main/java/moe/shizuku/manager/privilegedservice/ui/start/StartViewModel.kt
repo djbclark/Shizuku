@@ -3,6 +3,7 @@ package moe.shizuku.manager.privilegedservice.ui.start
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -14,7 +15,7 @@ class StartViewModel(
     private val privilegedServiceManager: PrivilegedServiceManager
 ) : ViewModel() {
     private val session = privilegedServiceManager.createStartSession()
-    val uiState = combine(
+    val uiState: StateFlow<StartUiState> = combine(
         session.steps,
         session.status
     ) { steps, status ->

@@ -6,5 +6,5 @@ sealed class RunnableStatus {
     object Completed : RunnableStatus()
     data class Failed(val throwable: Throwable) : RunnableStatus()
 
-    val isFinished = this is Completed || this is Failed
+    val isFinished: Boolean = this is Completed || this is Failed
 }

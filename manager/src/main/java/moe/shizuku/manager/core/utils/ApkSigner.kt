@@ -88,7 +88,7 @@ class ApkSigner(private val context: Context) {
         return loadKey()
     }
 
-    val keystoreFile by lazy {
+    val keystoreFile: File by lazy {
         File(context.filesDir, KEYSTORE_NAME)
     }
 

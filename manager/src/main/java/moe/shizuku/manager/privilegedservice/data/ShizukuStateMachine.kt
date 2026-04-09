@@ -42,9 +42,9 @@ class ShizukuStateMachine(
         }
     }
 
-    fun set(newState: State) = transition { newState }
+    fun set(newState: State): Unit = transition { newState }
 
-    fun setDead() = transition {
+    private fun setDead(): Unit = transition {
         when (it) {
             State.RUNNING -> State.CRASHED
             State.STOPPING -> {

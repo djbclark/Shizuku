@@ -17,6 +17,7 @@ import com.reandroid.arsc.chunk.xml.AndroidManifestBlock
 import com.reandroid.common.Namespace
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.TAG
+import moe.shizuku.manager.core.extensions.getAppLabel
 import java.io.File
 
 class ApkUtils(
@@ -25,7 +26,7 @@ class ApkUtils(
 ) {
 
     companion object {
-        const val ORIGINAL_PACKAGE_NAME = "moe.shizuku.privileged.api"
+        const val ORIGINAL_PACKAGE_NAME: String = "moe.shizuku.privileged.api"
     }
 
     private val workDir by lazy {
@@ -118,8 +119,8 @@ class ApkUtils(
         return outFile
     }
 
-    fun getAppLabel(): String =
-        context.applicationInfo.loadLabel(context.packageManager).toString()
+    private fun getAppLabel(): String =
+        context.getAppLabel(context.applicationInfo)
 
     fun getVersionName(): String =
         context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty()

@@ -37,7 +37,7 @@ class ReleaseRemoteDataSource {
         json.decodeFromString<List<GitHubReleaseDto>>(body)
     }
 
-    suspend fun downloadFile(url: String, targetFile: File) = withContext(Dispatchers.IO) {
+    suspend fun downloadFile(url: String, targetFile: File): Long = withContext(Dispatchers.IO) {
         val request = Request.Builder().url(url).build()
         val response = client.newCall(request).execute()
         if (!response.isSuccessful) throw Exception("Download failed: ${response.code}")

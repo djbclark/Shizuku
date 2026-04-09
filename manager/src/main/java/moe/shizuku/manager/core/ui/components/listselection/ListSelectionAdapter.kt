@@ -25,12 +25,12 @@ class ListSelectionAdapter(
             notifyItemRangeChanged(0, itemCount)
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutInflater.from(parent.context)
             .inflate(R.layout.radio_button_list_item, parent, false)
     )
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int): Unit = holder.bind(items[position])
 
     override fun getItemCount(): Int = items.size
 

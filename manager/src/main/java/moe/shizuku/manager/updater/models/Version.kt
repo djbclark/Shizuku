@@ -1,10 +1,10 @@
 package moe.shizuku.manager.updater.models
 
 data class Version(
-    val major: Int,
-    val minor: Int,
-    val patch: Int,
-    val commit: Int = 0,
+    private val major: Int,
+    private val minor: Int,
+    private val patch: Int,
+    private val commit: Int = 0,
 ) : Comparable<Version> {
     override fun compareTo(other: Version): Int =
         compareValuesBy(

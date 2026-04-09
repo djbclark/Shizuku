@@ -8,7 +8,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import moe.shizuku.manager.R
 
-fun Fragment.openUrl(url: String) = requireContext().openUrl(url)
+fun Fragment.openUrl(url: String): Unit = requireContext().openUrl(url)
 
 fun Context.openUrl(url: String) {
     val uri = url.toUri()

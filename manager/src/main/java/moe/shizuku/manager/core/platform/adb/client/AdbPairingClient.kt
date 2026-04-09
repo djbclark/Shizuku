@@ -91,7 +91,7 @@ private class PairingPacketHeader(
             val type = buffer.get()
             val payload = buffer.int
 
-            if (version < kMinSupportedKeyHeaderVersion || version > kMaxSupportedKeyHeaderVersion) {
+            if (version !in kMinSupportedKeyHeaderVersion..kMaxSupportedKeyHeaderVersion) {
                 Log.e(
                     TAG,
                     "PairingPacketHeader version mismatch (us=$kCurrentKeyHeaderVersion them=$version)"
@@ -102,7 +102,7 @@ private class PairingPacketHeader(
                 Log.e(TAG, "Unknown PairingPacket type=$type")
                 return null
             }
-            if (payload <= 0 || payload > kMaxPayloadSize) {
+            if (payload !in 1..kMaxPayloadSize) {
                 Log.e(TAG, "header payload not within a safe payload size (size=$payload)")
                 return null
             }
@@ -268,8 +268,7 @@ class AdbPairingClient(
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
 
-        if (!pairingContext.initCipher(theirMessage)) return false
-        return true
+        return !pairingContext.initCipher(theirMessage)
     }
 
     private fun doExchangePeerInfo(): Boolean {

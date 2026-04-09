@@ -50,7 +50,7 @@ class AutoStartWorker(
                         if (authStep?.status == RunnableStatus.Running) {
                             val foregroundInfo = ForegroundInfo(
                                 AutoStartManager.NOTIFICATION_ID,
-                                autoStartManager.buildNotification(null)
+                                autoStartManager.buildNotification()
                             )
                             setForeground(foregroundInfo)
                         }
@@ -138,7 +138,7 @@ class AutoStartWorker(
             )
         }
 
-        const val CHANNEL_ID = "AdbStartWorker"
-        const val NOTIFICATION_ID = 1448
+        const val CHANNEL_ID: String = "AdbStartWorker"
+        const val NOTIFICATION_ID: Int = 1448
     }
 }

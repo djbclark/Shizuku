@@ -9,7 +9,7 @@ class PermissionManager(
     fun isGranted(uid: Int): Boolean =
         (Shizuku.getFlagsForUid(uid, MASK_PERMISSION) and FLAG_ALLOWED) == FLAG_ALLOWED
 
-    fun setGranted(uid: Int, grant: Boolean) =
+    fun setGranted(uid: Int, grant: Boolean): Unit =
         if (grant) grant(uid) else revoke(uid)
 
     private fun grant(uid: Int) =

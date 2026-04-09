@@ -37,6 +37,7 @@ import moe.shizuku.manager.updater.data.ReleaseRepository
 import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 import moe.shizuku.manager.watchdog.WatchdogManager
 import moe.shizuku.manager.watchdog.utils.WatchdogNotifications
+import org.koin.core.module.Module
 import org.koin.core.module.dsl.createdAtStart
 import org.koin.core.module.dsl.withOptions
 import org.koin.dsl.module
@@ -44,7 +45,7 @@ import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
 
-val appModule = module {
+val appModule: Module = module {
     single<AdbPortHelper>()
     single<AdbSettingsManager>()
     single<ApkSigner>()

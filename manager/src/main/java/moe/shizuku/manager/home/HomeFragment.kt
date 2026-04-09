@@ -289,7 +289,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
         dialog.show()
     }
 
-    fun start() = when (val canStart = privilegedServiceManager.canStart()) {
+    fun start(): Unit = when (val canStart = privilegedServiceManager.canStart()) {
         is Success -> findNavController().navigate(R.id.navigate_to_start)
         is Failure -> {
             snackbar(canStart.msgRes).run {

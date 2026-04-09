@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,7 +42,7 @@ class AuthorizedAppsViewModel(
     )
 
     private val _events = Channel<AuthorizedAppsEvent>()
-    val events = _events.receiveAsFlow()
+    val events: Flow<AuthorizedAppsEvent> = _events.receiveAsFlow()
 
     fun refresh() {
         viewModelScope.launch {

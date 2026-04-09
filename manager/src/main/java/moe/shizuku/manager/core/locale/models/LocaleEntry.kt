@@ -22,7 +22,7 @@ data class LocaleEntry(
     override val type: ListSelectionItem.Type = ListSelectionItem.Type.RADIO
 
     companion object {
-        val SystemDefault = LocaleEntry("", "", "")
+        val SystemDefault: LocaleEntry = LocaleEntry("", "", "")
     }
 }
 

@@ -43,7 +43,7 @@ class PrivilegedServiceManager(
     private val internalCommand by lazy {
         "$starterFilePath --apk=${context.applicationInfo.sourceDir}"
     }
-    val adbCommand by lazy { "adb shell $starterFilePath" }
+    val adbCommand: String by lazy { "adb shell $starterFilePath" }
 
     private var adbSession: AdbSession? = null
 

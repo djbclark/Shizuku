@@ -11,9 +11,7 @@ class LocaleMigrator(
     private val localeRepository: LocaleRepository
 ) {
     private val languageMigrated by preferencesRepository.pref {
-        boolean(
-            "language_migrated", false
-        )
+        boolean("language_migrated")
     }
 
     // https://developer.android.com/guide/topics/resources/app-languages#custom-storage

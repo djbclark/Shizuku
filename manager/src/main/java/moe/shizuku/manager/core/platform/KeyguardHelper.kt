@@ -15,7 +15,7 @@ class KeyguardHelper(private val context: Context) {
             return km.isKeyguardLocked
         }
 
-    suspend fun waitForUnlock() = suspendCancellableCoroutine { cont ->
+    suspend fun waitForUnlock(): Unit = suspendCancellableCoroutine { cont ->
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 context.unregisterReceiver(this)

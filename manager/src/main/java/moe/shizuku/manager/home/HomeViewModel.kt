@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
@@ -29,10 +30,10 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _serviceStatus = MutableLiveData<Resource<ServiceStatus>>()
-    val serviceStatus = _serviceStatus as LiveData<Resource<ServiceStatus>>
+    val serviceStatus: LiveData<Resource<ServiceStatus>> = _serviceStatus as LiveData<Resource<ServiceStatus>>
 
     private val _events = Channel<HomeEvent>()
-    val events = _events.receiveAsFlow()
+    val events: Flow<HomeEvent> = _events.receiveAsFlow()
 
     private fun load(): ServiceStatus {
         permissionManager.isPermissionOwner()

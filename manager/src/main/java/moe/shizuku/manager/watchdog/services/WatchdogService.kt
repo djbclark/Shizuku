@@ -65,7 +65,7 @@ class WatchdogService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
-        const val ACTION_STOP_SERVICE = "ACTION_STOP_SERVICE"
+        const val ACTION_STOP_SERVICE: String = "ACTION_STOP_SERVICE"
         private val _isRunning = MutableStateFlow(false)
         val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
     }

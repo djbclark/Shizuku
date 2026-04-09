@@ -78,12 +78,12 @@ class AdbSession(
         client?.close()
     }
 
-    override fun close() = closeClient()
+    override fun close(): Unit = closeClient()
 
     class Factory(
         private val preferencesRepository: PreferencesRepository
     ) {
-        fun create(port: Int = 0) =
+        fun create(port: Int = 0): AdbSession =
             AdbSession(preferencesRepository, port)
     }
 }

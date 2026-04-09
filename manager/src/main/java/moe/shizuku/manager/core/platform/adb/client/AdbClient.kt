@@ -59,7 +59,7 @@ class AdbClient(
 
             message = read()
         } else if (message.command == A_AUTH) {
-            if (message.command != A_AUTH && message.arg0 != ADB_AUTH_TOKEN) error("not A_AUTH ADB_AUTH_TOKEN")
+            if (message.arg0 != ADB_AUTH_TOKEN) error("not A_AUTH ADB_AUTH_TOKEN")
             write(A_AUTH, ADB_AUTH_SIGNATURE, 0, key.sign(message.data))
 
             message = read()
@@ -127,7 +127,6 @@ class AdbClient(
     private fun write(message: AdbMessage) {
         outputStream.write(message.toByteArray())
         outputStream.flush()
-        Log.d(TAG, "write ${message.toStringShort()}")
     }
 
     private fun read(): AdbMessage {
@@ -150,7 +149,6 @@ class AdbClient(
         }
         val message = AdbMessage(command, arg0, arg1, dataLength, checksum, magic, data)
         message.validateOrThrow()
-        Log.d(TAG, "read ${message.toStringShort()}")
         return message
     }
 

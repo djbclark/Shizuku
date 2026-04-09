@@ -52,7 +52,7 @@ class TcpManager(
     val isTcpPortOpen: Boolean
         get() = adbPortHelper.tcpPort > 0
 
-    fun isTcpPortOpen(targetPort: Int) =
+    fun isTcpPortOpen(targetPort: Int): Boolean =
         adbPortHelper.tcpPort == targetPort
 
     // OPEN/CLOSE TCP PORT
@@ -60,14 +60,14 @@ class TcpManager(
     suspend fun openTcpPort(targetPort: Int) {
         if (isTcpPortOpen(targetPort)) return
 
-        val currentPort = adbPortHelper.getAdbPort(forceTls = false)
+        val currentPort = adbPortHelper.getAdbPort()
 
         adbSessionFactory.create(currentPort).use { session ->
             openTcpPort(targetPort, session)
         }
     }
 
-    suspend fun openTcpPort(targetPort: Int, session: AdbSession) = runCatching {
+    suspend fun openTcpPort(targetPort: Int, session: AdbSession): Result<Unit> = runCatching {
         if (isTcpPortOpen(targetPort)) return@runCatching
 
         session.withClient { client ->
@@ -95,7 +95,7 @@ class TcpManager(
         }
     }
 
-    suspend fun closeTcpPort(session: AdbSession) = runCatching {
+    suspend fun closeTcpPort(session: AdbSession): Result<Unit> = runCatching {
         if (!isTcpPortOpen) return@runCatching
 
         adbSettingsManager.enableUsbDebugging()

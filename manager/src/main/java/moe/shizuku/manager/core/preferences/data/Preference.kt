@@ -29,21 +29,21 @@ class Preference<T>(
 
     fun get(): T = prefs.getter(key, default)
 
-    fun set(v: T) = prefs.setter(key, v)
+    fun set(v: T): Unit = prefs.setter(key, v)
 }
 
 // Factory methods for Preference class
-fun SharedPreferences.boolean(key: String, default: Boolean = false) =
+fun SharedPreferences.boolean(key: String, default: Boolean = false): Preference<Boolean> =
     Preference(key, default, this, SharedPreferences::getBoolean) { k, v ->
         edit { putBoolean(k, v) }
     }
 
-fun SharedPreferences.int(key: String, default: Int = 0) =
+fun SharedPreferences.int(key: String, default: Int = 0): Preference<Int> =
     Preference(key, default, this, SharedPreferences::getInt) { k, v ->
         edit { putInt(k, v) }
     }
 
-fun SharedPreferences.string(key: String, default: String? = null) =
+fun SharedPreferences.string(key: String, default: String? = null): Preference<String?> =
     Preference(key, default, this, SharedPreferences::getString) { k, v ->
         edit { putString(k, v) }
     }
@@ -51,7 +51,7 @@ fun SharedPreferences.string(key: String, default: String? = null) =
 inline fun <reified T> SharedPreferences.enum(
     key: String,
     default: T
-) where T : Enum<T>, T : IntEnum =
+): Preference<T> where T : Enum<T>, T : IntEnum =
     Preference(
         key = key,
         default = default,

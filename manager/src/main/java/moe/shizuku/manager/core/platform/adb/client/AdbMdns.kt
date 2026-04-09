@@ -109,7 +109,7 @@ class AdbMdns(
         private val adbMdns: AdbMdns,
     ) : NsdManager.DiscoveryListener {
         override fun onDiscoveryStarted(serviceType: String) {
-            Log.v(TAG, "onDiscoveryStarted: $serviceType")
+            Log.i(TAG, "onDiscoveryStarted: $serviceType")
 
             adbMdns.onDiscoveryStart()
         }
@@ -162,7 +162,7 @@ class AdbMdns(
     }
 
     companion object {
-        const val TLS_CONNECT = "_adb-tls-connect._tcp"
-        const val TLS_PAIRING = "_adb-tls-pairing._tcp"
+        const val TLS_CONNECT: String = "_adb-tls-connect._tcp"
+        const val TLS_PAIRING: String = "_adb-tls-pairing._tcp"
     }
 }

@@ -36,8 +36,8 @@ import java.net.ConnectException
 @RequiresApi(Build.VERSION_CODES.R)
 class AdbPairingService : Service() {
     companion object {
-        const val NOTIFICATION_CHANNEL = "adb_pairing"
-        const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_CHANNEL: String = "adb_pairing"
+        const val NOTIFICATION_ID: Int = 1
 
         private const val REPLY_REQUEST_ID = 1
         private const val STOP_REQUEST_ID = 2

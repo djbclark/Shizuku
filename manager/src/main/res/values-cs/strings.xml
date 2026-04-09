@@ -24,7 +24,7 @@
     <!-- Settings -->
     <string name="settings_start_on_boot">Začněte na botě</string>
     <string name="settings_start_on_boot_summary">Vyžaduje Android 11+ nebo root</string>
-    <string name="settings_start_on_boot_bug">Kvůli chybě v systému Android 11-12 si bezdrátové ladění nepamatuje žádné autorizované sítě.\n\nPři každém restartu budete muset síť znovu autorizovat klepnutím na „Povolit“, jakmile se zobrazí dialogové okno pro autorizaci.</string>
+    <string name="settings_start_on_boot_bug">Kvůli chybě v systému Android 11–12 si bezdrátové ladění nepamatuje žádné autorizované sítě.\n\nPři každém restartu budete muset síť znovu autorizovat klepnutím na „Povolit“, jakmile se zobrazí dialogové okno pro autorizaci.</string>
     <string name="settings_watchdog">Hlídací pes</string>
     <string name="settings_watchdog_summary">Automaticky restartovat Shizuku v případě pádu</string>
     <string name="settings_tcp_mode">TCP režim</string>

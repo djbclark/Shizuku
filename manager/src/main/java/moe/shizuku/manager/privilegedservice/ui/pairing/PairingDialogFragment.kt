@@ -176,10 +176,10 @@ class AdbPairingViewModel(
 ) : ViewModel() {
 
     private val _result = MutableLiveData<Throwable?>()
-    val result = _result as LiveData<Throwable?>
+    val result: LiveData<Throwable?> = _result as LiveData<Throwable?>
 
     private val _port = MutableLiveData<Int>()
-    val port = _port as LiveData<Int>
+    val port: LiveData<Int> = _port as LiveData<Int>
 
     private val adbMdns: AdbMdns =
         AdbMdns(context, AdbMdns.TLS_PAIRING) {

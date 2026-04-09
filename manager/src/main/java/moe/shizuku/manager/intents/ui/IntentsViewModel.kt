@@ -39,6 +39,6 @@ class IntentsViewModel(
         _intentAction.value = action
     }
 
-    fun onRegenerateToken() =
+    fun onRegenerateToken(): String =
         tokenRepository.regenerateAuthToken()
 }

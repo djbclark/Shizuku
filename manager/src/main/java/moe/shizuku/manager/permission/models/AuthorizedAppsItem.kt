@@ -12,9 +12,9 @@ sealed class AuthorizedAppsItem(val viewType: ViewType) {
         private val user: DeviceUser,
         private val label: String
     ) : AuthorizedAppsItem(ViewType.APP) {
-        val packageName = appInfo.packageName!!
-        val uid = appInfo.uid
-        val displayName =
+        val packageName: String = appInfo.packageName!!
+        val uid: Int = appInfo.uid
+        val displayName: String =
             if (user.isCurrentUser) label
             else "$label (${user.name})"
     }

@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-suspend fun <T> Flow<T>.collectAsEvents(onEvent: (T) -> Unit) =
+suspend fun <T> Flow<T>.collectAsEvents(onEvent: (T) -> Unit): Unit =
     withContext(Dispatchers.Main.immediate) {
         collect(onEvent)
     }

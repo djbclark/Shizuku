@@ -33,7 +33,7 @@ sealed class SystemSettingsPage(
                         Intent.EXTRA_COMPONENT_NAME,
                         ComponentName(
                             packageName,
-                            "com.android.settings.development.qstile.DevelopmentTiles\$WirelessDebugging",
+                            $$"com.android.settings.development.qstile.DevelopmentTiles$WirelessDebugging",
                         ),
                     )
                     addFlags(defaultFlags)
@@ -61,7 +61,7 @@ sealed class SystemSettingsPage(
                 putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
             }
 
-        data class NotificationChannel(val channelId: String) : Notifications() {
+        data class NotificationChannel(private val channelId: String) : Notifications() {
             override fun buildIntent(context: Context): Intent =
                 super.buildIntent(context).apply {
                     putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
@@ -71,7 +71,7 @@ sealed class SystemSettingsPage(
 
     object Accessibility : SystemSettingsPage(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 
-    protected val defaultFlags =
+    protected val defaultFlags: Int =
         Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_NO_HISTORY or
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or

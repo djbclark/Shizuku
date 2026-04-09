@@ -40,33 +40,33 @@ class SimpleDialogFragment : DialogFragment() {
         private var positiveText: CharSequence? = null
         private var negativeText: CharSequence? = null
 
-        fun setTitle(title: CharSequence?) =
+        fun setTitle(title: CharSequence?): Builder =
             apply { this.title = title }
 
-        fun setTitle(@StringRes titleId: Int) =
+        fun setTitle(@StringRes titleId: Int): Builder =
             apply { this.title = context.getText(titleId) }
 
-        fun setMessage(message: CharSequence?) =
+        fun setMessage(message: CharSequence?): Builder =
             apply { this.message = message }
 
-        fun setMessage(@StringRes messageId: Int) =
+        fun setMessage(@StringRes messageId: Int): Builder =
             apply { this.message = context.getText(messageId) }
 
-        fun setPositiveButton(@StringRes textId: Int) =
+        fun setPositiveButton(@StringRes textId: Int): Builder =
             apply { this.positiveText = context.getString(textId) }
 
-        fun setPositiveButton(text: CharSequence?) =
+        fun setPositiveButton(text: CharSequence?): Builder =
             apply { this.positiveText = text }
 
-        fun addOkButton() = setPositiveButton(android.R.string.ok)
+        fun addOkButton(): Builder = setPositiveButton(android.R.string.ok)
 
-        fun setNegativeButton(@StringRes textId: Int) =
+        fun setNegativeButton(@StringRes textId: Int): Builder =
             apply { this.negativeText = context.getString(textId) }
 
-        fun setNegativeButton(text: CharSequence?) =
+        fun setNegativeButton(text: CharSequence?): Builder =
             apply { this.negativeText = text }
 
-        fun addCancelButton() = setNegativeButton(android.R.string.cancel)
+        fun addCancelButton(): Builder = setNegativeButton(android.R.string.cancel)
 
         fun show(fragmentManager: FragmentManager, key: String) {
             val fragment = SimpleDialogFragment().apply {
@@ -81,7 +81,7 @@ class SimpleDialogFragment : DialogFragment() {
             fragment.show(fragmentManager, key)
         }
 
-        fun <T : Enum<T>> show(fragmentManager: FragmentManager, key: T) =
+        fun <T : Enum<T>> show(fragmentManager: FragmentManager, key: T): Unit =
             show(fragmentManager, key.name)
     }
 
@@ -91,16 +91,16 @@ class SimpleDialogFragment : DialogFragment() {
         private const val ARG_MESSAGE = "message"
         private const val ARG_POSITIVE_TEXT = "pos_text"
         private const val ARG_NEGATIVE_TEXT = "neg_text"
-        const val KEY_SUCCESS = "success"
+        const val KEY_SUCCESS: String = "success"
     }
 }
 
-fun Fragment.dialog() = SimpleDialogFragment.Builder(requireContext())
-fun FragmentActivity.dialog() = SimpleDialogFragment.Builder(this)
+fun Fragment.dialog(): SimpleDialogFragment.Builder = SimpleDialogFragment.Builder(requireContext())
+fun FragmentActivity.dialog(): SimpleDialogFragment.Builder = SimpleDialogFragment.Builder(this)
 
 inline fun <reified T : Enum<T>> Fragment.handleDialogResults(
     crossinline onResult: (key: T, success: Boolean) -> Unit
-) = enumValues<T>().forEach { enumValue ->
+): Unit = enumValues<T>().forEach { enumValue ->
     childFragmentManager.setFragmentResultListener(
         enumValue.name,
         viewLifecycleOwner
@@ -111,7 +111,7 @@ inline fun <reified T : Enum<T>> Fragment.handleDialogResults(
 
 inline fun <reified T : Enum<T>> FragmentActivity.handleDialogResults(
     crossinline onResult: (key: T, success: Boolean) -> Unit
-) = enumValues<T>().forEach { enumValue ->
+): Unit = enumValues<T>().forEach { enumValue ->
     supportFragmentManager.setFragmentResultListener(enumValue.name, this) { _, bundle ->
         onResult(enumValue, bundle.getBoolean(SimpleDialogFragment.KEY_SUCCESS, false))
     }

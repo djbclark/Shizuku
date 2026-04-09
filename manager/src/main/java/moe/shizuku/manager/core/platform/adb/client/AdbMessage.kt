@@ -6,10 +6,10 @@ import java.nio.ByteOrder
 class AdbMessage(
     val command: Int,
     val arg0: Int,
-    val arg1: Int,
+    private val arg1: Int,
     val data_length: Int,
-    val data_crc32: Int,
-    val magic: Int,
+    private val data_crc32: Int,
+    private val magic: Int,
     val data: ByteArray?
 ) {
 
@@ -91,7 +91,7 @@ class AdbMessage(
         return "AdbMessage(${toStringShort()})"
     }
 
-    fun toStringShort(): String {
+    private fun toStringShort(): String {
         val commandString = when (command) {
             A_SYNC -> "A_SYNC"
             A_CNXN -> "A_CNXN"
@@ -108,7 +108,7 @@ class AdbMessage(
 
     companion object {
 
-        const val HEADER_LENGTH = 24
+        const val HEADER_LENGTH: Int = 24
 
 
         private fun crc32(data: ByteArray?): Int {

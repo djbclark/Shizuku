@@ -1,5 +1,6 @@
 package moe.shizuku.manager.core.extensions
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
@@ -17,3 +18,6 @@ fun ImageView.setAppIcon(appInfo: ApplicationInfo) {
         placeholder(placeholderDrawable)
     }
 }
+
+fun Context.getAppLabel(appInfo: ApplicationInfo): String =
+    packageManager.getApplicationLabel(appInfo).toString()

@@ -6,10 +6,8 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.edit
-import moe.shizuku.manager.core.extensions.TAG
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
@@ -330,8 +328,6 @@ class AdbKey(
             CertificateFactory
                 .getInstance("X.509")
                 .generateCertificate(ByteArrayInputStream(x509Certificate.encoded)) as X509Certificate
-
-        Log.d(TAG, privateKey.toString())
     }
 
     val adbPublicKey: ByteArray by lazy {
@@ -437,10 +433,6 @@ class AdbKey(
                     issuers: Array<out Principal>?,
                     socket: Socket?,
                 ): String? {
-                    Log.d(
-                        TAG,
-                        "chooseClientAlias: keyType=${keyTypes.contentToString()}, issuers=${issuers?.contentToString()}"
-                    )
                     for (keyType in keyTypes) {
                         if (keyType == "RSA") return alias
                     }
@@ -448,12 +440,10 @@ class AdbKey(
                 }
 
                 override fun getCertificateChain(alias: String?): Array<X509Certificate>? {
-                    Log.d(TAG, "getCertificateChain: alias=$alias")
                     return if (alias == this.alias) arrayOf(certificate) else null
                 }
 
                 override fun getPrivateKey(alias: String?): PrivateKey? {
-                    Log.d(TAG, "getPrivateKey: alias=$alias")
                     return if (alias == this.alias) privateKey else null
                 }
 
@@ -556,9 +546,9 @@ class PreferenceAdbKeyStore(
     }
 }
 
-const val ANDROID_PUBKEY_MODULUS_SIZE = 2048 / 8
-const val ANDROID_PUBKEY_MODULUS_SIZE_WORDS = ANDROID_PUBKEY_MODULUS_SIZE / 4
-const val RSAPublicKey_Size = 524
+const val ANDROID_PUBKEY_MODULUS_SIZE: Int = 2048 / 8
+const val ANDROID_PUBKEY_MODULUS_SIZE_WORDS: Int = ANDROID_PUBKEY_MODULUS_SIZE / 4
+const val RSAPublicKey_Size: Int = 524
 
 private fun BigInteger.toAdbEncoded(): IntArray {
     // little-endian integer with padding zeros in the end
