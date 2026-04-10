@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.core.extensions.TAG
-import moe.shizuku.manager.core.userservice.IUserService
 import rikka.shizuku.Shizuku
 
 class UserServiceRepository(context: Context) {

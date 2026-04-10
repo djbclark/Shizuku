@@ -1,4 +1,4 @@
-package moe.shizuku.manager.core.userservice;
+package moe.shizuku.manager.core.platform.userservice;
 
 interface IUserService {
 

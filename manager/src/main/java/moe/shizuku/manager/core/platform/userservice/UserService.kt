@@ -4,14 +4,13 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManagerHidden
 import android.content.pm.UserInfo
-import android.os.Build
 import android.os.IUserManager
 import android.os.ServiceManager
 import android.util.Log
 import androidx.annotation.Keep
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.unsafeCast
-import moe.shizuku.manager.core.userservice.IUserService
+import moe.shizuku.manager.core.platform.device.AndroidVersion
 import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub {
@@ -40,11 +39,13 @@ class UserService : IUserService.Stub {
     }
 
     override fun getUsers(): List<UserInfo> = runCatching {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (AndroidVersion.isAtLeast11) {
             userManager.getUsers(true, true, true)
         } else {
             userManager.getUsers(true)
         }
+    }.recoverCatching {
+        userManager.getUsers(true)
     }.onFailure {
         Log.e(TAG, "getUsers", it)
     }.getOrDefault(emptyList())

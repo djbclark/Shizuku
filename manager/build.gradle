@@ -16,7 +16,7 @@ android {
         versionName = rootProject.ext.versionName
         externalNativeBuild {
             cmake {
-                arguments = ["-DANDROID_STL=none"]
+                arguments = ["-DANDROID_STL=c++_static"]
             }
         }
     }
@@ -170,9 +170,6 @@ dependencies {
 
     // Root
     implementation libs.libsu
-
-    // Native
-    implementation libs.libcxx
 
     // SSL
     implementation libs.boringssl

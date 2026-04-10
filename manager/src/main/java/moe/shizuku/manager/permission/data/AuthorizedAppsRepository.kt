@@ -37,7 +37,7 @@ class AuthorizedAppsRepository(
 
     suspend fun refresh(allUsers: Boolean = true) {
         val users = if (allUsers) {
-            deviceUserRepository.getUsers().values
+            deviceUserRepository.getUsers()
         } else {
             listOf(deviceUserRepository.getCurrentUser())
         }

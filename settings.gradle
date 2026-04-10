@@ -38,6 +38,6 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = "Shizuku"
 include ":server", ":starter", ":shell", ":manager", ":hidden-api"
-
-includeBuild("api")
+includeBuild "api"

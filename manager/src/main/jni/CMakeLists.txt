@@ -18,12 +18,11 @@ else ()
 endif ()
 
 find_package(boringssl REQUIRED CONFIG)
-find_package(cxx REQUIRED CONFIG)
 
 add_executable(libshizuku.so
         starter.cpp misc.cpp selinux.cpp cgroup.cpp)
 
-target_link_libraries(libshizuku.so log cxx::cxx)
+target_link_libraries(libshizuku.so log)
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_command(TARGET libshizuku.so POST_BUILD
@@ -33,7 +32,7 @@ endif ()
 add_library(adb SHARED
         adb_pairing.cpp misc.cpp)
 
-target_link_libraries(adb log boringssl::crypto_static cxx::cxx)
+target_link_libraries(adb log boringssl::crypto_static)
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_command(TARGET adb POST_BUILD

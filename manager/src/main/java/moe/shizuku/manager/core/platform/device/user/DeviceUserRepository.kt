@@ -27,18 +27,18 @@ class DeviceUserRepository(
         return userCache[userId] ?: createPlaceholder(userId)
     }
 
-    suspend fun getUsers(): Map<Int, DeviceUser> = mutex.withLock {
+    suspend fun getUsers(): Set<DeviceUser> = mutex.withLock {
         if (userCache.isEmpty()) {
             runCatching {
-                userServiceRepository.getService().getUsers().associate {
+                userCache = userServiceRepository.getService().getUsers().associate {
                     it.id to it.toDeviceUser()
-                }.also { userCache = it }
+                }
             }.onFailure {
                 Log.w(TAG, "getUsers", it)
             }
         }
 
-        return@withLock userCache
+        return@withLock userCache.values.toSet()
     }
 
     private fun createPlaceholder(userId: Int) = DeviceUser(
