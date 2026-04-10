@@ -6,10 +6,10 @@ import java.nio.ByteOrder
 class AdbMessage(
     val command: Int,
     val arg0: Int,
-    private val arg1: Int,
+    val arg1: Int,
     val data_length: Int,
-    private val data_crc32: Int,
-    private val magic: Int,
+    val data_crc32: Int,
+    val magic: Int,
     val data: ByteArray?
 ) {
 

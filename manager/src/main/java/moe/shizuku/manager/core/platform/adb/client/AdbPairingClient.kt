@@ -24,7 +24,7 @@ private const val kExportedKeySize = 64
 
 private const val kPairingPacketHeaderSize = 6
 
-private class PeerInfo(
+class PeerInfo(
     val type: Byte,
     data: ByteArray,
 ) {
@@ -58,7 +58,7 @@ private class PeerInfo(
     }
 }
 
-private class PairingPacketHeader(
+class PairingPacketHeader(
     val version: Byte,
     val type: Byte,
     val payload: Int,
@@ -114,7 +114,7 @@ private class PairingPacketHeader(
     }
 }
 
-private class PairingContext private constructor(
+class PairingContext private constructor(
     private val nativePtr: Long,
 ) {
     val msg: ByteArray
@@ -268,7 +268,7 @@ class AdbPairingClient(
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
 
-        return !pairingContext.initCipher(theirMessage)
+        return pairingContext.initCipher(theirMessage)
     }
 
     private fun doExchangePeerInfo(): Boolean {
