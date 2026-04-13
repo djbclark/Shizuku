@@ -34,7 +34,7 @@ class AutoStartManager(
         AWAITING_WIFI,
         AWAITING_RETRY,
         RUNNING,
-        STOPPED,
+        STOPPED
     }
 
     fun start(forceStart: Boolean = false) {

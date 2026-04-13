@@ -19,7 +19,6 @@ class PowerManagerHelper(private val context: Context) {
     fun getBatteryOptimizationIntent(): Intent {
         return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
             data = "package:${context.packageName}".toUri()
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }
 }

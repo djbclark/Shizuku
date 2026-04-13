@@ -134,7 +134,7 @@ class AutoStartWorker(
             WorkManager.getInstance(context).enqueueUniqueWork(
                 "adb_start_worker",
                 ExistingWorkPolicy.REPLACE,
-                request,
+                request
             )
         }
 

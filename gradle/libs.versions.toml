@@ -13,7 +13,7 @@ androidx-navigation = "2.9.7"
 androidx-preference = "1.2.1"
 androidx-recyclerview = "1.4.0"
 androidx-work = "2.11.2"
-apksig = "9.1.1"
+apksig = "9.1.0"
 arsclib = "1.3.8"
 boringssl = "20251124"
 bouncycastle = "1.83"
@@ -65,10 +65,11 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 hidden-compat = { group = "dev.rikka.hidden", name = "compat", version.ref = "hidden-api" }
 hidden-stub = { group = "dev.rikka.hidden", name = "stub", version.ref = "hidden-api" }
 hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenapibypass" }
-koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
-koin-core = { module = "io.insert-koin:koin-core" }
-koin-android = { module = "io.insert-koin:koin-android" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-androidx-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager" }
 koin-annotations = { module = "io.insert-koin:koin-annotations" }
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
@@ -98,7 +99,7 @@ androidx = [
     "androidx-recyclerview",
     "androidx-work"
 ]
-koin = ["koin-android", "koin-annotations", "koin-core"]
+koin = ["koin-android", "koin-androidx-workmanager", "koin-annotations", "koin-core"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

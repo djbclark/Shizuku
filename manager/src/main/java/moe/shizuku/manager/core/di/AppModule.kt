@@ -1,6 +1,7 @@
 package moe.shizuku.manager.core.di
 
 import moe.shizuku.manager.autostart.AutoStartManager
+import moe.shizuku.manager.autostart.AutoStartWorker
 import moe.shizuku.manager.autostart.StartOnBootManager
 import moe.shizuku.manager.core.locale.data.LocaleMigrator
 import moe.shizuku.manager.core.locale.data.LocaleRepository
@@ -47,6 +48,7 @@ import org.koin.dsl.module
 import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
+import org.koin.plugin.module.dsl.worker
 
 val appModule: Module = module {
     single<AdbPortHelper>()
@@ -93,4 +95,6 @@ val appModule: Module = module {
     viewModel<SettingsViewModel>()
     viewModel<StartViewModel>()
     viewModel<StealthViewModel>()
+
+    worker<AutoStartWorker>()
 }

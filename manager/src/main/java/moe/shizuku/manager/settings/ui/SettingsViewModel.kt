@@ -1,6 +1,7 @@
 package moe.shizuku.manager.settings.ui
 
 import android.os.Build
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.autostart.StartOnBootManager
+import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.locale.data.LocaleRepository
 import moe.shizuku.manager.core.locale.models.LocaleEntry
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
@@ -192,6 +194,7 @@ class SettingsViewModel(
     }
 
     fun onBatteryOptimizationResult() {
+        Log.d(TAG, "onBatteryOptimizationResult: $pendingBatteryOptimization")
         val setting = pendingBatteryOptimization ?: return
         if (powerManagerHelper.isIgnoringBatteryOptimizations()) {
             when (setting) {

@@ -272,16 +272,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 viewModel.applyStartOnBootChange(true)
             }.setNegativeButton(android.R.string.cancel, null).show()
 
+    private val batteryOptimizationLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            viewModel.onBatteryOptimizationResult()
+        }
+
     private fun showBatteryOptimizationSnackbar() =
         snackbar(R.string.settings_battery_optimization)
             .setAction(R.string.fix) {
                 val intent = powerManagerHelper.getBatteryOptimizationIntent()
-                val batteryOptimizationLauncher =
-                    registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                        viewModel.onBatteryOptimizationResult()
-                    }
                 batteryOptimizationLauncher.launch(intent)
             }
+            .show()
 
     private fun promptStopTcp() =
         MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.tcp_close_port)
