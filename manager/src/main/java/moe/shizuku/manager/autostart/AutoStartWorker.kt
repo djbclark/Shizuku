@@ -21,8 +21,8 @@ import kotlinx.coroutines.launch
 import moe.shizuku.manager.R
 import moe.shizuku.manager.core.utils.runnable.RunnableStatus
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.privilegedservice.models.StartStep
 import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
+import moe.shizuku.manager.privilegedservice.models.StartStep
 import java.io.EOFException
 import java.util.concurrent.TimeoutException
 
@@ -43,7 +43,7 @@ class AutoStartWorker(
             val session = privilegedServiceManager.createStartSession()
 
             coroutineScope {
-                launch {
+                val job = launch {
                     session.steps.collectLatest { steps ->
                         val authStep =
                             steps.find { it is StartStep.AwaitingAuthorization }
@@ -56,9 +56,10 @@ class AutoStartWorker(
                         }
                     }
                 }
-            }
 
-            privilegedServiceManager.startService(session)
+                privilegedServiceManager.startService(session)
+                job.cancel()
+            }
 
             val nm =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
