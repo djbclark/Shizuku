@@ -19,7 +19,7 @@ import moe.shizuku.manager.core.locale.data.LocaleRepository
 import moe.shizuku.manager.core.locale.models.LocaleEntry
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
-import moe.shizuku.manager.core.platform.services.PowerManagerHelper
+import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
 import moe.shizuku.manager.core.preferences.data.Preference
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.preferences.models.StartMode
@@ -33,7 +33,7 @@ import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val localeRepository: LocaleRepository,
-    private val powerManagerHelper: PowerManagerHelper,
+    private val batteryOptimizationHelper: BatteryOptimizationHelper,
     private val stateMachine: ShizukuStateMachine,
     private val tcpManager: TcpManager,
     private val adbSettingsManager: AdbSettingsManager,
@@ -186,7 +186,7 @@ class SettingsViewModel(
     }
 
     private fun shouldRequestBatteryOptimization(settingsValue: Boolean) =
-        settingsValue && !powerManagerHelper.isIgnoringBatteryOptimizations()
+        settingsValue && !batteryOptimizationHelper.isIgnoringBatteryOptimizations()
 
     private fun requestBatteryOptimization(pref: Preference<*>) {
         pendingBatteryOptimization = pref
@@ -196,7 +196,7 @@ class SettingsViewModel(
     fun onBatteryOptimizationResult() {
         Log.d(TAG, "onBatteryOptimizationResult: $pendingBatteryOptimization")
         val setting = pendingBatteryOptimization ?: return
-        if (powerManagerHelper.isIgnoringBatteryOptimizations()) {
+        if (batteryOptimizationHelper.isIgnoringBatteryOptimizations()) {
             when (setting) {
                 preferencesRepository.startOnBoot -> onStartOnBootChanged(true)
                 preferencesRepository.watchdog -> onWatchdogChanged(true)

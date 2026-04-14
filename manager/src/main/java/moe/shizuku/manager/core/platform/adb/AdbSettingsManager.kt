@@ -11,13 +11,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.shizuku.manager.core.extensions.isTelevision
 import moe.shizuku.manager.core.extensions.isWifiConnected
 import moe.shizuku.manager.core.platform.device.AndroidVersion
-import moe.shizuku.manager.core.platform.services.KeyguardManagerHelper
+import moe.shizuku.manager.core.platform.services.KeyguardHelper
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AdbSettingsManager(
     private val context: Context,
-    private val keyguardManagerHelper: KeyguardManagerHelper
+    private val keyguardHelper: KeyguardHelper
 ) {
     // USB DEBUGGING
 
@@ -63,8 +63,8 @@ class AdbSettingsManager(
 
         onAwaitingAuth(true)
 
-        if (keyguardManagerHelper.isKeyguardLocked) {
-            keyguardManagerHelper.waitForUnlock()
+        if (keyguardHelper.isKeyguardLocked) {
+            keyguardHelper.waitForUnlock()
             enableWirelessDebugging()
         }
 

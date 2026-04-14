@@ -27,7 +27,7 @@ import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
-import moe.shizuku.manager.core.platform.services.PowerManagerHelper
+import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
 import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.preferences.models.StartMode
@@ -53,7 +53,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val homeModel: HomeViewModel by viewModel()
     private val listSelectionModel: ListSelectionViewModel by viewModel()
     private val preferencesRepository: PreferencesRepository by inject()
-    private val powerManagerHelper: PowerManagerHelper by inject()
+    private val batteryOptimizationHelper: BatteryOptimizationHelper by inject()
     private val updateHelper: UpdateHelper by inject()
     private val stateMachine: ShizukuStateMachine by inject()
     private val privilegedServiceManager: PrivilegedServiceManager by inject()
@@ -158,7 +158,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                     msg = getString(R.string.home_battery_optimization),
                     duration = Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.fix) {
-                    val intent = powerManagerHelper.getBatteryOptimizationIntent()
+                    val intent = batteryOptimizationHelper.getBatteryOptimizationIntent()
                     startActivity(intent)
                 }.show()
             }

@@ -1,20 +1,21 @@
 package moe.shizuku.manager.core.di
 
+import moe.shizuku.manager.autostart.AutoStartNotificationProvider
 import moe.shizuku.manager.autostart.AutoStartManager
 import moe.shizuku.manager.autostart.AutoStartWorker
 import moe.shizuku.manager.autostart.StartOnBootManager
 import moe.shizuku.manager.core.locale.data.LocaleMigrator
 import moe.shizuku.manager.core.locale.data.LocaleRepository
 import moe.shizuku.manager.core.locale.data.LocaleXmlDataSource
-import moe.shizuku.manager.core.platform.services.KeyguardManagerHelper
+import moe.shizuku.manager.core.platform.services.KeyguardHelper
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSession
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
-import moe.shizuku.manager.core.platform.services.NotificationManagerHelper
+import moe.shizuku.manager.core.platform.services.notifications.NotificationHelper
 import moe.shizuku.manager.core.platform.services.pkg.PackageInstallerHelper
 import moe.shizuku.manager.core.platform.services.pkg.PackageInfoRepository
 import moe.shizuku.manager.core.platform.services.user.DeviceUserRepository
-import moe.shizuku.manager.core.platform.services.PowerManagerHelper
+import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
 import moe.shizuku.manager.core.platform.services.pkg.PackageManagerHelper
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
@@ -57,18 +58,19 @@ val appModule: Module = module {
     single<ApkUtils>()
     single<AuthorizedAppsRepository>()
     single<AutoStartManager>()
+    single<AutoStartNotificationProvider>()
     single<DeviceUserRepository>()
     single<RootUtils>()
-    single<KeyguardManagerHelper>()
+    single<KeyguardHelper>()
     single<LocaleMigrator>()
     single<LocaleRepository>()
     single<LocaleXmlDataSource>()
-    single<NotificationManagerHelper>()
+    single<NotificationHelper>()
     single<PackageInfoRepository>()
     single<PackageInstallerHelper>()
     single<PackageManagerHelper>()
     single<PermissionManager>()
-    single<PowerManagerHelper>()
+    single<BatteryOptimizationHelper>()
     single<PreferencesRepository>()
     single<PrivilegedServiceManager>()
     single<ReleaseRemoteDataSource>()

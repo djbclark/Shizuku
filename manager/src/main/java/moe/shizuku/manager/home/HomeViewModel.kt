@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
-import moe.shizuku.manager.core.platform.services.PowerManagerHelper
+import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
 import moe.shizuku.manager.home.models.HelpItem
 import moe.shizuku.manager.home.models.HomeEvent
 import moe.shizuku.manager.permission.PermissionManager
@@ -24,7 +24,7 @@ import rikka.shizuku.Shizuku
 class HomeViewModel(
     private val shizukuStateMachine: ShizukuStateMachine,
     private val preferencesRepository: PreferencesRepository,
-    private val powerManagerHelper: PowerManagerHelper,
+    private val batteryOptimizationHelper: BatteryOptimizationHelper,
     private val stateMachine: ShizukuStateMachine,
     private val permissionManager: PermissionManager
 ) : ViewModel() {
@@ -99,7 +99,7 @@ class HomeViewModel(
 
     fun checkBatteryOptimization() {
         if (!preferencesRepository.startOnBoot.get() && !preferencesRepository.watchdog.get()) return
-        if (!powerManagerHelper.isIgnoringBatteryOptimizations()) {
+        if (!batteryOptimizationHelper.isIgnoringBatteryOptimizations()) {
             _events.trySend(HomeEvent.ShowBatteryOptimizationSnackbar)
         }
     }

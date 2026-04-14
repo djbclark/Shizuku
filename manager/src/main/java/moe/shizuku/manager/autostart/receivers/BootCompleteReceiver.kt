@@ -11,8 +11,6 @@ class BootCompleteReceiver : BroadcastReceiver(), KoinComponent {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
-
-        val autoStartManager: AutoStartManager = get()
-        autoStartManager.start()
+        get<AutoStartManager>().start()
     }
 }

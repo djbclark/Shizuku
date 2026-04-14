@@ -7,8 +7,10 @@ import moe.shizuku.manager.core.extensions.TAG
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
-class LocaleXmlDataSource {
-    fun getLocales(context: Context): List<Locale> {
+class LocaleXmlDataSource(
+    private val context: Context
+) {
+    fun getLocales(): List<Locale> {
         val locales = mutableListOf<Locale>()
         try {
             // locales_config.xml is generated at build time
@@ -39,6 +41,6 @@ class LocaleXmlDataSource {
             Log.e(TAG, "Error loading locales from XML", e)
         }
 
-        return locales
+        return locales.toList()
     }
 }

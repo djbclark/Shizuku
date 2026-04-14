@@ -23,7 +23,7 @@ import moe.shizuku.manager.core.extensions.collectAsEvents
 import moe.shizuku.manager.core.extensions.showSnackbar
 import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.locale.data.LocaleRepository
-import moe.shizuku.manager.core.platform.services.PowerManagerHelper
+import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.preferences.models.StartMode
 import moe.shizuku.manager.core.preferences.models.Theme
@@ -43,7 +43,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private val preferencesRepository: PreferencesRepository by inject()
     private val localeRepository: LocaleRepository by inject()
-    private val powerManagerHelper: PowerManagerHelper by inject()
+    private val batteryOptimizationHelper: BatteryOptimizationHelper by inject()
 
     // -------------------
     // PREFERENCES
@@ -280,7 +280,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun showBatteryOptimizationSnackbar() =
         snackbar(R.string.settings_battery_optimization)
             .setAction(R.string.fix) {
-                val intent = powerManagerHelper.getBatteryOptimizationIntent()
+                val intent = batteryOptimizationHelper.getBatteryOptimizationIntent()
                 batteryOptimizationLauncher.launch(intent)
             }
             .show()

@@ -7,7 +7,9 @@ class PackageManagerHelper(private val context: Context) {
         context.packageManager
     }
 
-    val packageName: String = context.packageName
+    val packageName: String by lazy {
+        context.packageName
+    }
 
     fun isPackageInstalled(pkgName: String): Boolean = runCatching {
         packageManager.getPackageInfo(pkgName, 0)

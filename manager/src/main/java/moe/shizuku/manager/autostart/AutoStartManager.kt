@@ -1,41 +1,48 @@
 package moe.shizuku.manager.autostart
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
-import moe.shizuku.manager.R
-import moe.shizuku.manager.autostart.receivers.NotifAttemptReceiver
-import moe.shizuku.manager.autostart.receivers.NotifCancelReceiver
-import moe.shizuku.manager.autostart.receivers.NotifRestoreReceiver
+import androidx.work.WorkManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import moe.shizuku.manager.autostart.models.toAutoStartState
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.platform.services.user.DeviceUserRepository
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
 import moe.shizuku.manager.privilegedservice.models.PreStartCheck
 import moe.shizuku.manager.privilegedservice.data.ShizukuStateMachine
+import java.io.EOFException
+import java.util.concurrent.TimeoutException
 
 class AutoStartManager(
     private val context: Context,
+    private val notificationProvider: AutoStartNotificationProvider,
     private val shizukuStateMachine: ShizukuStateMachine,
     private val privilegedServiceManager: PrivilegedServiceManager,
     private val deviceUserRepository: DeviceUserRepository
 ) {
-    companion object {
-        const val NOTIFICATION_ID: Int = 1447
-        private const val CHANNEL_ID = "AdbStartWorker"
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
+
+    init {
+        observeWorker()
     }
 
-    enum class WorkerState {
-        AWAITING_WIFI,
-        AWAITING_RETRY,
-        AWAITING_AUTHORIZATION,
-        RUNNING,
-        STOPPED
+    private fun observeWorker() {
+        val workManager = WorkManager.getInstance(context)
+        scope.launch {workManager.getWorkInfosForUniqueWorkFlow(AutoStartWorker.WORK_NAME)
+            .map { it.firstOrNull()?.toAutoStartState() }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collectLatest { state ->
+                notificationProvider.updateNotification(state)
+            }
+        }
     }
 
     fun start(forceStart: Boolean = false) {
@@ -44,149 +51,24 @@ class AutoStartManager(
         when (privilegedServiceManager.canStartInBackground()) {
             PreStartCheck.Success -> {
                 AutoStartWorker.enqueue(context, privilegedServiceManager.isWifiRequired)
-                updateNotification(WorkerState.AWAITING_WIFI)
             }
 
             PreStartCheck.Failure.WriteSecureSettingsNotGranted -> {
-                showPermissionErrorNotification()
+                notificationProvider.showPermissionErrorNotification()
             }
 
             else -> Log.w(TAG, "Background start not supported")
         }
     }
 
-    fun buildNotification(msg: String? = null): Notification {
-        val channel =
-            NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.start_background),
-                NotificationManager.IMPORTANCE_LOW,
-            )
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(channel)
-
-        val cancelIntent = Intent(context, NotifCancelReceiver::class.java)
-        val cancelPendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                cancelIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-
-        val attemptNowIntent = Intent(context, NotifAttemptReceiver::class.java)
-        val attemptNowPendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                attemptNowIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-
-        val restoreIntent = Intent(context, NotifRestoreReceiver::class.java)
-        val restorePendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                restoreIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-
-        val nb = NotificationCompat.Builder(context, CHANNEL_ID)
-
-        if (msg != null) nb.setContentText(msg)
-
-        return nb
-            .setSmallIcon(R.drawable.ic_system_icon)
-            .setContentTitle(context.getString(R.string.start_background))
-            .setOngoing(true)
-            .setSilent(true)
-            .addAction(
-                R.drawable.ic_server_restart,
-                context.getString(R.string.start_background_attempt_now),
-                attemptNowPendingIntent
-            )
-            .addAction(
-                R.drawable.ic_close_24,
-                context.getString(android.R.string.cancel),
-                cancelPendingIntent
-            )
-            .setDeleteIntent(restorePendingIntent)
-            .build()
-    }
-
-    fun updateNotification(state: WorkerState) {
-        if (state == WorkerState.STOPPED) return
-        val msgId =
-            when (state) {
-                WorkerState.AWAITING_WIFI -> R.string.start_background_awaiting_wifi
-                WorkerState.AWAITING_RETRY -> R.string.start_background_awaiting_retry
-                WorkerState.AWAITING_AUTHORIZATION -> R.string.start_background_awaiting_auth
-                else -> null
-            }
-        val msg = if (msgId != null) context.getString(msgId) else null
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(NOTIFICATION_ID, buildNotification(msg))
-    }
-
-    private fun showPermissionErrorNotification() {
-        val channel =
-            NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.start_background),
-                NotificationManager.IMPORTANCE_LOW,
-            )
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(channel)
-
-        val webpageIntent =
-            Intent(
-                Intent.ACTION_VIEW,
-                "https://github.com/thedjchi/Shizuku/wiki#shizuku-isnt-starting-on-boot-for-me".toUri()
-            )
-        val pendingWebpageIntent =
-            PendingIntent.getActivity(
-                context,
-                0,
-                webpageIntent,
-                PendingIntent.FLAG_IMMUTABLE,
-            )
-
-        val msg = context.getString(R.string.start_background_error_permission_message)
-
-        val notification =
-            NotificationCompat
-                .Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_system_icon)
-                .setContentTitle(context.getString(R.string.start_background_error_permission))
-                .setContentText(msg)
-                .setSilent(true)
-                .setContentIntent(pendingWebpageIntent)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
-                .build()
-
-        nm.notify(NOTIFICATION_ID, notification)
-    }
-
-    fun fgsNotif(): Notification {
-        val channel =
-            NotificationChannel(
-                "fgsAutoStart",
-                "fgs",
-                NotificationManager.IMPORTANCE_NONE,
-            )
-
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (nm.getNotificationChannel("fgsAutoStart") == null)
-            nm.createNotificationChannel(channel)
-
-        val nb = NotificationCompat.Builder(context, "fgsAutoStart")
-
-        return nb
-            .setSmallIcon(R.drawable.ic_system_icon)
-            .setContentTitle("fgs")
-            .setOngoing(true)
-            .setSilent(true)
-            .build()
+    fun reportError(t: Throwable) {
+        val ignored = listOf(
+            EOFException::class,
+            SecurityException::class,
+            TimeoutException::class,
+        )
+        if (ignored.none { it.isInstance(t) }) {
+            notificationProvider.showErrorNotification(t)
+        }
     }
 }

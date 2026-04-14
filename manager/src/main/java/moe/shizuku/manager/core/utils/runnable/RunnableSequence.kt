@@ -7,7 +7,7 @@ import moe.shizuku.manager.core.extensions.TAG
 
 class RunnableSequence<T : Runnable>(
     private val _steps: List<T>
-) : Runnable() {
+) : Runnable(throws = false) {
     val steps: Flow<List<T>> =
         combine(_steps.map { it.status }) { _steps }
 

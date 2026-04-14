@@ -11,7 +11,5 @@ import org.koin.core.component.KoinComponent
 class NotifCancelReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
         WorkManager.getInstance(context).cancelUniqueWork("adb_start_worker")
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.cancel(AutoStartManager.NOTIFICATION_ID)
     }
 }

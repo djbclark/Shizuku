@@ -143,16 +143,12 @@ class PrivilegedServiceManager(
             adbSession = adbSessionFactory.create()
         }
 
-        try {
-            sequence.run()
-        } catch (e: Exception) {
-            Log.e(TAG, "startService: Failed to start service", e)
-            throw e
-        } finally {
-            shizukuStateMachine.update()
-            adbSession?.close()
-            adbSession = null
-        }
+        sequence.run()
+
+        // Clean-up
+        shizukuStateMachine.update()
+        adbSession?.close()
+        adbSession = null
     }
 
     fun stopService() {

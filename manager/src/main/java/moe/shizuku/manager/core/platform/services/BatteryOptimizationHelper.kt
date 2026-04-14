@@ -8,7 +8,7 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import moe.shizuku.manager.core.extensions.isTelevision
 
-class PowerManagerHelper(private val context: Context) {
+class BatteryOptimizationHelper(private val context: Context) {
     private val powerManager: PowerManager by systemService(context)
 
     fun isIgnoringBatteryOptimizations(): Boolean {
