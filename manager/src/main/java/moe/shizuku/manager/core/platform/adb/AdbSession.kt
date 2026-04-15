@@ -3,13 +3,14 @@ package moe.shizuku.manager.core.platform.adb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import moe.shizuku.manager.core.extensions.resultOf
 import moe.shizuku.manager.core.platform.adb.client.AdbClient
 import moe.shizuku.manager.core.platform.adb.client.AdbKey
 import moe.shizuku.manager.core.platform.adb.client.AdbKeyException
 import moe.shizuku.manager.core.platform.adb.client.PreferenceAdbKeyStore
+import moe.shizuku.manager.core.preferences.data.PreferencesRepository
+import java.io.EOFException
 import java.net.SocketTimeoutException
-import kotlin.coroutines.cancellation.CancellationException
 
 class AdbSession(
     private val preferencesRepository: PreferencesRepository,
@@ -44,7 +45,8 @@ class AdbSession(
         val currentClient = _client
         if (currentClient != null) return currentClient
 
-        if (port <= 0) throw IllegalStateException("Port not set")
+        val port = this.port
+        check (port > 0) { "Port must be greater than 0" }
 
         val newClient = AdbClient("127.0.0.1", port, getKey())
         newClient.connectWithRetry()
@@ -56,19 +58,18 @@ class AdbSession(
         var delayTime = 0L
         val maxAttempts = 5
         for (attempt in 1..maxAttempts) {
-            try {
-                if (delayTime > 0) delay(delayTime)
-                connect()
-                return
-            } catch (e: Exception) {
-                if (attempt == maxAttempts ||
-                    e is CancellationException ||
-                    e is SocketTimeoutException
-                ) {
-                    throw e
+            if (delayTime > 0) delay(delayTime)
+
+            resultOf { connect() }
+                .onSuccess { return }
+                .onFailure {
+                    if (attempt >= maxAttempts) throw it
+
+                    if (it is EOFException || it is SocketTimeoutException) {
+                        delayTime += 1000
+                        continue
+                    } else throw it
                 }
-                delayTime += 1000
-            }
         }
     }
 

@@ -49,6 +49,8 @@ class AutoStartWorker(
             } else return Result.success()
     }
 
+    private var isForeground = false
+
     private suspend fun checkAwaitingAuth(steps: List<StartStep>) {
         val enableWirelessDebuggingStep = steps.find {
             it is StartStep.EnableWirelessDebugging
@@ -58,7 +60,10 @@ class AutoStartWorker(
 
         setProgress(workDataOf(WORK_DATA_AWAITING_AUTH to isAwaitingAuth))
 
-        if (isAwaitingAuth) setForeground(getForegroundInfo())
+        if (isAwaitingAuth && !isForeground) {
+            setForeground(getForegroundInfo())
+            isForeground = true
+        }
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {

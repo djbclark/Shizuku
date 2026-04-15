@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.shizuku.manager.core.extensions.isTelevision
 import moe.shizuku.manager.core.platform.adb.client.AdbMdns
+import moe.shizuku.manager.core.platform.adb.models.WirelessDebuggingResult
 import kotlin.coroutines.resume
 
 class AdbPortHelper(
@@ -25,7 +26,10 @@ class AdbPortHelper(
 
     @RequiresApi(Build.VERSION_CODES.R)
     private suspend fun getTlsPort(): Int {
-        adbSettingsManager.enableWirelessDebuggingAwaitingAuth()
+        val isWirelessDebuggingEnabled = adbSettingsManager.enableWirelessDebugging()
+
+        check (isWirelessDebuggingEnabled == WirelessDebuggingResult.Success)
+        { "Wireless debugging not enabled" }
 
         return suspendCancellableCoroutine { cont ->
             var mdns: AdbMdns? = null

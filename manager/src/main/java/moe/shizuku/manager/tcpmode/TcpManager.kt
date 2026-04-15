@@ -98,7 +98,8 @@ class TcpManager(
     suspend fun closeTcpPort(session: AdbSession): Result<Unit> = runCatching {
         if (!isTcpPortOpen) return@runCatching
 
-        adbSettingsManager.enableUsbDebugging()
+        check (adbSettingsManager.enableUsbDebugging().isSuccess)
+        { "USB debugging not enabled" }
 
         with(session) {
             port = adbPortHelper.tcpPort

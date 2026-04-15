@@ -22,30 +22,31 @@ class LocaleRepository(
     private val _localeFlow = MutableStateFlow(getLocale())
     val localeFlow: StateFlow<LocaleEntry> = _localeFlow.asStateFlow()
 
-    fun getLocale(): LocaleEntry = AppCompatDelegate.getApplicationLocales().get(0)?.toLocaleEntry()
+    fun getLocale(): LocaleEntry =
+        AppCompatDelegate.getApplicationLocales().get(0)?.toLocaleEntry()
         ?: LocaleEntry.SystemDefault
 
     fun getLocaleEntries(): List<LocaleEntry> {
-        val locales = getSupportedLocales()
+        val locales = getSupportedLocales() ?: return emptyList()
 
-        val sortedLanguages =
-            locales.map { it.toLocaleEntry() }.sortedBy { it.nameOwnLocale.lowercase() }
+        val sortedLanguages = locales
+            .map { it.toLocaleEntry() }
+            .sortedBy { it.nameOwnLocale.lowercase() }
 
         return listOf(LocaleEntry.SystemDefault) + sortedLanguages
     }
 
-    private fun getSupportedLocales(): List<Locale> {
+    private fun getSupportedLocales(): List<Locale>? {
         cachedLocales?.let { return it }
 
-        if (AndroidVersion.isAtLeast13) {
-            LocaleConfig(context).supportedLocales?.let { locales ->
-                return locales.toList().also {
-                    cachedLocales = it
-                }
+        val supportedLocales =
+            if (AndroidVersion.isAtLeast13) {
+                LocaleConfig(context).supportedLocales?.toList()
+            } else {
+                localeXmlDataSource.getLocales()
             }
-        }
 
-        return localeXmlDataSource.getLocales().also {
+        return supportedLocales.also {
             cachedLocales = it
         }
     }
