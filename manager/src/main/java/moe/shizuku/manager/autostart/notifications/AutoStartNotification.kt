@@ -88,7 +88,8 @@ class AutoStartNotification(
             notificationId = ENQUEUED_ID
         }
 
-        notificationHelper.notify(notificationId, buildNotification(state))
+        val notification = buildNotification(state)
+        notificationHelper.notify(notificationId, notification)
     }
 
     fun showErrorNotification() {

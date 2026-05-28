@@ -13,20 +13,21 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.extensions.collectAsEvents
 import moe.shizuku.manager.core.extensions.snackbar
-import moe.shizuku.manager.core.ui.helpers.viewBinding
+import moe.shizuku.manager.core.platform.device.RomInfo
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 import moe.shizuku.manager.core.ui.components.dialog
 import moe.shizuku.manager.core.ui.components.handleDialogResults
+import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.AuthorizedAppsFragmentBinding
 import moe.shizuku.manager.permission.models.AuthorizedAppsEvent
 import moe.shizuku.manager.permission.models.AuthorizedAppsUiState
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-
-import moe.shizuku.manager.core.platform.device.RomInfo
-import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
 
 class AuthorizedAppsFragment : Fragment(R.layout.authorized_apps_fragment) {
 
     private val viewModel: AuthorizedAppsViewModel by viewModel()
+    private val settingsIntentFactory: SettingsIntentFactory by inject()
 
     private val adapter by lazy {
         AppsAdapter(
@@ -52,7 +53,7 @@ class AuthorizedAppsFragment : Fragment(R.layout.authorized_apps_fragment) {
 
             when (key) {
                 AuthorizedAppsEvent.Dialog.ADB_RESTRICTED -> {
-                    // TODO SystemSettingsPage.Developer.launch(requireContext())
+                    startActivity(settingsIntentFactory.developerOptions())
                 }
             }
         }

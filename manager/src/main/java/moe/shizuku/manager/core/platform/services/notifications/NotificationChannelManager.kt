@@ -12,7 +12,7 @@ class NotificationChannelManager(
         NotificationManagerCompat.from(context)
     }
 
-    fun createChannels()     {
+    fun createChannels() {
         val channels = appNotificationChannels.map { createChannel(it) }
         notificationManager.createNotificationChannelsCompat(channels)
     }

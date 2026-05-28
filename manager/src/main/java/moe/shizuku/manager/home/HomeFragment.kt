@@ -1,6 +1,5 @@
 package moe.shizuku.manager.home
 
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -28,7 +27,8 @@ import moe.shizuku.manager.core.extensions.snackbar
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
 import moe.shizuku.manager.core.platform.services.BatteryOptimizationHelper
-import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
+import moe.shizuku.manager.core.platform.settings.DeveloperOptionsSetting
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.preferences.models.StartMode
 import moe.shizuku.manager.core.ui.components.listselection.ListSelectionViewModel
@@ -52,6 +52,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     private val preferencesRepository: PreferencesRepository by inject()
     private val batteryOptimizationHelper: BatteryOptimizationHelper by inject()
     private val updateHelper: UpdateHelper by inject()
+    private val settingsIntentFactory: SettingsIntentFactory by inject()
     private val privilegedServiceManager: PrivilegedServiceManager by inject()
     private val privilegedServiceStateMachine: PrivilegedServiceStateMachine by inject()
     private val adbSettingsManager: AdbSettingsManager by inject()
@@ -155,8 +156,8 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                         preferencesRepository.startMode.get() == StartMode.ROOT
                 setOnClickListener {
                     lifecycleScope.launch {
-                        // start()
-                        autoStartManager.start()
+                        start()
+//                        autoStartManager.start()
                     }
                 }
             }
@@ -167,7 +168,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
 
             if (adbSettingsManager.hasWirelessDebugging) {
                 buttonPair.setOnClickListener {
-                    onPairClicked(requireContext())
+                    onPairClicked()
                 }
             } else {
                 buttonPair.visibility = GONE
@@ -263,7 +264,7 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     }
 
     suspend fun start() {
-        privilegedServiceManager.canStart()
+        privilegedServiceManager.checkForegroundStart()
             .onOk { findNavController().navigate(R.id.navigate_to_start) }
             .onErr {
                 val msgRes = when (it) {
@@ -278,13 +279,14 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
                 snackbar(msgRes).run {
                     if (it == PreStartCheckError.WirelessDebuggingDisabled) {
                         setAction(R.string.enable) {
-                            SystemSettingsPage.Developer.HighlightWirelessDebugging.launch(
-                                requireContext()
-                            )
+                            startActivity(settingsIntentFactory.wirelessDebugging())
                         }
                     } else if (it == PreStartCheckError.UsbDebuggingDisabled) {
                         setAction(R.string.enable) {
-                            SystemSettingsPage.Developer.HighlightUsbDebugging.launch(requireContext())
+                            val devOptions = settingsIntentFactory.developerOptions(
+                                highlight = DeveloperOptionsSetting.UsbDebugging
+                            )
+                            startActivity(devOptions)
                         }
                     }
                     show()
@@ -293,11 +295,11 @@ class HomeFragment : Fragment(R.layout.home_fragment) {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun onPairClicked(context: Context) {
+    private fun onPairClicked() {
         if (requireContext().isTelevision) {
-            showAccessibilityDialog(context)
+            showAccessibilityDialog(requireContext())
         } else if (preferencesRepository.legacyPairing.get()) {
-            (context as? FragmentActivity)?.supportFragmentManager?.let {
+            (requireContext() as? FragmentActivity)?.supportFragmentManager?.let {
                 // AdbPairDialogFragment().show(it) // TODO
             }
         } else {

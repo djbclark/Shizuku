@@ -12,7 +12,7 @@ import moe.shizuku.manager.R
 import moe.shizuku.manager.core.extensions.TAG
 import moe.shizuku.manager.core.extensions.applySystemBarsPadding
 import moe.shizuku.manager.core.platform.device.RomInfo
-import moe.shizuku.manager.core.platform.settings.SystemSettingsHelper
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 import moe.shizuku.manager.core.ui.helpers.viewBinding
 import moe.shizuku.manager.databinding.PairingFragmentBinding
 import moe.shizuku.manager.pairing.notifications.AdbPairingNotification
@@ -23,6 +23,7 @@ import org.koin.android.ext.android.inject
 class PairingFragment : Fragment(R.layout.pairing_fragment) {
     private val binding by viewBinding(PairingFragmentBinding::bind)
     private val notificationProvider: AdbPairingNotification by inject()
+    private val settingsIntentFactory: SettingsIntentFactory by inject()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,7 +34,7 @@ class PairingFragment : Fragment(R.layout.pairing_fragment) {
             miui.isVisible = RomInfo.isMiui
 
             developerOptions.setOnClickListener {
-                SystemSettingsHelper.launchOrHighlightWirelessDebugging(requireContext())
+                startActivity(settingsIntentFactory.wirelessDebugging())
             }
         }
     }

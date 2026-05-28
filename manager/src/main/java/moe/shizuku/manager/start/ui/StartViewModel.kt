@@ -87,7 +87,7 @@ class StartViewModel(
                 onSuccess = { StartStepUiStatus.Completed() },
                 onFailure = { reason ->
                     val uiText = when (reason) {
-                        RootError.PermissionDenied -> UiText.DynamicString("Root permission was denied")
+                        RootError.PermissionDenied -> UiText.StringLiteral("Root permission was denied")
                     }
                     StartStepUiStatus.Failed(uiText)
                 }
@@ -134,7 +134,6 @@ class StartViewModel(
                 onFailure = { reason ->
                     val uiText = when (reason) {
                         AdbPortError.NotFound -> UiText.StringResource(R.string.start_error_port_not_found)
-                        is AdbPortError.SettingsError -> UiText.DynamicString(reason.e.toString())
                     }
                     StartStepUiStatus.Failed(uiText)
                 }
@@ -146,7 +145,7 @@ class StartViewModel(
                     val uiText = when (reason) {
                         AdbConnectionError.NotPaired -> UiText.StringResource(R.string.start_error_pairing_required)
                         is AdbConnectionError.ConnectionFailed -> {
-                            reason.e.message?.let { UiText.DynamicString(it) }
+                            reason.e.message?.let { UiText.StringLiteral(it) }
                                 ?: UiText.StringResource(R.string.error)
                         }
                     }
@@ -157,7 +156,7 @@ class StartViewModel(
             is StartStep.OpenTcpPort -> step.status.value.mapToUiStatus(
                 onSuccess = { StartStepUiStatus.Completed() },
                 onFailure = { reason ->
-                    val uiText = reason?.let { UiText.DynamicString(it) }
+                    val uiText = reason?.let { UiText.StringLiteral(it) }
                         ?: UiText.StringResource(R.string.error)
                     StartStepUiStatus.Failed(uiText)
                 }
@@ -168,7 +167,7 @@ class StartViewModel(
                 onFailure = { errors ->
                     val message = errors.joinToString("\n")
                     val uiText = if (message.isNotEmpty()) {
-                        UiText.DynamicString(message)
+                        UiText.StringLiteral(message)
                     } else {
                         UiText.StringResource(R.string.error)
                     }

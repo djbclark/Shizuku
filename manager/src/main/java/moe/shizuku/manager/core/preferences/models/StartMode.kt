@@ -6,5 +6,5 @@ enum class StartMode(
     override val value: Int
 ) : IntEnum {
     WADB(0),
-    ROOT(1);
+    ROOT(1)
 }

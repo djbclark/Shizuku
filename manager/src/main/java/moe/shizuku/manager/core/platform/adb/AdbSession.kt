@@ -18,66 +18,47 @@ import moe.shizuku.manager.core.platform.adb.client.AdbKey
 import moe.shizuku.manager.core.platform.adb.client.PreferenceAdbKeyStore
 import moe.shizuku.manager.core.platform.adb.models.AdbConnectionError
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
-import java.io.EOFException
 import java.io.IOException
-import java.net.SocketTimeoutException
 import javax.net.ssl.SSLProtocolException
 
 class AdbSession(
     private val preferencesRepository: PreferencesRepository,
-    port: Int
+    initialPort: Int
 ) : AutoCloseable {
     private val mutex = Mutex()
     private var key: AdbKey? = null
     private var client: AdbClient? = null
     private var isConnected = false
 
-    var port: Int = port
+    private suspend fun getKey(): AdbKey = key ?: withContext(Dispatchers.IO) {
+        AdbKey(PreferenceAdbKeyStore(preferencesRepository.prefs), "shizuku").also { key = it }
+    }
+
+    var port: Int = initialPort
         set(value) {
             if (field != value) {
                 field = value
-                closeClient()
+                close()
             }
         }
 
-    private suspend fun getKey() = key ?: withContext(Dispatchers.IO) {
-        AdbKey(
-            PreferenceAdbKeyStore(preferencesRepository.prefs),
-            "shizuku"
-        ).also { key = it }
-    }
+    suspend fun connect(): Result<AdbClient, AdbConnectionError> = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            if (isConnected) return@withLock Ok(client!!)
 
-    private suspend fun createClient(): AdbClient {
-        val port = this.port
-        require(port > 0) { "Port must be greater than 0" }
+            require(port > 0) { "Port must be greater than 0" }
+            val client = client ?: AdbClient("127.0.0.1", port, getKey()).also {
+                this@AdbSession.client = it
+            }
 
-        return AdbClient("127.0.0.1", port, getKey())
-    }
-
-    private suspend fun getClient(): AdbClient = mutex.withLock {
-        client?.let { return@withLock it }
-
-        createClient().also {
-            client = it
-            isConnected = false
-        }
-    }
-
-    suspend fun connect(): Result<AdbClient, AdbConnectionError> {
-        val client = getClient()
-
-        return if (isConnected) Ok(client)
-        else connectWithRetry(client).onOk {
-            isConnected = true
+            connectWithRetry(client).onOk { isConnected = true }
         }
     }
 
     private suspend fun connectWithRetry(client: AdbClient): Result<AdbClient, AdbConnectionError> {
-        var delayTime = 0L
         val maxAttempts = 5
-
-        for (attempt in 1..maxAttempts) {
-            if (delayTime > 0) delay(delayTime)
+        repeat(maxAttempts) { attempt ->
+            if (attempt > 0) delay(1000L * attempt)
 
             resultOf { client.connect() }
                 .fold(
@@ -85,19 +66,18 @@ class AdbSession(
                     failure = {
                         when (it) {
                             is SSLProtocolException -> return Err(AdbConnectionError.NotPaired)
-                            is EOFException, is SocketTimeoutException -> {
-                                if (attempt < maxAttempts) delayTime += 1000
-                                else return Err(AdbConnectionError.ConnectionFailed(it))
+                            is IOException -> {
+                                val lastAttempt = maxAttempts - 1
+                                if (attempt == lastAttempt)
+                                    return Err(AdbConnectionError.ConnectionFailed(it))
                             }
 
-                            is IOException -> return Err(AdbConnectionError.ConnectionFailed(it))
                             else -> throw it
                         }
                     }
                 )
         }
-
-        error("No return value after $maxAttempts attempts")
+        error("Unexpected retry exit")
     }
 
     suspend fun <T> withClient(block: suspend (AdbClient) -> T): Result<T, AdbConnectionError> =
@@ -106,25 +86,20 @@ class AdbSession(
                 resultOf { block(client) }
                     .mapError {
                         if (it is IOException) {
-                            closeClient()
+                            close()
                             AdbConnectionError.ConnectionFailed(it)
                         } else throw it
                     }
             }
         }
 
-    private fun closeClient() {
+    override fun close() {
         client?.close()
         client = null
         isConnected = false
     }
 
-    override fun close(): Unit = closeClient()
-
-    class Factory(
-        private val preferencesRepository: PreferencesRepository
-    ) {
-        fun create(port: Int = 0): AdbSession =
-            AdbSession(preferencesRepository, port)
+    class Factory(private val preferencesRepository: PreferencesRepository) {
+        fun create(port: Int = 0) = AdbSession(preferencesRepository, port)
     }
 }

@@ -12,8 +12,6 @@ import moe.shizuku.manager.core.platform.adb.models.AdbPortError
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -38,10 +36,6 @@ class AdbPortHelper(
 
     @RequiresApi(Build.VERSION_CODES.R)
     suspend fun getTlsPort(): Result<Int, AdbPortError> = withContext(Dispatchers.IO) {
-        adbSettingsManager.setWirelessDebugging(true)
-            .mapError { AdbPortError.SettingsError(it) }
-            .onErr { Err(it) }
-
         withTimeoutOrNull(10_000L) {
             adbMdns.connectFlow.first()
                 .let { Ok(it) }

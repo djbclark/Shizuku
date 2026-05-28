@@ -11,7 +11,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import moe.shizuku.manager.R
 import moe.shizuku.manager.pairing.services.AdbPairingAccessibilityService
 import moe.shizuku.manager.core.extensions.hasWriteSecureSettings
-import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 
 fun showAccessibilityDialog(context: Context) {
     val installer = context.packageManager.getInstallerPackageName(context.packageName)
@@ -62,7 +62,8 @@ private fun Context.showEnableDialog() {
         .setTitle(R.string.pairing_accessibility_required)
         .setMessage(R.string.pairing_accessibility_required_message)
         .setPositiveButton(R.string.enable) { _, _ ->
-            SystemSettingsPage.Accessibility.launch(this)
+            val accessibility = SettingsIntentFactory(this).accessibility()
+            startActivity(accessibility)
         }.setNegativeButton(android.R.string.cancel, null)
         .show()
 }
@@ -82,7 +83,8 @@ private fun Context.showNavigateDialog() {
         .setTitle(R.string.pair)
         .setMessage(msg)
         .setPositiveButton(R.string.developer_options) { _, _ ->
-            SystemSettingsPage.Developer.HighlightWirelessDebugging.launch(this)
+            val wirelessDebugging = SettingsIntentFactory(this).wirelessDebugging()
+            startActivity(wirelessDebugging)
         }.setNegativeButton(android.R.string.cancel, null)
         .show()
 }

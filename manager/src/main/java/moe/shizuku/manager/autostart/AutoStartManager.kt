@@ -7,13 +7,13 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.github.michaelbull.result.onErr
-import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
-import moe.shizuku.manager.start.models.PreStartCheckError
 import com.github.michaelbull.result.onOk
 import moe.shizuku.manager.autostart.AutoStartWorker.Companion.WORK_NAME
 import moe.shizuku.manager.autostart.models.AutoStartState
 import moe.shizuku.manager.autostart.notifications.AutoStartNotification
+import moe.shizuku.manager.privilegedservice.PrivilegedServiceManager
 import moe.shizuku.manager.privilegedservice.PrivilegedServiceStateMachine
+import moe.shizuku.manager.start.models.PreStartCheckError
 
 class AutoStartManager(
     private val context: Context,
@@ -25,7 +25,7 @@ class AutoStartManager(
     fun start(forceStart: Boolean = false) {
         if (privilegedServiceStateMachine.isRunning && !forceStart) return
 
-        privilegedServiceManager.canStartInBackground()
+        privilegedServiceManager.checkBackgroundStart()
             .onOk {
                 enqueue(privilegedServiceManager.isWifiRequired)
                 notificationProvider.updateNotification(
@@ -49,20 +49,22 @@ class AutoStartManager(
     }
 
     private fun enqueue(isWifiRequired: Boolean) {
-        val cb = Constraints.Builder()
-        if (isWifiRequired) {
-            cb.setRequiredNetworkType(NetworkType.UNMETERED)
-        }
-        val constraints = cb.build()
+        val workRequestBuilder = OneTimeWorkRequestBuilder<AutoStartWorker>()
 
-        val request =
-            OneTimeWorkRequestBuilder<AutoStartWorker>().setConstraints(constraints)
+        if (isWifiRequired) {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
                 .build()
+
+            workRequestBuilder.setConstraints(constraints)
+        }
+
+        val workRequest = workRequestBuilder.build()
 
         WorkManager.getInstance(context).enqueueUniqueWork(
             WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            request
+            workRequest
         )
     }
 }

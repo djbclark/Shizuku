@@ -99,7 +99,7 @@ class SettingsViewModel(
     fun onStartOnBootChanged(newValue: Boolean) {
         if (shouldRequestBatteryOptimization(newValue)) {
             requestBatteryOptimization(preferencesRepository.startOnBoot)
-        } else if (startOnBootManager.adbAuthNeverSaved) {
+        } else if (startOnBootManager.hasAdbAuthBug) {
             _events.trySend(SettingsEvent.ShowStartOnBootBugDialog)
         } else {
             applyStartOnBootChange(newValue)

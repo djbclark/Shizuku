@@ -6,14 +6,16 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import moe.shizuku.manager.R
+import moe.shizuku.manager.core.platform.device.AndroidVersion
 import moe.shizuku.manager.core.platform.services.notifications.AppNotificationChannel
 import moe.shizuku.manager.core.platform.services.notifications.NotificationHelper
-import moe.shizuku.manager.core.platform.settings.SystemSettingsPage
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 
 class CrashNotification(
     private val context: Context,
     private val channel: AppNotificationChannel,
-    private val notificationHelper: NotificationHelper
+    private val notificationHelper: NotificationHelper,
+    private val settingsIntentFactory: SettingsIntentFactory
 ) {
 
     fun showCrashNotification() {
@@ -25,22 +27,24 @@ class CrashNotification(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val disableIntent = SystemSettingsPage.Notifications.NotificationChannel(channel.id)
-            .buildIntent(context)
-        val disablePendingIntent = PendingIntent.getActivity(
-            context, 0, disableIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-
-        val notification = NotificationCompat.Builder(context, channel.id)
+        val nb = NotificationCompat.Builder(context, channel.id)
             .setContentTitle(context.getString(R.string.watchdog_crash_alert))
             .setContentText(context.getString(R.string.watchdog_crash_alert_message))
             .setSmallIcon(R.drawable.ic_system_icon)
             .setContentIntent(learnMorePendingIntent)
             .setAutoCancel(true)
-            .addAction(0, context.getString(R.string.watchdog_disable_alerts), disablePendingIntent)
-            .build()
 
+        if (AndroidVersion.isAtLeast8) {
+            val disableIntent = settingsIntentFactory.notifications(channel.id)
+            val disablePendingIntent = PendingIntent.getActivity(
+                context, 0, disableIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            nb.addAction(0, context.getString(R.string.watchdog_disable_alerts), disablePendingIntent)
+        }
+
+        val notification = nb.build()
         notificationHelper.notify(ID_CRASH, notification)
     }
 

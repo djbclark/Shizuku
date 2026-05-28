@@ -13,6 +13,7 @@ import moe.shizuku.manager.watchdog.notifications.WatchdogNotification
 import moe.shizuku.manager.core.locale.data.LocaleMigrator
 import moe.shizuku.manager.core.locale.data.LocaleRepository
 import moe.shizuku.manager.core.locale.data.LocaleXmlDataSource
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 import moe.shizuku.manager.core.platform.services.KeyguardHelper
 import moe.shizuku.manager.core.platform.adb.AdbPortHelper
 import moe.shizuku.manager.core.platform.adb.AdbSession
@@ -86,6 +87,7 @@ val appModule: Module = module {
     single<PackageInfoRepository>()
     single<PackageInstallerHelper>()
     single<PackageManagerHelper>()
+    single<SettingsIntentFactory>()
     single<PermissionManager>()
     single<PreferencesRepository>()
     single<PrivilegedServiceManager>()

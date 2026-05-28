@@ -3,34 +3,26 @@ package moe.shizuku.manager.autostart
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import moe.shizuku.manager.autostart.receivers.BootCompleteReceiver
 import moe.shizuku.manager.core.preferences.data.PreferencesRepository
 import moe.shizuku.manager.core.extensions.isTelevision
 import moe.shizuku.manager.core.platform.adb.AdbSettingsManager
+import moe.shizuku.manager.core.platform.device.AndroidVersion
 import moe.shizuku.manager.core.utils.root.RootUtils
 
 class StartOnBootManager(
     private val context: Context,
     private val adbSettingsManager: AdbSettingsManager,
+    scope: CoroutineScope,
     preferencesRepository: PreferencesRepository
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val _bootReceiverEnabled = MutableStateFlow(false)
-    val bootReceiverEnabled: StateFlow<Boolean> = _bootReceiverEnabled.asStateFlow()
 
     init {
         preferencesRepository.startOnBoot.flow.onEach {
-            setBootReceiverEnabled(context, it)
-            _bootReceiverEnabled.value = isBootReceiverEnabled(context)
+            setBootReceiverEnabled(it)
         }.launchIn(scope)
     }
 
@@ -39,17 +31,10 @@ class StartOnBootManager(
                 context.isTelevision ||
                 (RootUtils.isRooted() ?: false)
 
-    val adbAuthNeverSaved: Boolean
-        get() = !context.isTelevision && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+    val hasAdbAuthBug: Boolean
+        get() = !context.isTelevision && !AndroidVersion.isAtLeast13
 
-    fun isBootReceiverEnabled(context: Context): Boolean {
-        val bootCompleteReceiver = ComponentName(context, BootCompleteReceiver::class.java)
-        val state = context.packageManager.getComponentEnabledSetting(bootCompleteReceiver)
-
-        return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-    }
-
-    private fun setBootReceiverEnabled(context: Context, enabled: Boolean) {
+    private fun setBootReceiverEnabled(enabled: Boolean) {
         val bootCompleteReceiver = ComponentName(context, BootCompleteReceiver::class.java)
         val state = if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
         else PackageManager.COMPONENT_ENABLED_STATE_DISABLED

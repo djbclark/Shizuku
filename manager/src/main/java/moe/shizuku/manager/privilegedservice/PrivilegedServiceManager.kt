@@ -53,17 +53,17 @@ class PrivilegedServiceManager(
             return isStartModeWadb && (isTcpPortOpen || !isTcpModeEnabled)
         }
 
-    fun canStartInBackground(): Result<Unit, PreStartCheckError.Background> =
-        canStartCommon().fold(
+    fun checkBackgroundStart(): Result<Unit, PreStartCheckError.Background> =
+        checkStartCommon().fold(
             failure = { Err(it as PreStartCheckError.Background) },
             success = {
                 if (context.hasWriteSecureSettings()) Ok(Unit)
                 else Err(PreStartCheckError.WriteSecureSettingsNotGranted)
             }
-        ).also { Log.i(TAG, "canStartInBackground: $it") }
+        ).also { Log.i(TAG, "checkBackgroundStart: $it") }
 
-    suspend fun canStart(): Result<Unit, PreStartCheckError.Foreground> =
-        canStartCommon().fold(
+    suspend fun checkForegroundStart(): Result<Unit, PreStartCheckError.Foreground> =
+        checkStartCommon().fold(
             failure = { Err(it as PreStartCheckError.Foreground) },
             success = {
                 adbSettingsManager.setUsbDebugging(true)
@@ -81,9 +81,9 @@ class PrivilegedServiceManager(
                         }
                     }
             }
-        )
+        ).also { Log.i(TAG, "checkForegroundStart: $it") }
 
-    private fun canStartCommon(): Result<Unit, PreStartCheckError> =
+    private fun checkStartCommon(): Result<Unit, PreStartCheckError> =
         when (preferencesRepository.startMode.get()) {
             StartMode.ROOT -> {
                 if (RootUtils.isRooted() == true) Ok(Unit) // TODO handle null

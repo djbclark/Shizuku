@@ -27,14 +27,16 @@ import moe.shizuku.manager.core.platform.adb.client.AdbKey
 import moe.shizuku.manager.core.platform.adb.AdbMdns
 import moe.shizuku.manager.core.platform.adb.client.AdbPairingClient
 import moe.shizuku.manager.core.platform.adb.client.PreferenceAdbKeyStore
-import moe.shizuku.manager.core.platform.settings.SystemSettingsHelper
+import moe.shizuku.manager.core.platform.settings.SettingsIntentFactory
 import moe.shizuku.manager.databinding.AdbPairDialogBinding
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import java.net.ConnectException
 
 @RequiresApi(VERSION_CODES.R)
 class AdbPairDialogFragment : DialogFragment() {
     private val viewModel: AdbPairingViewModel by activityViewModel()
+    private val settingsIntentFactory: SettingsIntentFactory by inject()
     private val binding by viewBinding(AdbPairDialogBinding::inflate)
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -73,7 +75,7 @@ class AdbPairDialogFragment : DialogFragment() {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isVisible = false
 
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            SystemSettingsHelper.launchOrHighlightWirelessDebugging(it.context)
+            startActivity(settingsIntentFactory.wirelessDebugging())
         }
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
