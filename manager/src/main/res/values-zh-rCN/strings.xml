@@ -83,12 +83,14 @@
     <string name="home_automation_bottom_sheet_label_extras">额外参数</string>
     <string name="home_automation_regenerate_token">重新生成令牌？</string>
     <string name="home_automation_regenerate_token_message">您需要使用新令牌重新配置您的意图。</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">开发者指南</string>
     <string name="home_learn_more_description">了解如何使用 Shizuku 开发</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">您需要进行额外的步骤</string>
     <string name="home_adb_is_limited_description">您的设备制造商限制了 adb 的权限，使用 Shizuku 的应用无法正常工作。\n\n通常，在“开发者选项”中调整一些选项即可解除此限制。请阅读帮助来了解具体的操作方式。\n\n您可能需要重新启动 Shizuku 以使操作生效。</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">adb 权限受限</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[这极有可能是你的设备制造商限制了 adb 的权限。<p><b><a href="%1$s">此文档</a></b>中可能有针对你的系统的解决方案。]]></string>
@@ -106,6 +108,7 @@
     <string name="terminal_tutorial_2_description">提示：如果你的终端应用程序的主目录（~）位于私有文件目录中，将文件放在那里就可以直接运行 %1$s 而无需输入路径。\n\n否则，你可以在终端应用程序的 %3$s 配置文件中为 %2$s 创建一个别名。</string>
     <string name="terminal_tutorial_3">使用以下命令打开 shell：</string>
     <string name="rish_description"><![CDATA[使用 %1$s，您可以在任何终端应用程序中运行 shell 命令。<p>点击了解更多使用方法。]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">设置</string>
     <string name="settings_behavior">行为</string>
@@ -156,6 +159,7 @@
     <string name="snackbar_battery_optimization_home">要使 开机启动/watchdog 功能正常工作，必须禁用电池优化。</string>
     <string name="snackbar_battery_optimization_settings">请禁用电池优化功能以使用此功能。</string>
     <string name="snackbar_action_fix">修复</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">未找到电子邮件应用</string>
     <string name="toast_shizuku_already_starting">Shizuku 已在后台启动</string>
