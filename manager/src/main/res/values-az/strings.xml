@@ -75,12 +75,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Avtomatlaşdırma proqramları ilə Shizuku-ya nəzarət edin</string>
     <string name="home_automation_button_view_intents">Niyyətlərə baxın</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Tərtibatçı təlimatı</string>
     <string name="home_learn_more_description">Necə Shizuku dəstəkli proqram hazırlaya biləcəyinizi öyrənin və ya Shizuku dəstəkli proqramları əldə edin</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Əlavə bir addım atmalısan</string>
     <string name="home_adb_is_limited_description">Cihaz istehsalçınız adb icazələrini məhdudlaşdırıb və Shizuku istifadə edən tətbiqlər düzgün işləməyəcək.\n\nAdətən, bu məhdudiyyət \"İnkişaf etdirici seçimləri\"ndə bəzi seçimləri tənzimləməklə aradan qaldırıla bilər. Bunun necə ediləcəyi barədə ətraflı məlumat üçün zəhmət olmasa, köməkçi səhifəni oxuyun.\n\nƏməliyyatın təsir etməsi üçün Shizuku-nu yenidən başlatmaq lazım ola bilər.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">adb icazəsi məhduddur</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Çox güman ki, cihazınızın istehsalçısı adb icazəsini məhdudlaşdırır.<p>Sisteminiz üçün <b><a href="%1$s">bu sənəddə</a></b> həll yolu ola bilər.]]></string>
@@ -98,6 +100,7 @@
     <string name="terminal_tutorial_2_description">İpucu: Terminal proqramınızın ev kataloqu (~) şəxsi fayllar kataloqundadırsa, faylları orada yerləşdirmək sizə yolu yazmadan %1$s -ı işə salmağa imkan verəcək.\n\nƏks halda, siz terminal proqramınızın %3$s konfiqurasiya faylında %2$s üçün ləqəb yarada bilərsiniz.</string>
     <string name="terminal_tutorial_3">Aşağıdakı əmrlə qabığı açın:</string>
     <string name="rish_description"><![CDATA[%1$silə siz istənilən terminal proqramında qabıq əmrlərini işlədə bilərsiniz.<p>Onu necə istifadə etmək barədə ətraflı öyrənmək üçün toxunun.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Parametrlər</string>
     <string name="settings_behavior">Davranış</string>
@@ -146,6 +149,7 @@
     <string name="snackbar_battery_optimization_home">Start on boot/watchdog düzgün işləməsi üçün batareya optimizasiyası deaktiv edilməlidir.</string>
     <string name="snackbar_battery_optimization_settings">Zəhmət olmasa, bu funksiyadan istifadə etmək üçün batareya optimizasiyasını söndürün.</string>
     <string name="snackbar_action_fix">Düzəlt</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Heç bir e-poçt tətbiqi tapılmadı</string>
     <string name="toast_shizuku_already_starting">Shizuku artıq arxa planda başlayır</string>
