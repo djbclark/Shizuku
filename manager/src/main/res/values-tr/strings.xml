@@ -75,6 +75,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Shizuku\'yu otomasyon uygulamalarıyla kontrol edin</string>
     <string name="home_automation_button_view_intents">Görünüm amaçları</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Geliştirici kılavuzu</string>
     <string name="home_learn_more_description">Shizuku ile nasıl uygulama geliştireceğinizi öğrenin</string>
@@ -85,6 +86,7 @@
 \nGenellikle, bu kısıtlama \"Geliştirici seçenekleri\"ndeki bazı ayarlar değiştirilerek kaldırılabilir. Bunun nasıl yapılacağına ilişkin ayrıntılar için lütfen yardımı okuyun. 
 \n 
 \nİşlemin etkili olabilmesi için Shizuku yeniden başlatılmalı.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">ADB’nin izni sınırlıdır</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Cihaz üreticinizin adb iznini sınırlaması son derece olasıdır. <p>Bu belgede<b><a href="%1$s">sisteminiz için bir çözüm olabilir</a></b>.]]></string>
@@ -102,6 +104,7 @@
     <string name="terminal_tutorial_2_description">İpucu: Terminal uygulamanızın ana dizini (~) özel dosyalar dizinindeyse, dosyaları oraya yerleştirmek, yolu yazmadan %1$s komutunu çalıştırmanıza olanak tanır.\n\nAksi takdirde, terminal uygulamanızın %3$s yapılandırma dosyasında %2$s için bir takma ad oluşturabilirsiniz.</string>
     <string name="terminal_tutorial_3">Aşağıdaki komutla bir kabuk açın:</string>
     <string name="rish_description"><![CDATA[%1$sile herhangi bir terminal uygulamasında kabuk komutlarını çalıştırabilirsiniz.<p>Nasıl kullanılacağı hakkında daha fazla bilgi edinmek için dokunun.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Ayarlar</string>
     <string name="settings_behavior">Davranış</string>
@@ -150,6 +153,7 @@
     <string name="snackbar_battery_optimization_home">Önyükleme/bekçi köpeği sırasında başlatmanın düzgün çalışması için pil optimizasyonunun devre dışı bırakılması gerekir.</string>
     <string name="snackbar_battery_optimization_settings">Bu özelliği kullanmak için lütfen pil optimizasyonunu devre dışı bırakın.</string>
     <string name="snackbar_action_fix">Düzeltmek</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">E-posta uygulaması bulunamadı</string>
     <string name="toast_shizuku_already_starting">Shizuku arka planda zaten başlıyor</string>
