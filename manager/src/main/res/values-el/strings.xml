@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Ελέγξτε το Shizuku με εφαρμογές αυτοματισμού</string>
     <string name="home_automation_button_view_intents">Προβολή προθέσεων</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Οδηγός προγραμματιστή</string>
     <string name="home_learn_more_description">Μάθετε πώς να αναπτύσσεστε με το Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Πρέπει να κάνεις ένα επιπλέον βήμα</string>
     <string name="home_adb_is_limited_description">Ο κατασκευαστής της συσκευής σας έχει περιορίσει τα δικαιώματα adb και οι εφαρμογές που χρησιμοποιούν το Shizuku δεν θα λειτουργούν σωστά.\n\nΣυνήθως, αυτός ο περιορισμός μπορεί να αρθεί προσαρμόζοντας ορισμένες επιλογές στις \"Επιλογές προγραμματιστή\". Διαβάστε τη βοήθεια για λεπτομέρειες σχετικά με το πώς να το κάνετε αυτό.\n\nΕνδέχεται να χρειαστεί να επανεκκινήσετε το Shizuku για να τεθεί σε ισχύ η λειτουργία.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Η άδεια του adb είναι περιορισμένη</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Είναι πολύ πιθανό ο κατασκευαστής της συσκευής σας να περιορίζει την άδεια του adb.<p>Μπορεί να υπάρχει μια λύση για το σύστημά σας σε <b><a href=\"%1$s\">αυτό το έγγραφο</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Συμβουλή: Εάν ο αρχικός κατάλογος (~) της εφαρμογής τερματικού σας βρίσκεται στον κατάλογο ιδιωτικών αρχείων, η τοποθέτηση των αρχείων εκεί θα σας επιτρέψει να εκτελέσετε το %1$s χωρίς να γράψετε τη διαδρομή.\n\nΔιαφορετικά, μπορείτε να δημιουργήσετε ένα ψευδώνυμο για το %2$s στο αρχείο ρυθμίσεων %3$s της εφαρμογής τερματικού σας.</string>
     <string name="terminal_tutorial_3">Ανοίξτε ένα κέλυφος με την ακόλουθη εντολή:</string>
     <string name="rish_description"><![CDATA[Με το %1$s, μπορείτε να εκτελέσετε εντολές shell σε οποιαδήποτε εφαρμογή τερματικού.<p>Πατήστε για να μάθετε περισσότερα σχετικά με τον τρόπο χρήσης του.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Ρυθμίσεις</string>
     <string name="settings_behavior">Συμπεριφορά</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">Η βελτιστοποίηση μπαταρίας πρέπει να είναι απενεργοποιημένη για να λειτουργήσει σωστά η εκκίνηση κατά την εκκίνηση/επιτήρηση.</string>
     <string name="snackbar_battery_optimization_settings">Απενεργοποιήστε τη βελτιστοποίηση μπαταρίας για να χρησιμοποιήσετε αυτήν τη δυνατότητα.</string>
     <string name="snackbar_action_fix">Διορθώνω</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Δεν βρέθηκε εφαρμογή email</string>
     <string name="toast_shizuku_already_starting">Το Shizuku ξεκινά ήδη στο παρασκήνιο</string>
