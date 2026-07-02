@@ -76,6 +76,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Controlează Shizuku cu aplicații de automatizare</string>
     <string name="home_automation_button_view_intents">Vizualizați intențiile</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Ghid pentru dezvoltatori</string>
     <string name="home_learn_more_description">Află cum să dezvolți cu Shizuku</string>
@@ -86,6 +87,7 @@
 \nDe obicei, această limitare poate fi ridicată prin ajustarea unor opțiuni din „Opțiuni pentru dezvoltatori”. Citește ajutorul pentru detalii despre cum să faci acest lucru.
 \n
 \nPoate fi necesar să repornești Shizuku pentru ca operațiunea să intre în vigoare.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Permisiunea adb este limitată</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Este foarte posibil ca producătorul dispozitivului să limiteze permisiunea adb.<p>Este posibil să existe o soluție pentru acest sistem în <b><a href="%1$s">acest document</a></b>.]]></string>
@@ -103,6 +105,7 @@
     <string name="terminal_tutorial_2_description">Sfat: Dacă directorul principal (~) al aplicației terminale se află în directorul de fișiere private, plasarea fișierelor acolo vă va permite să rulați %1$s fără a scrie calea.\n\nÎn caz contrar, puteți crea un alias pentru %2$s în fișierul de configurare %3$s al aplicației terminale.</string>
     <string name="terminal_tutorial_3">Deschideți un shell cu următoarea comandă:</string>
     <string name="rish_description"><![CDATA[Cu %1$s, puteți rula comenzi shell în orice aplicație terminal.<p>Atingeți pentru a afla mai multe despre cum să o utilizați.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Setări</string>
     <string name="settings_behavior">Comportament</string>
@@ -151,6 +154,7 @@
     <string name="snackbar_battery_optimization_home">Optimizarea bateriei trebuie dezactivată pentru ca pornirea la pornire/funcția de supraveghere să funcționeze corect.</string>
     <string name="snackbar_battery_optimization_settings">Dezactivați optimizarea bateriei pentru a utiliza această funcție.</string>
     <string name="snackbar_action_fix">Reparare</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nu a fost găsită nicio aplicație de e-mail</string>
     <string name="toast_shizuku_already_starting">Shizuku începe deja în fundal</string>
