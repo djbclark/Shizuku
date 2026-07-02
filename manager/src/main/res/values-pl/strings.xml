@@ -74,12 +74,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Kontroluj Shizuku za pomocą aplikacji automatyzacyjnych</string>
     <string name="home_automation_button_view_intents">Wyświetl intencje</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Przewodnik dla programistów</string>
     <string name="home_learn_more_description">Dowiedz się, jak tworzyć aplikacje z wykorzystaniem Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Wymagany dodatkowy krok</string>
     <string name="home_adb_is_limited_description">Producent urządzenia ograniczył uprawnienia ADB i aplikacje korzystające z Shizuku nie będą działać poprawnie.\n\nZazwyczaj to ograniczenie można znieść, zmieniając opcje w sekcji \"Opcje programisty\". Przeczytaj pomoc, aby dowiedzieć się, jak to zrobić.\n\nMoże być konieczne ponowne uruchomienie Shizuku, aby zmiany weszły w życie.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Uprawnienia ADB są ograniczone</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Jest wysoce prawdopodobne, że producent urządzenia ogranicza uprawnienia ADB.<p>Rozwiązanie dla Twojego systemu może znajdować się w <b><a href=\"%1$s\">tym dokumencie</a></b>.]]></string>
@@ -97,6 +99,7 @@
     <string name="terminal_tutorial_2_description">Wskazówka: Jeśli katalog domowy (~) Twojej aplikacji terminalowej znajduje się w katalogu plików prywatnych, umieszczenie plików w tym miejscu umożliwi uruchomienie %1$s bez wpisywania ścieżki.\n\nW przeciwnym razie możesz utworzyć alias dla %2$s w pliku konfiguracyjnym %3$s Twojej aplikacji terminalowej.</string>
     <string name="terminal_tutorial_3">Otwórz powłokę za pomocą następującego polecenia:</string>
     <string name="rish_description"><![CDATA[Za pomocą %1$smożesz uruchamiać polecenia powłoki w dowolnej aplikacji terminalowej.<p>Kliknij, aby dowiedzieć się więcej o sposobie korzystania z tej opcji.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Ustawienia</string>
     <string name="settings_behavior">Zachowanie</string>
@@ -145,6 +148,7 @@
     <string name="snackbar_battery_optimization_home">Aby start przy uruchomieniu systemu i nadzorowanie działały poprawnie, musisz wyłączyć optymalizację baterii.</string>
     <string name="snackbar_battery_optimization_settings">Wyłącz optymalizację baterii, aby korzystać z tej funkcji.</string>
     <string name="snackbar_action_fix">Napraw</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nie znaleziono aplikacji pocztowej</string>
     <string name="toast_shizuku_already_starting">Shizuku już uruchamia się w tle</string>
