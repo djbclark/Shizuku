@@ -77,12 +77,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Upravljajte Shizuku z aplikacijami za avtomatizacijo</string>
     <string name="home_automation_button_view_intents">Ogled namenov</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Vodnik za razvijalce</string>
     <string name="home_learn_more_description">Naučite se razvijati s Shizukujem</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Morate narediti dodaten korak</string>
     <string name="home_adb_is_limited_description">Proizvajalec vaše naprave je omejil dovoljenja adb in aplikacije, ki uporabljajo Shizuku, ne bodo delovale pravilno.\n\nObičajno je to omejitev mogoče odpraviti s prilagoditvijo nekaterih možnosti v »Možnostih za razvijalce«. Za podrobnosti o tem preberite pomoč.\n\nMorda boste morali znova zagnati Shizuku, da bo operacija začela veljati.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Dovoljenje adb je omejeno</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Zelo možno je, da proizvajalec vaše naprave omejuje dovoljenja adb.<p>Rešitev za vaš sistem je morda v <b><a href=\"%1$s\">tem dokumentu</a></b>.]]></string>
@@ -100,6 +102,7 @@
     <string name="terminal_tutorial_2_description">Nasvet: Če je domači imenik (~) vaše terminalske aplikacije v imeniku zasebnih datotek, boste z namestitvijo datotek tja lahko zagnali %1$s brez pisanja poti.\n\nSicer pa lahko v konfiguracijski datoteki %3$s vaše terminalske aplikacije ustvarite vzdevek za %2$s .</string>
     <string name="terminal_tutorial_3">Odprite lupino z naslednjim ukazom:</string>
     <string name="rish_description"><![CDATA[Z %1$slahko zaženete ukaze lupine v kateri koli terminalski aplikaciji.<p>Dotaknite se, če želite izvedeti več o uporabi.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Nastavitve</string>
     <string name="settings_behavior">Vedenje</string>
@@ -148,6 +151,7 @@
     <string name="snackbar_battery_optimization_home">Optimizacija baterije mora biti onemogočena, da zagon ob zagonu/watchdogu deluje pravilno.</string>
     <string name="snackbar_battery_optimization_settings">Prosimo, da onemogočite optimizacijo baterije za uporabo te funkcije.</string>
     <string name="snackbar_action_fix">Popraviti</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Ni najdene aplikacije za e-pošto</string>
     <string name="toast_shizuku_already_starting">Shizuku že začne v ozadju</string>
