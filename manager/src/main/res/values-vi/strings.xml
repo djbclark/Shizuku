@@ -77,12 +77,14 @@
     <string name="home_automation_description_device_restriction">Để sử dụng ý định bắt đầu trên thiết bị của bạn, trước tiên bạn cần bật ADB qua TCP bằng cách chạy %1$s từ PC.</string>
     <string name="home_automation_button_view_intents">Xem ý định</string>
     <string name="home_automation_bottom_sheet_intents">Ý định</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Hướng dẫn dành cho nhà phát triển</string>
     <string name="home_learn_more_description">Tìm hiểu cách phát triển với Shizuku hoặc tải ứng dụng bằng Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Bạn cần phải thực hiện thêm một bước</string>
     <string name="home_adb_is_limited_description">Nhà sản xuất thiết bị của bạn đã hạn chế quyền adb và các ứng dụng sử dụng Shizuku sẽ không hoạt động bình thường.\n\nThông thường, hạn chế này có thể được gỡ bỏ bằng cách điều chỉnh một số tùy chọn trong \"Tùy chọn nhà phát triển\". Vui lòng đọc phần trợ giúp để biết chi tiết về cách thực hiện việc này.\n\nBạn có thể cần khởi động lại Shizuku để thao tác có hiệu lực.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Quyền của adb bị hạn chế</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Rất có thể nhà sản xuất thiết bị của bạn giới hạn quyền của adb.<p>Có thể có giải pháp cho hệ thống của bạn trong <b><a href="%1$s">tài liệu này</a></b>.]]></string>
@@ -100,6 +102,7 @@
     <string name="terminal_tutorial_2_description">Mẹo: Nếu thư mục gốc của ứng dụng đầu cuối (~) nằm trong thư mục tệp riêng tư, việc đặt các tệp ở đó sẽ cho phép bạn chạy %1$s mà không cần ghi đường dẫn.\n\nNếu không, bạn có thể tạo bí danh cho %2$s trong tệp cấu hình %3$s của ứng dụng đầu cuối.</string>
     <string name="terminal_tutorial_3">Mở shell bằng lệnh sau:</string>
     <string name="rish_description"><![CDATA[Với %1$s, bạn có thể chạy lệnh shell trong bất kỳ ứng dụng đầu cuối nào.<p>Nhấn để tìm hiểu thêm về cách sử dụng.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Cài đặt</string>
     <string name="settings_behavior">Hành vi</string>
@@ -148,6 +151,7 @@
     <string name="snackbar_battery_optimization_home">Phải tắt tính năng tối ưu hóa pin để khởi động khi khởi động/theo dõi hoạt động bình thường.</string>
     <string name="snackbar_battery_optimization_settings">Vui lòng tắt tính năng tối ưu hóa pin để sử dụng tính năng này.</string>
     <string name="snackbar_action_fix">Sửa chữa</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Không tìm thấy ứng dụng email</string>
     <string name="toast_shizuku_already_starting">Shizuku đã bắt đầu ở phía sau</string>
