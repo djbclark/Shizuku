@@ -75,6 +75,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Controlla Shizuku con le app di automazione</string>
     <string name="home_automation_button_view_intents">Visualizza intenti</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Guida per gli sviluppatori</string>
     <string name="home_learn_more_description">Impara a sviluppare con Shizuku</string>
@@ -85,6 +86,7 @@
 \nDi solito, questa limitazione può essere rimossa regolando alcune opzioni in \"Opzioni sviluppatore\". Si prega di leggere la guida per i dettagli su come eseguire questa operazione.
 \n
 \nPotrebbe essere necessario riavviare Shizuku per rendere effettiva l\'operazione.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Il permesso di adb è limitato</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[È molto probabile che il fabbricante del tuo dispositivo limiti i permessi di adb.<p>Ci potrebbe essere una soluzione per il vostro dispositivo in <b><a href="%1$s">questo documento</a></b>.]]></string>
@@ -102,6 +104,7 @@
     <string name="terminal_tutorial_2_description">Suggerimento: se la directory home dell\'app terminale (~) si trova nella directory dei file privati, posizionando i file lì sarà possibile eseguire %1$s senza scrivere il percorso.\n\nIn caso contrario, è possibile creare un alias per %2$s nel file di configurazione %3$s dell\'app terminale.</string>
     <string name="terminal_tutorial_3">Aprire una shell con il seguente comando:</string>
     <string name="rish_description"><![CDATA[Con %1$spuoi eseguire comandi shell in qualsiasi app terminale.<p>Tocca per saperne di più su come utilizzarlo.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Impostazioni</string>
     <string name="settings_behavior">Comportamento</string>
@@ -150,6 +153,7 @@
     <string name="snackbar_battery_optimization_home">Per far sì che l\'avvio all\'avvio/watchdog funzioni correttamente, è necessario disattivare l\'ottimizzazione della batteria.</string>
     <string name="snackbar_battery_optimization_settings">Per utilizzare questa funzione, disattivare l\'ottimizzazione della batteria.</string>
     <string name="snackbar_action_fix">Aggiustare</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nessuna app di posta elettronica trovata</string>
     <string name="toast_shizuku_already_starting">Shizuku sta già iniziando sullo sfondo</string>
