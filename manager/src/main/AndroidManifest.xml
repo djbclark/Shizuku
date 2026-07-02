@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -9,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
@@ -50,6 +53,10 @@
     <uses-permission
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         tools:node="remove" />
+
+    <queries>
+        <package android:name="moe.shizuku.privileged.api" />
+    </queries>
 
     <application
         android:name=".ShizukuApplication"
@@ -93,6 +100,10 @@
         <activity
             android:name=".shell.ShellTutorialActivity"
             android:label="@string/home_terminal_title" />
+        <activity
+            android:name=".stealth.StealthTutorialActivity"
+            android:label="@string/home_stealth_title"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
@@ -222,6 +233,16 @@
         <receiver android:name=".receiver.NotifAttemptReceiver" />
         <receiver android:name=".receiver.NotifCancelReceiver" />
         <receiver android:name=".receiver.NotifRestoreReceiver" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <provider
             android:name=".ShizukuManagerProvider"
