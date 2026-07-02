@@ -77,6 +77,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Ovládejte Shizuku pomocí automatizačních aplikací</string>
     <string name="home_automation_button_view_intents">Zobrazit záměry</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Průvodce pro vývojáře</string>
     <string name="home_learn_more_description">Naučte se, jak vyvíjet aplikace s pomocí Shizuku</string>
@@ -87,6 +88,7 @@
 \nToto omezení může většinou být zakázáno pouze změněním některých možností ve \"Vývojářských Nastaveních\". Prosím přečtěte si stránku podpory pro informace jak toto udělat.
 \n
 \nMožná budete muset restartovat Shizuku pro tuto operaci aby měla efekt.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Oprávnění adb je omezené</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Je vysoce možné, že výrobce vašeho zařízení omezuje oprávnění adb. <p> V <b> <a href="%1$s"> tomto dokumentu </a> </b> může být pro váš systém řešení.]]></string>
@@ -104,6 +106,7 @@
     <string name="terminal_tutorial_2_description">Tip: Pokud se domovský adresář (~) vaší terminálové aplikace nachází v adresáři soukromých souborů, umístění souborů tam vám umožní spustit %1$s bez zápisu cesty.\n\nV opačném případě můžete vytvořit alias pro %2$s v konfiguračním souboru %3$s vaší terminálové aplikace.</string>
     <string name="terminal_tutorial_3">Otevřete shell pomocí následujícího příkazu:</string>
     <string name="rish_description"><![CDATA[Pomocí %1$smůžete spouštět příkazy shellu v jakékoli terminálové aplikaci.<p>Klepnutím se dozvíte více o jeho použití.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Nastavení</string>
     <string name="settings_behavior">Chování</string>
@@ -154,6 +157,7 @@
     <string name="snackbar_battery_optimization_home">Optimalizace baterie musí být vypnutá, aby start při startu/watchdogu fungoval správně.</string>
     <string name="snackbar_battery_optimization_settings">Pro použití této funkce prosím vypněte optimalizaci baterie.</string>
     <string name="snackbar_action_fix">Opravit</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Žádná e-mailová aplikace nenalezena</string>
     <string name="toast_shizuku_already_starting">Shizuku už začíná v pozadí</string>
