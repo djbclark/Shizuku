@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">کنترل شیزوکو با برنامه‌های اتوماسیون</string>
     <string name="home_automation_button_view_intents">مشاهده اهداف</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">راهنمای توسعه‌دهنده</string>
     <string name="home_learn_more_description">یاد بگیرید که چگونه با Shizuku توسعه دهید</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">شما باید یک قدم اضافی بردارید</string>
     <string name="home_adb_is_limited_description">سازنده دستگاه شما مجوزهای adb را محدود کرده است و برنامه هایی که از Shizuku استفاده می کنند به درستی کار نمی کنند.\n\nمعمولاً با تنظیم برخی از گزینه‌ها در \"گزینه‌های توسعه دهنده\" می‌توان این محدودیت را برطرف کرد. لطفاً راهنما را برای جزئیات نحوه انجام این کار بخوانید.\n\nشاید لازم باشد Shizuku را مجدداً راه اندازی کنید تا عملیات اجرایی شود.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">مجوز adb محدود است</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[این احتمال وجود دارد که سازنده دستگاه شما مجوز adb را محدود کند.<p>ممکن است راه حلی برای دستگاه شما در <b><a href=\"%1$s\">این سند</a></b> وجود داشته باشد.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">نکته: اگر دایرکتوری خانگی برنامه ترمینال شما (~) در دایرکتوری فایل‌های خصوصی باشد، قرار دادن فایل‌ها در آنجا به شما امکان می‌دهد %1$s را بدون نوشتن مسیر اجرا کنید.\n\nدر غیر این صورت، می‌توانید یک نام مستعار برای %2$s در فایل پیکربندی %3$s برنامه ترمینال خود ایجاد کنید.</string>
     <string name="terminal_tutorial_3">با دستور زیر یک پوسته باز کنید:</string>
     <string name="rish_description"><![CDATA[با %1$sمی‌توانید دستورات shell را در هر برنامه ترمینالی اجرا کنید.<p>برای کسب اطلاعات بیشتر در مورد نحوه استفاده از آن، ضربه بزنید.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">تنظیمات</string>
     <string name="settings_behavior">رفتار</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">برای اینکه شروع به کار در هنگام بوت/واچ‌داگ به درستی انجام شود، باید بهینه‌سازی باتری غیرفعال باشد.</string>
     <string name="snackbar_battery_optimization_settings">لطفاً برای استفاده از این ویژگی، بهینه‌سازی باتری را غیرفعال کنید.</string>
     <string name="snackbar_action_fix">رفع</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">هیچ برنامه ایمیلی یافت نشد</string>
     <string name="toast_shizuku_already_starting">شیزوکو از قبل در پس‌زمینه شروع به کار کرده است</string>
