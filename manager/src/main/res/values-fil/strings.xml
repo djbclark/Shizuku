@@ -75,6 +75,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Kontrolin ang Shizuku gamit ang mga automation app</string>
     <string name="home_automation_button_view_intents">Tingnan ang mga layunin</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Gabay ng developer</string>
     <string name="home_learn_more_description">Matuto kung paano mag-develop gamit ang Shizuku</string>
@@ -85,6 +86,7 @@
 \nKadalasan, pwedeng matanggal ang mga paghihigpit na ito sa pamamagitan ng ilang mga pagbabago sa \"Mga opsyon ng developer\". Mangyaring sumangguni sa gabay para sa higit pang detalye kung paano ito gagawin.
 \n
 \nMaaaring kailanganin mong isara at buksan ulit ang Shizuku para umepekto ang opersayon.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Limitado ang pahintulot ng adb</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Posibleng nilimitahan ng gumawa ng device mo ang kakayahan ng adb.<p>Maaaring may solusyon para sa sistema mo sa <b><a href="%1$s">dokumentong ito</a></b>.]]></string>
@@ -102,6 +104,7 @@
     <string name="terminal_tutorial_2_description">Tip: Kung ang home directory ng iyong terminal app (~) ay nasa private files directory, ang paglalagay ng mga file doon ay magbibigay-daan sa iyong tumakbo %1$s nang hindi isinusulat ang path.\n\nKung hindi, maaari kang lumikha ng alias para sa %2$s sa iyong terminal app na %3$s configuration file.</string>
     <string name="terminal_tutorial_3">Magbukas ng shell gamit ang sumusunod na command:</string>
     <string name="rish_description"><![CDATA[Sa %1$s, maaari kang magpatakbo ng mga shell command sa anumang terminal app.<p>I-tap para matuto pa tungkol sa kung paano ito gamitin.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Mga Setting</string>
     <string name="settings_behavior">Pag-uugali</string>
@@ -150,6 +153,7 @@
     <string name="snackbar_battery_optimization_home">Ang pag-optimize ng baterya ay dapat na hindi pinagana para sa pagsisimula sa boot / watchdog upang gumana nang maayos.</string>
     <string name="snackbar_battery_optimization_settings">Mangyaring huwag paganahin ang pag-optimize ng baterya upang magamit ang tampok na ito.</string>
     <string name="snackbar_action_fix">Ayusin</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Walang natagpuang email app</string>
     <string name="toast_shizuku_already_starting">Nagsisimula na si Shizuku sa background</string>
