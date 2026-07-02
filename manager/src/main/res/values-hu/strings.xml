@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Irányítsd a Shizukut automatizálási alkalmazásokkal</string>
     <string name="home_automation_button_view_intents">Szándékok megtekintése</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Fejlesztői útmutató</string>
     <string name="home_learn_more_description">Tanuljon meg fejlődni a Shizukuval</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Egy plusz lépést kell tennie</string>
     <string name="home_adb_is_limited_description">Az eszköz gyártója korlátozta az adb-engedélyeket, és a Shizuku-t használó alkalmazások nem működnek megfelelően.\n\nÁltalában ez a korlátozás bizonyos beállítások módosításával feloldható a \"Fejlesztői lehetőségek\"-nél. Kérjük, olvassa el a súgót ennek részleteiért.\n\nLehet, hogy újra kell indítania a Shizukut, hogy a művelet érvénybe lépjen.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Az adb engedélye korlátozott</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Nagyon valószínű, hogy az eszköz gyártója korlátozza az adb engedélyét.<p>Lehet, hogy van megoldás a rendszeréhez ebben a <b><a href=\"%1$s\">dokumentumban</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Tipp: Ha a terminálalkalmazásod kezdőkönyvtára (~) a privát fájlok könyvtárában található, akkor a fájlok oda helyezése lehetővé teszi a %1$s futtatását az elérési út megadása nélkül.\n\nEgyébként létrehozhatsz egy aliast a %2$s számára a terminálalkalmazásod %3$s konfigurációs fájljában.</string>
     <string name="terminal_tutorial_3">Nyisson meg egy shell-t a következő paranccsal:</string>
     <string name="rish_description"><![CDATA[A %1$sparanccsal shell parancsokat futtathatsz bármelyik terminálalkalmazásban.<p>Koppints ide, ha többet szeretnél megtudni a használatáról.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Beállítások</string>
     <string name="settings_behavior">Viselkedés</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">A rendszerindításkor/watchdogkor történő indítás megfelelő működéséhez le kell tiltani az akkumulátoroptimalizálást.</string>
     <string name="snackbar_battery_optimization_settings">Kérjük, kapcsolja ki az akkumulátoroptimalizálást a funkció használatához.</string>
     <string name="snackbar_action_fix">Javítás</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nem található e-mail alkalmazás</string>
     <string name="toast_shizuku_already_starting">A Shizuku már elindul a háttérben</string>
