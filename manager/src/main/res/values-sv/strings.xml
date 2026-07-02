@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Styr Shizuku med automatiseringsappar</string>
     <string name="home_automation_button_view_intents">Visa avsikter</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Utvecklarguide</string>
     <string name="home_learn_more_description">Lär dig hur du utvecklar med Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Du behöver ta ett extra steg</string>
     <string name="home_adb_is_limited_description">Din enhetstillverkare har begränsade ADB-behörigheter och appar som använder Shizuku kommer inte att fungera korrekt.\n\nVanligtvis kan denna begränsning hävas genom att justera vissa alternativ i \"Utvecklaralternativ\". Läs hjälpen för mer information om hur du gör detta.\n\nDu kan behöva starta om Shizuku för att åtgärden ska träda i kraft.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">ADB:s behörighet är begränsad</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Det är mycket möjligt att din enhetstillverkare begränsar behörigheten för adb.<p>Det kan finnas en lösning för ditt system i <b><a href=\"%1$s\">det här dokumentet</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Tips: Om din terminalapps hemkatalog (~) finns i katalogen för privata filer, kommer du att kunna köra %1$s utan att skriva sökvägen genom att placera filerna där.\n\nAnnars kan du skapa ett alias för %2$s i din terminalapps konfigurationsfil %3$s .</string>
     <string name="terminal_tutorial_3">Öppna ett shell med följande kommando:</string>
     <string name="rish_description"><![CDATA[Med %1$skan du köra shell-kommandon i vilken terminalapp som helst.<p>Tryck för att lära dig mer om hur du använder det.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Inställningar</string>
     <string name="settings_behavior">Beteende</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">Batterioptimering måste vara inaktiverad för att start vid uppstart/watchdog ska fungera korrekt.</string>
     <string name="snackbar_battery_optimization_settings">Inaktivera batterioptimering för att använda den här funktionen.</string>
     <string name="snackbar_action_fix">Fixera</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Ingen e-postapp hittades</string>
     <string name="toast_shizuku_already_starting">Shizuku börjar redan i bakgrunden</string>
