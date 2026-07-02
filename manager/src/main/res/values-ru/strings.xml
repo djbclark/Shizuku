@@ -77,6 +77,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Управляйте Shizuku с помощью приложений автоматизации</string>
     <string name="home_automation_button_view_intents">Просмотр намерений</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Руководство разработчика</string>
     <string name="home_learn_more_description">Узнайте, как начать разрабатывать с Shizuku</string>
@@ -87,6 +88,7 @@
 \nОбычно эти ограничения можно снять в настройках для разработчиков. Пожалуйста, прочитай раздел помощи, чтобы узнать как это сделать.
 \n
 \nВозможно Вам понадобится перезапустить Shizuku для применения изменений.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Доступ к adb ограничен</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Возможно, что производитель вашего устройства ограничивает доступ к adb.<p>Решение для вашей системы может быть описано <b><a href=\"%1$s\">здесь</a></b>.]]></string>
@@ -104,6 +106,7 @@
     <string name="terminal_tutorial_2_description">Совет: если домашний каталог вашего эмулятора терминала (~) находится в каталоге личных файлов, размещение файлов там позволит вам запускать %1$s без указания пути.\n\nВ противном случае вы можете создать псевдоним для %2$s в файле конфигурации %3$s вашего эмулятора терминала.</string>
     <string name="terminal_tutorial_3">Откройте оболочку с помощью следующей команды:</string>
     <string name="rish_description"><![CDATA[С помощью %1$s вы можете запускать команды оболочки в любом эмуляторе терминала.<p>Нажмите, чтобы узнать больше об использовании.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Настройки</string>
     <string name="settings_behavior">Поведение</string>
@@ -154,6 +157,7 @@
     <string name="snackbar_battery_optimization_home">Для корректной работы функции оптимизации батареи необходимо отключить запуск при загрузке/Watchdog.</string>
     <string name="snackbar_battery_optimization_settings">Чтобы использовать эту функцию, отключите оптимизацию расхода заряда батареи.</string>
     <string name="snackbar_action_fix">Исправить</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Приложение электронной почты не найдено</string>
     <string name="toast_shizuku_already_starting">Shizuku уже запускается в фоновом режиме</string>
