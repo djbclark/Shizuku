@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Bestuur Shizuku met automatiseringsapps</string>
     <string name="home_automation_button_view_intents">Bekijk intenties</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Ontwikkelaarsgids</string>
     <string name="home_learn_more_description">Leer hoe je ontwikkelt met Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Je moet een extra stap nemen</string>
     <string name="home_adb_is_limited_description">De fabrikant van je apparaat heeft ADB-rechten beperkt en apps die Shizuku gebruiken zullen niet goed werken.\n\nMeestal kan deze beperking worden opgeheven door enkele opties in \"Ontwikkelaarsopties\" aan te passen. Lees de hulp voor details over hoe je dit kunt doen.\n\nJe moet Shizuku mogelijk opnieuw starten voordat de wijziging effect neemt.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">De toestemming voor adb is beperkt</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Het is zeer goed mogelijk dat de fabrikant van je apparaat de toestemming van adb beperkt.<p>Er kan een oplossing voor jouw systeem zijn in <b><a href=\"%1$s\">dit document</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Tip: Als de thuismap (~) van je terminal-app zich in de map met privébestanden bevindt, kun je de bestanden daar plaatsen zodat je %1$s kunt uitvoeren zonder het pad te hoeven schrijven.\n\nAnders kun je een alias voor %2$s aanmaken in het configuratiebestand van je terminal-app %3$s.</string>
     <string name="terminal_tutorial_3">Open een shell met de volgende opdracht:</string>
     <string name="rish_description"><![CDATA[Met %1$s kun je shell-opdrachten uitvoeren in elke terminal-app.<p>Klik om meer te weten te komen over het gebruik ervan.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Instellingen</string>
     <string name="settings_behavior">Gedrag</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">Batterijoptimalisatie moet uitgeschakeld zijn om bij opstarten/watchdog goed te starten.</string>
     <string name="snackbar_battery_optimization_settings">Schakel alstublieft batterijoptimalisatie uit om deze functie te gebruiken.</string>
     <string name="snackbar_action_fix">Repareren</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Geen e-mailapp gevonden</string>
     <string name="toast_shizuku_already_starting">Shizuku begint al op de achtergrond</string>
