@@ -71,12 +71,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Kawal Shizuku dengan apl automasi</string>
     <string name="home_automation_button_view_intents">Lihat niat</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Panduan pembangun</string>
     <string name="home_learn_more_description">Ketahui cara membangun dengan Shizuku</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Anda perlu mengambil langkah tambahan</string>
     <string name="home_adb_is_limited_description">Pengilang peranti anda telah mengehadkan kebenaran adb dan apl yang menggunakan Shizuku tidak akan berfungsi dengan betul.\n\nBiasanya, had ini boleh ditarik balik dengan melaraskan beberapa pilihan dalam \"Pilihan pembangun\". Sila baca bantuan untuk mendapatkan butiran tentang cara melakukan ini.\n\nAnda mungkin perlu memulakan semula Shizuku untuk operasi berkuat kuasa.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Kebenaran adb adalah terhad</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Kemungkinan besar pengeluar peranti anda mengehadkan kebenaran adb.<p>Mungkin terdapat penyelesaian untuk sistem anda dalam <b><a href=\"%1$s\">dokumen ini</a></b>.]]></string>
@@ -94,6 +96,7 @@
     <string name="terminal_tutorial_2_description">Petua: Jika direktori rumah apl terminal anda (~) berada dalam direktori fail peribadi, meletakkan fail di sana akan membolehkan anda menjalankan %1$s tanpa menulis laluan.\n\nJika tidak, anda boleh mencipta alias untuk %2$s dalam fail konfigurasi %3$s apl terminal anda.</string>
     <string name="terminal_tutorial_3">Buka shell dengan arahan berikut:</string>
     <string name="rish_description"><![CDATA[Dengan %1$s, anda boleh menjalankan arahan shell dalam mana-mana apl terminal.<p>Ketik untuk mengetahui lebih lanjut tentang cara menggunakannya.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">tetapan</string>
     <string name="settings_behavior">Tingkah laku</string>
@@ -142,6 +145,7 @@
     <string name="snackbar_battery_optimization_home">Pengoptimuman bateri mesti dilumpuhkan untuk permulaan pada but/pemantau untuk berfungsi dengan baik.</string>
     <string name="snackbar_battery_optimization_settings">Sila lumpuhkan pengoptimuman bateri untuk menggunakan ciri ini.</string>
     <string name="snackbar_action_fix">Betulkan</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Tiada apl e-mel ditemui</string>
     <string name="toast_shizuku_already_starting">Shizuku sudah bermula di latar belakang</string>
