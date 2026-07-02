@@ -74,6 +74,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">자동화 앱으로 Shizuku 제어</string>
     <string name="home_automation_button_view_intents">의도 보기</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">개발자 가이드</string>
     <string name="home_learn_more_description">Shizuku로 개발하는 방법 알아보기</string>
@@ -84,6 +85,7 @@
 \n일반적으로 \'개발자 옵션\'에서 일부 옵션을 조정하여 이 제한을 해제할 수 있습니다. 자세한 방법은 도움말을 참조하세요.
 \n
 \n작업을 적용하려면 Shizuku를 다시 시작해야 할 수도 있습니다.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">ADB의 권한이 제한됨</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[기기 제조사에서 ADB의 권한을 제한하고 있을 가능성이 높습니다.<p><b><a href="%1$s">이 문서</a></b>에 시스템에 대한 해결 방안이 있을 수 있습니다.]]></string>
@@ -101,6 +103,7 @@
     <string name="terminal_tutorial_2_description">팁: 터미널 앱의 홈 디렉토리(~)가 개인 파일 디렉토리에 있는 경우, 해당 디렉토리에 파일을 두면 경로를 쓰지 않고도 %1$s 을 실행할 수 있습니다.\n\n그렇지 않은 경우, 터미널 앱의 %3$s 구성 파일에서 %2$s 에 대한 별칭을 만들 수 있습니다.</string>
     <string name="terminal_tutorial_3">다음 명령으로 셸을 엽니다.</string>
     <string name="rish_description"><![CDATA[%1$s를 사용하면 모든 터미널 앱에서 셸 명령을 실행할 수 있습니다.<p>탭하여 사용 방법에 대한 자세한 내용을 알아보세요.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">설정</string>
     <string name="settings_behavior">행동</string>
@@ -149,6 +152,7 @@
     <string name="snackbar_battery_optimization_home">부팅/워치독 시작 시 배터리 최적화를 비활성화해야 제대로 작동합니다.</string>
     <string name="snackbar_battery_optimization_settings">이 기능을 사용하려면 배터리 최적화를 비활성화하세요.</string>
     <string name="snackbar_action_fix">고치다</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">이메일 앱을 찾을 수 없습니다</string>
     <string name="toast_shizuku_already_starting">시즈쿠는 이미 배경에서 시작하고 있습니다</string>
