@@ -74,6 +74,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">自動化アプリでShizukuを制御する</string>
     <string name="home_automation_button_view_intents">インテントを表示</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">開発者ガイド</string>
     <string name="home_learn_more_description">Shizukuを使った開発方法、Shizukuを使ったアプリの入手方法について学ぶことができます</string>
@@ -84,6 +85,7 @@
 \n通常､ この制限は「開発者向けオプション」のいくつかの項目を調整することで解除できます。これを行う方法の詳細については､ ヘルプをお読みください。
 \n
 \n操作を有効にするために､ Shizukuを再起動する必要がある場合があります。</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">adbの権限が制限されています</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[端末の製造元がadbの権限を制限している可能性が高いです。<p> <b><a href="%1$s">このドキュメント</a></b>の中に、あなたのシステムに合った解決策があるかもしれません。]]></string>
@@ -101,6 +103,7 @@
     <string name="terminal_tutorial_2_description">ヒント: ターミナル アプリのホーム ディレクトリ (~) がプライベート ファイル ディレクトリにある場合は、そこにファイルを配置すると、パスを書き込まなくても %1$s を実行できます。\n\nそれ以外の場合は、ターミナル アプリの %3$s 構成ファイルで %2$s のエイリアスを作成できます。</string>
     <string name="terminal_tutorial_3">次のコマンドでシェルを開きます。</string>
     <string name="rish_description"><![CDATA[%1$sを使用すると、任意のターミナル アプリでシェル コマンドを実行できます。<p>タップして、使用方法の詳細を確認してください。]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">設定</string>
     <string name="settings_behavior">行動</string>
@@ -149,6 +152,7 @@
     <string name="snackbar_battery_optimization_home">起動/ウォッチドッグが正常に機能するには、バッテリー最適化を無効にする必要があります。</string>
     <string name="snackbar_battery_optimization_settings">この機能を使用するには、バッテリーの最適化を無効にしてください。</string>
     <string name="snackbar_action_fix">修理</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">メールアプリが見つかりません</string>
     <string name="toast_shizuku_already_starting">バックグラウンドではすでに雫が起動しています</string>
