@@ -79,6 +79,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">التحكم في شيزوكو باستخدام تطبيقات الأتمتة</string>
     <string name="home_automation_button_view_intents">عرض النوايا</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">دليل المطور</string>
     <string name="home_learn_more_description">تعلم كيف تطور مع Shizuku</string>
@@ -89,6 +90,7 @@
 \nعادة ، يمكن رفع هذا القيد عن طريق تعديل بعض الخيارات في \"خيارات المطور\". يرجى قراءة التعليمات للحصول على تفاصيل حول كيفية القيام بذلك.
 \n
 \nقد تحتاج إلى إعادة تشغيل Shizuku حتى تدخل العملية حيز التنفيذ.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">إذن الADB محدود</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[من المحتمل جدًا أن تحدد الشركة المصنعة للجهاز إذن adb. <p> قد يكون هناك حل لنظامك في <b><a href="%1$s">هذا المستند</a></b>.]]></string>
@@ -106,6 +108,7 @@
     <string name="terminal_tutorial_2_description">نصيحة: إذا كان دليل الصفحة الرئيسية لتطبيقك الطرفي (~) موجودًا في دليل الملفات الخاصة، فإن وضع الملفات هناك سيسمح لك بتشغيل %1$s دون كتابة المسار.\n\nوإلا، يمكنك إنشاء اسم مستعار لـ %2$s في ملف تكوين تطبيقك الطرفي %3$s .</string>
     <string name="terminal_tutorial_3">افتح shell باستخدام الأمر التالي:</string>
     <string name="rish_description"><![CDATA[باستخدام %1$s، يمكنك تشغيل أوامر shell في أي تطبيق طرفي. انقر فوق<p>لمعرفة المزيد حول كيفية استخدامه.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">الإعدادات</string>
     <string name="settings_behavior">سلوك</string>
@@ -154,6 +157,7 @@
     <string name="snackbar_battery_optimization_home">يجب تعطيل تحسين البطارية حتى يعمل التشغيل عند التمهيد/مراقبة التشغيل بشكل صحيح.</string>
     <string name="snackbar_battery_optimization_settings">يرجى تعطيل تحسين البطارية لاستخدام هذه الميزة.</string>
     <string name="snackbar_action_fix">يصلح</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">لم يتم العثور على تطبيق البريد الإلكتروني</string>
     <string name="toast_shizuku_already_starting">شيزوكو بدأت بالفعل في الخلفية</string>
