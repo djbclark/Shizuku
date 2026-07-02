@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Ohjaa Shizukua automaatiosovelluksilla</string>
     <string name="home_automation_button_view_intents">Näytä aikomukset</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Kehittäjän opas</string>
     <string name="home_learn_more_description">Opi kehittymään Shizukun kanssa</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Sinun täytyy ottaa ylimääräinen askel</string>
     <string name="home_adb_is_limited_description">Laitevalmistajasi on rajoittanut adb-oikeuksia, eikä Shizukua käyttävät sovellukset toimi kunnolla.\n\nYleensä tämä rajoitus voidaan poistaa säätämällä joitakin asetuksia \"Kehittäjävaihtoehdot\" -osiossa. Lue ohjeet ohjeista, miten tämä tehdään.\n\nSaatat joutua käynnistämään Shizukun uudelleen, jotta operaatio alkaa vaikuttaa.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">adb:n lupa on rajoitettu</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[On hyvin mahdollista, että laitevalmistajasi rajoittaa adb:n käyttöoikeuksia.<p>Järjestelmällesi saattaa olla ratkaisu <b><a href=\"%1$s\">Tämä asiakirja</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Vinkki: Jos päätesovelluksesi kotihakemisto (~) on yksityisten tiedostojen hakemistossa, tiedostojen sijoittaminen sinne mahdollistaa %1$s -komennon suorittamisen kirjoittamatta polkua.\n\nMuussa tapauksessa voit luoda aliaksen %2$s -komennolle päätesovelluksesi %3$s -määritystiedostossa.</string>
     <string name="terminal_tutorial_3">Avaa komentotulkki seuraavalla komennolla:</string>
     <string name="rish_description"><![CDATA[Komentosarjalla %1$svoit suorittaa komentotulkkikomentoja missä tahansa päätesovelluksessa.<p>Napauta saadaksesi lisätietoja sen käytöstä.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Asetukset</string>
     <string name="settings_behavior">Käyttäytyminen</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">Akun optimointi täytyy olla pois päältä, jotta käynnistys käynnistyksellä/watchdogilla toimisi kunnolla.</string>
     <string name="snackbar_battery_optimization_settings">Ole hyvä ja poista akun optimointi käytöstä tämän ominaisuuden käyttämiseksi.</string>
     <string name="snackbar_action_fix">Kiinnittää</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Sähköpostisovellusta ei löytynyt</string>
     <string name="toast_shizuku_already_starting">Shizuku aloittaa jo taustalla</string>
