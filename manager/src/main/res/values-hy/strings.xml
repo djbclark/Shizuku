@@ -75,12 +75,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Կառավարեք Շիզուկուն ավտոմատացման հավելվածներով</string>
     <string name="home_automation_button_view_intents">Դիտել մտադրությունները</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Մշակողի ուղեցույց</string>
     <string name="home_learn_more_description">Սովորեք ծրագրավորել Shizuku-ով կամ Shizuku-ն ուրիշ ծրագրերի հետ օգտագործել</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Դուք պետք է լրացուցիչ քայլ կատարեք</string>
     <string name="home_adb_is_limited_description">Ձեր սարքի արտադրողը սահմանափակել է adb թույլտվությունները եւ հավելվածները, որոնք օգտագործում են Shizuku, ճիշտ չեն աշխատի:\n\nՍովորաբար այս սահմանափակումը կարելի է վերացնել՝ որոշ տարբերակներ կարգավորելով «Մշակողի ընտրանքներ» բաժնում։ Խնդրում ենք կարդալ օգնությունը մանրամասների համար, թե ինչպես դա անել:\n\nԳործողության ուժի մեջ մտնելու համար անհրաժեշտ է վերագործարկել Շիզուկուին։</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Adb-ի թույլտվությունները սահմանափակված են</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Շատ հնարավոր է, որ Ձեր սարքի արտադրողը սահմանափակել է adb-ի թույլտվությունները։ <p>Հնարավոր լուծումները գտեք <b><a href="%1$s">այստեղ</a></b>։]]></string>
@@ -98,6 +100,7 @@
     <string name="terminal_tutorial_2_description">Հուշում. Եթե ձեր տերմինալի հավելվածի գլխավոր գրացուցակը (~) գտնվում է մասնավոր ֆայլերի գրացուցակում, ֆայլերը այնտեղ տեղադրելը թույլ կտա ձեզ գործարկել %1$s -ը՝ առանց ուղին գրելու:\n\nՀակառակ դեպքում, կարող եք ստեղծել կեղծանուն %2$s -ի համար ձեր տերմինալի հավելվածի %3$s կարգավորման ֆայլում:</string>
     <string name="terminal_tutorial_3">Բացեք shell-ը հետևյալ հրամանով.</string>
     <string name="rish_description"><![CDATA[%1$s-ի միջոցով կարող եք գործարկել shell հրամաններ ցանկացած տերմինալային հավելվածում:<p>Սեղմեք՝ դրա օգտագործման մասին ավելին իմանալու համար:]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Կարգավորումներ</string>
     <string name="settings_behavior">Վարքագիծ</string>
@@ -146,6 +149,7 @@
     <string name="snackbar_battery_optimization_home">Մարտկոցի օպտիմալացումը պետք է անջատված լինի, որպեսզի boot/watchdog-ը ճիշտ աշխատի:</string>
     <string name="snackbar_battery_optimization_settings">Խնդրում ենք անջատել մարտկոցի օպտիմալացումը՝ այս հատկությունն օգտագործելու համար:</string>
     <string name="snackbar_action_fix">Ֆիքսել</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Էլփոստի հավելված չի գտնվել</string>
     <string name="toast_shizuku_already_starting">Շիզուկուն արդեն սկսում է հետեւում</string>
