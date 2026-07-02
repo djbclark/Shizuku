@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">აკონტროლეთ Shizuku ავტომატიზაციის აპლიკაციებით</string>
     <string name="home_automation_button_view_intents">ხედვის განზრახვები</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">დეველოპერის სახელმძღვანელო</string>
     <string name="home_learn_more_description">ისწავლეთ როგორ განვითარდეთ Shizuku-სთან ერთად</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">თქვენ უნდა გადადგათ დამატებითი ნაბიჯი</string>
     <string name="home_adb_is_limited_description">თქვენი მოწყობილობის მწარმოებელმა შეზღუდა adb ნებართვები და აპლიკაციები, რომლებიც იყენებენ Shizuku-ს, არ იმუშავებენ გამართულად.\n\nჩვეულებრივ, ეს შეზღუდვა შეიძლება მოიხსნას \"დეველოპერის ოფციებში\" ზოგიერთი ვარიანტის კორექტირებით. გთხოვთ, წაიკითხოთ დახმარება დეტალებისთვის, თუ როგორ უნდა გააკეთოთ ეს.\n\nშეიძლება დაგჭირდეთ Shizuku-ს გადატვირთვა, რომ ოპერაცია ძალაში შევიდეს.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">ADB-ის ნებართვა შეზღუდულია</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[ძალიან შესაძლებელია, რომ თქვენი მოწყობილობის მწარმოებელმა შეზღუდოს adb-ის ნებართვა.<p>შეიძლება არსებობდეს გამოსავალი თქვენი სისტემისთვის <b><a href=\"%1$s\">ეს დოკუმენტი</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">რჩევა: თუ თქვენი ტერმინალის აპლიკაციის საწყისი დირექტორია (~) კერძო ფაილების დირექტორიაშია, ფაილების იქ განთავსება საშუალებას მოგცემთ გაუშვათ %1$s გზის ჩაწერის გარეშე.\n\nწინააღმდეგ შემთხვევაში, შეგიძლიათ შექმნათ მეტსახელი %2$s -სთვის თქვენი ტერმინალის აპლიკაციის %3$s კონფიგურაციის ფაილში.</string>
     <string name="terminal_tutorial_3">გახსენით shell შემდეგი ბრძანებით:</string>
     <string name="rish_description"><![CDATA[%1$s-ის საშუალებით შეგიძლიათ გაუშვათ shell ბრძანებები ნებისმიერ ტერმინალის აპლიკაციაში.<p>შეეხეთ, რომ მეტი გაიგოთ მისი გამოყენების შესახებ.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">პარამეტრები</string>
     <string name="settings_behavior">ქცევა</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">ბატარეის ოპტიმიზაცია უნდა გამორთული იყოს ჩატვირთვის / მაკონტროლებლის დასაწყებად გამართულად მუშაობისთვის.</string>
     <string name="snackbar_battery_optimization_settings">გთხოვთ, გამორთოთ ბატარეის ოპტიმიზაცია ამ ფუნქციის გამოსაყენებლად.</string>
     <string name="snackbar_action_fix">დაფიქსირება</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">ელ.ფოსტის აპი ვერ მოიძებნა</string>
     <string name="toast_shizuku_already_starting">Shizuku უკვე იწყება ფონზე</string>
