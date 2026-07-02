@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">ஆட்டோமேஷன் பயன்பாடுகள் மூலம் ஷிசுகுவைக் கட்டுப்படுத்தவும்</string>
     <string name="home_automation_button_view_intents">நோக்கங்களைக் காண்க</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">டெவலப்பர் வழிகாட்டி</string>
     <string name="home_learn_more_description">ஷிசுகுவுடன் எவ்வாறு உருவாக்குவது என்பதை அறிக</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">நீங்கள் ஒரு கூடுதல் படி எடுக்க வேண்டும்.</string>
     <string name="home_adb_is_limited_description">உங்கள் சாதன உற்பத்தியாளர் adb அனுமதிகளை கட்டுப்படுத்தியுள்ளார், மேலும் Shizuku ஐப் பயன்படுத்தும் பயன்பாடுகள் சரியாக வேலை செய்யாது.\n\nவழக்கமாக, \"டெவலப்பர் விருப்பங்கள்\" இல் உள்ள சில விருப்பங்களை சரிசெய்வதன் மூலம் இந்த வரம்பை நீக்க முடியும். இதை எப்படி செய்வது என்பது குறித்த விவரங்களுக்கு உதவியைப் படிக்கவும்.\n\nசெயல்பாடு நடைமுறைக்கு வர நீங்கள் Shizuku ஐ மறுதொடக்கம் செய்ய வேண்டியிருக்கலாம்.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">adb இன் அனுமதி குறைவாக உள்ளது.</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[உங்கள் சாதன உற்பத்தியாளர் adb இன் அனுமதியை வரம்பிடுவது மிகவும் சாத்தியம்.<p> <b><a href=\"%1$s\">இந்த ஆவணத்தில்</a></b>உங்கள் கணினிக்கு ஒரு தீர்வு இருக்கலாம்.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">குறிப்பு: உங்கள் டெர்மினல் பயன்பாட்டின் முகப்பு கோப்பகம் (~) தனிப்பட்ட கோப்புகள் கோப்பகத்தில் இருந்தால், கோப்புகளை அங்கு வைப்பதன் மூலம் பாதையை எழுதாமல் %1$s இயக்க முடியும்.\n\nஇல்லையெனில், உங்கள் டெர்மினல் பயன்பாட்டின் %3$s உள்ளமைவு கோப்பில் %2$s க்கு மாற்றுப்பெயரை உருவாக்கலாம்.</string>
     <string name="terminal_tutorial_3">பின்வரும் கட்டளையுடன் ஒரு ஷெல்லைத் திறக்கவும்:</string>
     <string name="rish_description"><![CDATA[%1$sஉடன், நீங்கள் எந்த முனைய பயன்பாட்டிலும் ஷெல் கட்டளைகளை இயக்கலாம்.<p>அதை எவ்வாறு பயன்படுத்துவது என்பது பற்றி மேலும் அறிய தட்டவும்.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">அமைப்புகள்</string>
     <string name="settings_behavior">நடத்தை</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">துவக்கத்தில்/வாட்ச்டாக்கில் ஸ்டார்ட் சரியாக வேலை செய்ய பேட்டரி ஆப்டிமைசேஷன் முடக்கப்பட்டிருக்க வேண்டும்.</string>
     <string name="snackbar_battery_optimization_settings">இந்த அம்சத்தைப் பயன்படுத்த பேட்டரி மேம்படுத்தலை முடக்கவும்.</string>
     <string name="snackbar_action_fix">சரிசெய்தல்</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">மின்னஞ்சல் பயன்பாடு எதுவும் கிடைக்கவில்லை.</string>
     <string name="toast_shizuku_already_starting">ஷிசுகு ஏற்கனவே பின்னணியில் தொடங்குகிறது.</string>
