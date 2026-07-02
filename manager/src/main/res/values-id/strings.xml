@@ -74,6 +74,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Kontrol Shizuku dengan aplikasi otomatisasi</string>
     <string name="home_automation_button_view_intents">Lihat maksud</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Panduan pengembang</string>
     <string name="home_learn_more_description">Pelajari cara mengembangkan dengan Shizuku</string>
@@ -84,6 +85,7 @@
 \nBiasanya, batasan ini dapat dihilangkan dengan menyesuaikan beberapa opsi di \"Opsi pengembang\". Silakan baca bantuan untuk detail tentang cara melakukan ini.
 \n
 \nAnda mungkin perlu memulai ulang Shizuku agar operasi dapat diterapkan.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Izin adb terbatas</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Kemungkinan besar merk perangkat Anda membatasi perizinan adb.<p>Solusi untuk perangkat Anda mungkin ada pada <b><a href="%1$s">dokumentasi ini</a></b>.]]></string>
@@ -101,6 +103,7 @@
     <string name="terminal_tutorial_2_description">Kiat: Jika direktori beranda (~) aplikasi terminal Anda berada di direktori file pribadi, meletakkan file di sana akan memungkinkan Anda menjalankan %1$s tanpa menuliskan jalurnya.\n\nJika tidak, Anda dapat membuat alias untuk %2$s dalam file konfigurasi %3$s aplikasi terminal Anda.</string>
     <string name="terminal_tutorial_3">Buka shell dengan perintah berikut:</string>
     <string name="rish_description"><![CDATA[Dengan %1$s, Anda dapat menjalankan perintah shell di aplikasi terminal apa pun.<p>Ketuk untuk mempelajari lebih lanjut tentang cara menggunakannya.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Pengaturan</string>
     <string name="settings_behavior">Perilaku</string>
@@ -149,6 +152,7 @@
     <string name="snackbar_battery_optimization_home">Optimalisasi baterai harus dinonaktifkan agar dapat memulai saat boot/watchdog agar berfungsi dengan baik.</string>
     <string name="snackbar_battery_optimization_settings">Nonaktifkan pengoptimalan baterai untuk menggunakan fitur ini.</string>
     <string name="snackbar_action_fix">Memperbaiki</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Tidak ada aplikasi email yang ditemukan</string>
     <string name="toast_shizuku_already_starting">Shizuku sudah mulai di latar belakang</string>
