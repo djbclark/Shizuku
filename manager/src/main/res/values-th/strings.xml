@@ -74,6 +74,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">ควบคุมชิซูกุด้วยแอปอัตโนมัติ</string>
     <string name="home_automation_button_view_intents">ดูความตั้งใจ</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">คู่มือนักพัฒนา</string>
     <string name="home_learn_more_description">เรียนรู้การพัฒนาเพื่อใช้ร่วมกันกับ Shizuku</string>
@@ -84,6 +85,7 @@
 \nโดยปกติ ข้อจำกัดนี้สามารถจัดการได้โดยการปรับตัวเลือกใน \"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์\" โปรดอ่าน การช่วยเหลือสำหรับรายละเอียดวิธีการแก้ไข
 \n
 \nคุณอาจต้องรีสตาร์ท Shizuku เพื่อให้การดำเนินการมีผล</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">การอนุญาตของ adb นั้นจำกัด</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[เป็นไปได้สูงที่ผู้ผลิตอุปกรณ์ของคุณจะจำกัดการอนุญาตของ adb <p>อาจมีวิธีแก้ไขสำหรับอุปกรณ์ของคุณใน<b><a href="%1$s">เอกสารนี้</a></b>]]></string>
@@ -101,6 +103,7 @@
     <string name="terminal_tutorial_2_description">เคล็ดลับ: หากไดเร็กทอรีโฮมของแอปเทอร์มินัลของคุณ (~) อยู่ในไดเร็กทอรีไฟล์ส่วนตัว การวางไฟล์ไว้ที่นั่นจะทำให้คุณสามารถรัน %1$s ได้โดยไม่ต้องเขียนเส้นทาง\n\nหรืออีกทางหนึ่ง คุณสามารถสร้างนามแฝงสำหรับ %2$s ในไฟล์การกำหนดค่า %3$s ของแอปเทอร์มินัลของคุณได้</string>
     <string name="terminal_tutorial_3">เปิดเชลล์ด้วยคำสั่งต่อไปนี้:</string>
     <string name="rish_description"><![CDATA[ด้วย %1$sคุณสามารถรันคำสั่งเชลล์ในแอปพลิเคชันเทอร์มินัลใดก็ได้<p>แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับวิธีการใช้งาน]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">การตั้งค่า</string>
     <string name="settings_behavior">พฤติกรรม</string>
@@ -149,6 +152,7 @@
     <string name="snackbar_battery_optimization_home">จะต้องปิดใช้งานการเพิ่มประสิทธิภาพแบตเตอรี่เพื่อให้เริ่มทำงานเมื่อบูตเครื่อง/เฝ้าระวังเพื่อให้ทำงานได้อย่างถูกต้อง</string>
     <string name="snackbar_battery_optimization_settings">โปรดปิดใช้งานการเพิ่มประสิทธิภาพแบตเตอรี่เพื่อใช้ฟีเจอร์นี้</string>
     <string name="snackbar_action_fix">แก้ไข</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">ไม่พบแอปอีเมล</string>
     <string name="toast_shizuku_already_starting">ชิซึกุเริ่มอยู่ด้านหลังแล้ว</string>
