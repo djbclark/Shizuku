@@ -75,6 +75,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Controlo Shizuku com aplicações de automação</string>
     <string name="home_automation_button_view_intents">Visualizar intenções</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Guia do desenvolvedor</string>
     <string name="home_learn_more_description">Aprenda a desenvolver com Shizuku</string>
@@ -85,6 +86,7 @@
 \nNormalmente, essa limitação pode ser contornada habilitando algumas opções em \"Opções do desenvolvedor\". Leia a ajuda para obter detalhes sobre como fazer isso.
 \n
 \nPode ser necessário reiniciar o Shizuku para que a operação entre em vigor.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">A permissão do adb é limitada</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[É altamente possível que o fabricante do seu dispositivo limite a permissão do adb.<p>Pode haver uma solução para o seu sistema <b><a href="%1$s">neste documento</a></b>.]]></string>
@@ -102,6 +104,7 @@
     <string name="terminal_tutorial_2_description">Dica: Se o diretório inicial da sua aplicação de terminal (~) estiver no diretório de ficheiros privados, colocar os ficheiros lá permitirá que execute %1$s sem ter de digitar o caminho.\n\nCaso contrário, pode criar um alias para %2$s no ficheiro de configuração da sua aplicação de terminal. %3$s</string>
     <string name="terminal_tutorial_3">Abra um terminal com o seguinte comando:</string>
     <string name="rish_description"><![CDATA[Com %1$s, pode executar comandos shell em qualquer aplicação de terminal.<p>Toque para saber mais sobre como utilizá-lo.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Configurações</string>
     <string name="settings_behavior">Comportamento</string>
@@ -150,6 +153,7 @@
     <string name="snackbar_battery_optimization_home">A otimização da bateria deve estar desativada para que o arranque no arranque/vigilância funcione corretamente.</string>
     <string name="snackbar_battery_optimization_settings">Desative a otimização da bateria para utilizar esta funcionalidade.</string>
     <string name="snackbar_action_fix">Corrigir</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nenhuma aplicação de e-mail encontrada</string>
     <string name="toast_shizuku_already_starting">Shizuku já está a começar em segundo plano.</string>
