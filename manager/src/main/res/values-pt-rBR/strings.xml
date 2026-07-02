@@ -84,6 +84,7 @@
     <string name="home_automation_bottom_sheet_label_extras">Extras</string>
     <string name="home_automation_regenerate_token">Regenerar token?</string>
     <string name="home_automation_regenerate_token_message">Você precisará reconfigurar seus intents com o novo token.</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Guia do desenvolvedor</string>
     <string name="home_learn_more_description">Aprenda a desenvolver com Shizuku</string>
@@ -94,6 +95,7 @@
 \nNormalmente, essa limitação pode ser eliminada ajustando algumas opções nas “Opções do desenvolvedor”. Por favor, leia a ajuda para obter detalhes sobre como fazer isso.
 \n
 \nPode ser necessário reiniciar o Shizuku para que a operação tenha efeito.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">A permissão do ADB é limitada</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[É bem provável que o fabricante do seu dispositivo limite a permissão do ADB.<p>Pode haver uma solução para seu sistema <b><a href="%1$s">neste documento</a></b>.]]></string>
@@ -111,6 +113,7 @@
     <string name="terminal_tutorial_2_description">Dica: Se o diretório inicial do seu aplicativo de terminal (~) estiver no diretório de arquivos privados, colocar os arquivos lá permitirá que você execute %1$s sem precisar escrever o caminho.\n\nCaso contrário, você pode criar um alias para %2$s no arquivo de configuração do seu aplicativo de terminal. %3$s</string>
     <string name="terminal_tutorial_3">Abra um terminal com o seguinte comando:</string>
     <string name="rish_description"><![CDATA[Com %1$s, você pode executar comandos do shell em qualquer aplicativo de terminal.<p>Toque para saber mais sobre como usá-lo.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Configurações</string>
     <string name="settings_behavior">Comportamento</string>
@@ -161,6 +164,7 @@
     <string name="snackbar_battery_optimization_home">A otimização de bateria deve estar desativada para que a inicialização na inicialização/vigilância funcione corretamente.</string>
     <string name="snackbar_battery_optimization_settings">Desative a otimização de bateria para usar este recurso.</string>
     <string name="snackbar_action_fix">Consertar</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Nenhum aplicativo de e-mail encontrado</string>
     <string name="toast_shizuku_already_starting">Shizuku já está começando em segundo plano.</string>
