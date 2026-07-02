@@ -77,6 +77,7 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Керуйте Сідзуку за допомогою програм автоматизації</string>
     <string name="home_automation_button_view_intents">Переглянути наміри</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Посібник розробника</string>
     <string name="home_learn_more_description">Дізнайтеся, як розробляти з Shizuku</string>
@@ -87,6 +88,7 @@
 \nЗазвичай ці обмеження можна зняти змінивши налаштування в параметрах розробника. Будь ласка, прочитайте як це зробити в розділі \"Допомога\".
 \n
 \nМожливо потрібно буде перезапустити Shizuku.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Дозвіл на adb обмежений</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Можливо, ваш виробник пристрою лімітує дозвіл adb.<p>Можливо, є рішення для вашої системи у <b><a href="%1$s">цьому документі</a></b>.]]></string>
@@ -104,6 +106,7 @@
     <string name="terminal_tutorial_2_description">Порада: Якщо домашній каталог (~) вашої термінальної програми знаходиться в каталозі приватних файлів, розміщення файлів там дозволить вам запускати %1$s без запису шляху.\n\nВ іншому випадку ви можете створити псевдонім для %2$s у файлі конфігурації вашої термінальної програми %3$s .</string>
     <string name="terminal_tutorial_3">Відкрийте оболонку за допомогою такої команди:</string>
     <string name="rish_description"><![CDATA[За допомогою %1$sви можете виконувати команди оболонки в будь-якій термінальній програмі.<p>Натисніть, щоб дізнатися більше про те, як ним користуватися.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Налаштування</string>
     <string name="settings_behavior">Поведінка</string>
@@ -152,6 +155,7 @@
     <string name="snackbar_battery_optimization_home">Для коректної роботи запуску при завантаженні/сторожового таймера оптимізацію батареї необхідно вимкнути.</string>
     <string name="snackbar_battery_optimization_settings">Будь ласка, вимкніть оптимізацію батареї, щоб використовувати цю функцію.</string>
     <string name="snackbar_action_fix">Виправити</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Поштового додатка не знайдено</string>
     <string name="toast_shizuku_already_starting">Шизуку вже починається на задньому плані</string>
