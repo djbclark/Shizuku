@@ -72,12 +72,14 @@
     <!-- Home - Automation -->
     <string name="home_automation_title">Beheer Shizuku met outomatiseringsprogramme</string>
     <string name="home_automation_button_view_intents">Bekyk voornemens</string>
+    <!-- Home - Stealth mode -->
     <!-- Home - Learn more -->
     <string name="home_learn_more_title">Ontwikkelaarsgids</string>
     <string name="home_learn_more_description">Leer hoe om met Shizuku te ontwikkel</string>
     <!-- Home - Adb permissions limited -->
     <string name="home_adb_is_limited_title">Jy moet \'n ekstra stap neem</string>
     <string name="home_adb_is_limited_description">Jou toestelvervaardiger het ADB-toestemmings beperk en programme wat Shizuku gebruik, sal nie behoorlik werk nie.\n\nGewoonlik kan hierdie beperking opgehef word deur sommige opsies in \"Ontwikkelaaropsies\" aan te pas. Lees asseblief die hulp vir besonderhede oor hoe om dit te doen.\n\nJy moet dalk Shizuku herbegin vir die bewerking om in werking te tree.</string>
+    <!-- Home - Dialogs -->
     <!-- Application management -->
     <string name="app_management_dialog_adb_is_limited_title">Die toestemming van adb is beperk</string>
     <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Dit is hoogs moontlik dat jou toestelvervaardiger die toestemming van adb beperk.<p>Daar mag dalk \'n oplossing vir jou stelsel wees in <b><a href=\"%1$s\">hierdie dokument</a></b>.]]></string>
@@ -95,6 +97,7 @@
     <string name="terminal_tutorial_2_description">Wenk: As jou terminaal-app se tuisgids (~) in die privaat lêergids is, sal die plasing van die lêers daar jou toelaat om %1$s uit te voer sonder om die pad te skryf.\n\nAndersins kan jy \'n alias vir %2$s in jou terminaal-app se %3$s konfigurasielêer skep.</string>
     <string name="terminal_tutorial_3">Maak \'n dop oop met die volgende opdrag:</string>
     <string name="rish_description"><![CDATA[Met %1$skan jy dopbevele in enige terminaaltoepassing uitvoer.<p>Tik om meer te wete te kom oor hoe om dit te gebruik.]]></string>
+    <!-- Stealth -->
     <!-- Settings -->
     <string name="settings_title">Instellings</string>
     <string name="settings_behavior">Gedrag</string>
@@ -143,6 +146,7 @@
     <string name="snackbar_battery_optimization_home">Batteryoptimalisering moet gedeaktiveer wees vir die aanvang met selflaai/waghond om behoorlik te werk.</string>
     <string name="snackbar_battery_optimization_settings">Deaktiveer asseblief batteryoptimalisering om hierdie kenmerk te gebruik.</string>
     <string name="snackbar_action_fix">Herstel</string>
+    <!-- Updates -->
     <!-- Toast -->
     <string name="toast_no_email_app">Geen e-posprogram gevind nie</string>
     <string name="toast_shizuku_already_starting">Shizuku begin reeds in die agtergrond</string>
