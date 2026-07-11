@@ -101,7 +101,7 @@ jobs:
           eval $CMD
           FILE=$(ls "$APK_DIR"/*.apk)
 
-          VERSION=$(echo "$(basename "$FILE")" | sed -E 's/^shizuku-(.*)-(debug|release)-[^.]+\.apk/\1/')
+          VERSION=$(echo "$(basename "$FILE")" | sed -E 's/^shizuku-(.*-(debug[0-9]+|release[0-9]+))-[^.]+\.apk/\1/')
           APK_NAME=$(basename "$FILE")
 
           echo "versionName=$VERSION" >> $GITHUB_OUTPUT

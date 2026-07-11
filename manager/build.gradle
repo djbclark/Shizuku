@@ -122,11 +122,13 @@ afterEvaluate {
     tasks.getByName("preDebugBuild").dependsOn(":shell:assembleDebug")
 }
 
+def forkCommitCount = Integer.parseInt("git rev-list --count v13.7.0-thedjchi..HEAD".execute([], project.rootDir).text.trim())
+
 android.applicationVariants.configureEach { variant ->
     variant.outputs.configureEach {
         def abi = filters.find { it.filterType == "ABI" }?.identifier ?: "universal"
-        def vCode = rootProject.ext.versionCode
-        outputFileName = "shizuku-v${variant.versionName}-stayturgid-r${vCode}-${variant.name}-${abi}.apk"
+        def buildNum = variant.name == "debug" ? "debug${forkCommitCount}" : "release${forkCommitCount}"
+        outputFileName = "shizuku-v${variant.versionName}-${buildNum}-${abi}.apk"
 
         variant.assembleProvider.get().doLast {
             def outDir = new File(rootDir, "out")
