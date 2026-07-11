@@ -128,7 +128,7 @@ android.applicationVariants.configureEach { variant ->
     variant.outputs.configureEach {
         def abi = filters.find { it.filterType == "ABI" }?.identifier ?: "universal"
         def buildNum = variant.name == "debug" ? "debug${forkCommitCount}" : "release${forkCommitCount}"
-        outputFileName = "shizuku-v${variant.versionName}-${buildNum}-${abi}.apk"
+        outputFileName = "shizuku-v${variant.versionName}-stayturgid-${buildNum}-${abi}.apk"
 
         variant.assembleProvider.get().doLast {
             def outDir = new File(rootDir, "out")
