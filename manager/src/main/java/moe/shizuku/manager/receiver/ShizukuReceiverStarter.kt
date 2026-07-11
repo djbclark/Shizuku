@@ -44,7 +44,7 @@ object ShizukuReceiverStarter {
         if (ShizukuSettings.getLastLaunchMode() == LaunchMethod.ROOT) {
             rootStart(context)
         } else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || EnvironmentUtils.isTelevision() || EnvironmentUtils.getAdbTcpPort() > 0)
-            && ShizukuSettings.getLastLaunchMode() == LaunchMethod.ADB) {
+            && (ShizukuSettings.getLastLaunchMode() == LaunchMethod.ADB || ShizukuSettings.getLastLaunchMode() == LaunchMethod.UNKNOWN)) {
                 val tcpPort = EnvironmentUtils.getAdbTcpPort()
                 if (tcpPort > 0) {
                     // ADB is already listening on a TCP port; start directly without

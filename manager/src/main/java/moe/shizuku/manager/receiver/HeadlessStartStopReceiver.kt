@@ -24,7 +24,7 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
             ACTION_HEADLESS_START -> {
                 Log.i(AppConstants.TAG, "Headless start requested")
                 val launchMode = ShizukuSettings.getLastLaunchMode()
-                if (launchMode == ShizukuSettings.LaunchMethod.ADB) {
+                if (launchMode == ShizukuSettings.LaunchMethod.ADB || launchMode == ShizukuSettings.LaunchMethod.UNKNOWN) {
                     tryEnsureWirelessAdb(context)
                     AdbStarter.startDirect(context, ShizukuSettings.getTcpPort())
                 } else {
