@@ -125,7 +125,7 @@ afterEvaluate {
 android.applicationVariants.configureEach { variant ->
     variant.outputs.configureEach {
         def abi = filters.find { it.filterType == "ABI" }?.identifier ?: "universal"
-        outputFileName = "shizuku-v${variant.versionName}-${abi}.apk"
+        outputFileName = "shizuku-v${variant.versionName}-${variant.name}-${abi}.apk"
 
         variant.assembleProvider.get().doLast {
             def outDir = new File(rootDir, "out")
