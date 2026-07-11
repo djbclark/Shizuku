@@ -35,11 +35,102 @@ This version of Shizuku includes some extra features over the original version, 
 * **TCP mode:** (i.e., the `adb tcpip` command) once Shizuku successfully starts with Wi-Fi after a reboot, you can stop/restart Shizuku without a Wi-Fi connection!
 * **Watchdog service:** automatically restarts Shizuku if it stops unexpectedly, and can alert you of crashes/potential fixes
 * **Start/stop intents:** toggle Shizuku on-demand using automation apps (e.g., Tasker, MacroDroid, Automate)
+* **Headless start/stop receiver:** ADB-shell-only start/stop broadcasts for fleet automation and recovery scripts
 * **[BETA] Stealth mode:** hide Shizuku from other apps that don't work when Shizuku is installed
 * **[BETA] In-app updates:** option to automatically check for new updates, and can automatically download/install the latest version from GitHub
 * **Android/Google TV and VR headset support:** UI is now compatible with D-Pad remotes, all TVs are supported (including Android 14+ TVs that require pairing), and the multi-window pairing dialog is toggleable in settings for VR headsets
 * **MediaTek support:** fixes a critical bug in the original v13.6.0 which prevented Shizuku from working on MediaTek devices
 * And more!
+
+## 🤖 Headless / Fleet automation
+
+This fork exposes several mechanisms for unattended fleet management across three
+phases of the device lifecycle.
+
+### 1. Provisioning (one-time per device)
+
+Push a JSON configuration profile to pre-configure Shizuku settings without
+opening the UI:
+
+```bash
+adb push fleet_profile.json /sdcard/Download/shizuku-fleet.json
+adb shell am start -a ${applicationId}.APPLY_FLEET_PROFILE \
+    -e profile_path /sdcard/Download/shizuku-fleet.json \
+    moe.shizuku.manager.fleet.FleetProfileActivity
+```
+
+To suppress the result Toast, append `--es silent true`.
+
+Profile format:
+
+```json
+{
+  "_meta": {
+    "name": "My fleet profile",
+    "version": 1,
+    "clear_existing": false
+  },
+  "start_on_boot": true,
+  "watchdog": true,
+  "tcp_mode": true,
+  "tcp_port": 5555,
+  "auto_disable_usb_debugging": false,
+  "mode": "adb",
+  "update_mode": "stable"
+}
+```
+
+| Key | Type | Values | Notes |
+|-----|------|--------|-------|
+| `mode` | string/int | `"root"`, `"adb"`, `"unknown"` | Last launch method |
+| `start_on_boot` | boolean | `true`/`false` | Start after reboot |
+| `watchdog` | boolean | `true`/`false` | Auto-restart if Shizuku crashes |
+| `tcp_mode` | boolean | `true`/`false` | Switch to TCP mode after ADB start |
+| `tcp_port` | int | port number (e.g. `5555`) | ADB TCP port |
+| `auto_disable_usb_debugging` | boolean | `true`/`false` | Disable USB ADB on stop |
+| `legacy_pairing` | boolean | `true`/`false` | Legacy pairing dialog |
+| `update_mode` | string/int | `"off"`, `"stable"`, `"beta"` | Update check frequency |
+
+### 2. Automatic start on boot
+
+After the initial provisioning, Shizuku starts itself after each reboot when
+`start_on_boot` is enabled. No other automation is needed during normal
+operation.
+
+### 3. Remote start / stop (from a PC)
+
+When the device needs a kick (e.g. after a crash that the watchdog couldn't
+recover), connect over ADB and send a headless broadcast:
+
+```bash
+# Connect to the device
+adb connect <device-ip>:5555
+
+# Start Shizuku (attempts wireless ADB recovery if needed)
+adb shell am broadcast -a ${applicationId}.HEADLESS_START ${applicationId}
+
+# Stop Shizuku
+adb shell am broadcast -a ${applicationId}.HEADLESS_STOP ${applicationId}
+```
+
+The receiver is protected by `android.permission.INTERACT_ACROSS_USERS_FULL`,
+so only the ADB shell or system can trigger it. On Android 11+, if wireless
+ADB has dropped, the start broadcast will automatically re-enable ADB over
+WiFi via `WRITE_SECURE_SETTINGS` before connecting.
+
+### Authenticated intents (for automation apps)
+
+Third-party automation apps (Tasker, MacroDroid, etc.) use the authenticated
+start/stop intents. The format is shown in the app by tapping **"View intents"**.
+These require the `auth` extra token.
+
+To provision a known auth token from the ADB shell (so automation scripts on
+the PC can drive the authenticated intents without opening the UI):
+
+```bash
+adb shell am broadcast -a ${applicationId}.PROVISION_AUTH \
+    -e auth_token "YOUR_TOKEN"
+```
 
 ## 📝 User Guide
 

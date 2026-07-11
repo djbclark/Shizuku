@@ -59,6 +59,14 @@
         tools:node="remove" />
 
     <permission
+        android:name="moe.shizuku.manager.permission.START_STOP_SERVER"
+        android:description="@string/permission_start_stop_server_description"
+        android:label="@string/permission_start_stop_server_label"
+        android:protectionLevel="dangerous" />
+    <uses-permission
+        android:name="moe.shizuku.manager.permission.START_STOP_SERVER" />
+
+    <permission
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature"
         tools:node="remove" />
@@ -127,6 +135,22 @@
         <activity
             android:name=".starter.StarterActivity"
             android:label="@string/starter" />
+        <activity
+            android:name=".fleet.FleetProfileActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="${applicationId}.APPLY_FLEET_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="file" android:mimeType="application/json" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="content" android:mimeType="application/json" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".settings.BugReportDialogActivity"
             android:theme="@style/Theme.App.DialogHost"
@@ -239,6 +263,32 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="${applicationId}.STOP" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+            Headless start/stop receiver for fleet / ADB-shell automation.
+            Protected by INTERACT_ACROSS_USERS_FULL so it can only be triggered by
+            the ADB shell (or the system). It does not require the per-install auth
+            token used by the authenticated receivers.
+        -->
+        <receiver
+            android:name=".receiver.HeadlessStartStopReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL">
+            <intent-filter>
+                <action android:name="${applicationId}.HEADLESS_START" />
+                <action android:name="${applicationId}.HEADLESS_STOP" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.ProvisionAuthReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.PROVISION_AUTH" />
             </intent-filter>
         </receiver>
 

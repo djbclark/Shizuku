@@ -4,14 +4,19 @@ import android.Manifest.permission.WRITE_SECURE_SETTINGS
 import android.content.pm.PackageManager
 import android.content.Context
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import java.io.EOFException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.shizuku.manager.AppConstants
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.adb.AdbClient
@@ -22,6 +27,19 @@ import moe.shizuku.manager.utils.EnvironmentUtils
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 object AdbStarter {
+    private val directScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun startDirect(context: Context, port: Int) {
+        directScope.launch {
+            try {
+                startAdb(context, port)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Log.w(AppConstants.TAG, "Direct ADB start failed on port $port", e)
+            }
+        }
+    }
+
     suspend fun startAdb(context: Context, port: Int, log: ((String) -> Unit)? = null) {
         suspend fun AdbClient.runCommand(cmd: String) {
             command(cmd) { log?.invoke(String(it)) }

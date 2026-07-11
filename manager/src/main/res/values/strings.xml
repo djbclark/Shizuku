@@ -267,6 +267,8 @@
     <string name="permission_group_description" translatable="false">@string/permission_label</string>
     <string name="permission_label">access Shizuku</string>
     <string name="permission_description">Allow the app to use Shizuku.</string>
+    <string name="permission_start_stop_server_label">start/stop Shizuku server</string>
+    <string name="permission_start_stop_server_description">Allow the app to start or stop the Shizuku server without the per-device auth token.</string>
     <string name="permission_warning_template"><![CDATA[Allow <b>%1$s</b> to %2$s?]]></string>
     <string name="grant_dialog_button_allow_always">Allow all the time</string>
     <string name="grant_dialog_button_deny">"Deny"</string>
