@@ -4,6 +4,30 @@ Last updated: **2026-07-11**
 
 ---
 
+## Fork & release convention
+
+All work lives on **djbclark/Shizuku** (fork of thedjchi/Shizuku). Pre-built APKs and source tags follow this naming:
+
+```
+shizuku-v<version>-stayturgid-<buildType><N>-<abi>.apk
+```
+
+| Part | Meaning | Example |
+|---|---|---|
+| `version` | Upstream base version + fork suffix | `13.7.0-thedjchi` |
+| `stayturgid` | Fork identifier | — |
+| `buildType` | `release` or `debug` | — |
+| `N` | Commits since upstream `v13.7.0-thedjchi` tag | `5` |
+| `abi` | Target ABI (`universal` when unsplit) | `universal` |
+
+**Current release:** `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk`
+**Tag:** `v13.7.0-thedjchi-stayturgid-release5`
+**Release:** https://github.com/djbclark/Shizuku/releases/tag/v13.7.0-thedjchi-stayturgid-release5
+
+The counter `N` auto-increments with each commit (computed from `git rev-list --count v13.7.0-thedjchi..HEAD` in `manager/build.gradle`). The CI workflow (`.github/workflows/app.yml`) uses this naming for both artifacts and release tags.
+
+---
+
 ## Session summary
 
 Implemented fleet/headless automation features on the `thedjchi/Shizuku` fork (v13.7.0-thedjchi base). The work was driven by real fleet-deployment needs from the [stayturgid](https://github.com/djbclark/stayturgid) project, which manages a fleet of Android devices using AutoJs6 + Shizuku.
@@ -61,12 +85,12 @@ Implemented fleet/headless automation features on the `thedjchi/Shizuku` fork (v
 
 ### CI/CD
 
-A workflow has been created at `.github/workflows/release.yml` that:
-- Builds on push/PR to master
-- Creates a GitHub release when a tag matching `v*` is pushed
-- Uses `android-actions/setup-android@v3` with CMake 3.31.0 and NDK 29.0.14206865
-
-This workflow hasn't been tested yet — it needs to be pushed to master to validate.
+The existing `.github/workflows/app.yml` workflow (inherited from upstream) handles builds and releases:
+- **Manual trigger only** (`workflow_dispatch`) — no auto-trigger on push
+- `debug=true` builds `assembleDebug` and uploads artifact (no signing needed)
+- `debug=false` builds `assembleRelease` → creates a draft GitHub Release with the APK (requires `KEYSTORE` secrets)
+- Updated to install Android SDK components (`build-tools;36.0.0`, `platforms;android-36`, `cmake;3.31.0`, `ndk;29.0.14206865`) and Ninja
+- APK naming and tag extraction updated to match the `stayturgid-releaseN` convention
 
 ### Potential improvements
 
@@ -100,4 +124,10 @@ The following should be verified on device:
 | `manager/.../adb/AdbStarter.kt` | `startDirect` uses `Dispatchers.IO` — works for fire-and-forget but error handling is just logging. Consider retry logic. |
 | `manager/.../receiver/HeadlessStartStopReceiver.kt` | `tryEnsureWirelessAdb` is best-effort. No feedback to caller if ADB recovery fails. |
 | `manager/.../fleet/FleetProfileApplier.kt` | New code, limited testing. Only covers Shizuku's 8 relevant settings. |
-| `.github/workflows/release.yml` | Untested — needs validation on a real CI run. |
+| `.github/workflows/app.yml` | Fork doesn't have `KEYSTORE` secrets configured, so release builds (debug=false) will fail the signing step. Only debug builds work on the fork. |
+
+## Release history (djbclark/Shizuku)
+
+| Tag | APK | Notes |
+|---|---|---|
+| `v13.7.0-thedjchi-stayturgid-release5` | `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk` | Current release — fleet/headless features |
