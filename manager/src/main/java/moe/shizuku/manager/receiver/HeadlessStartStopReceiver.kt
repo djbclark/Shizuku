@@ -5,12 +5,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import moe.shizuku.manager.AppConstants
 import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.adb.AdbStarter
+import moe.shizuku.manager.utils.EnvironmentUtils
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.shizuku.Shizuku
 
@@ -33,6 +36,39 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
                 if (!ShizukuStateMachine.isRunning()) return
                 ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
                 runCatching { Shizuku.exit() }
+            }
+            ACTION_HEADLESS_STATUS -> {
+                val state = ShizukuStateMachine.get()
+                val stateLabel = state.name
+                val binderAlive = runCatching { Shizuku.pingBinder() }.getOrDefault(false)
+
+                val adbTcpPort = EnvironmentUtils.getAdbTcpPort()
+                val adbWifi = runCatching {
+                    Settings.Global.getInt(context.contentResolver, "adb_wifi_enabled", 0)
+                }.getOrDefault(0)
+                val adbUsb = runCatching {
+                    Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0)
+                }.getOrDefault(0)
+
+                val adbParts = mutableListOf<String>()
+                if (adbUsb != 0) adbParts.add("USB:1")
+                if (adbWifi != 0) adbParts.add("WiFi:${adbTcpPort.let { if (it > 0) it.toString() else "?" }}")
+                if (adbParts.isEmpty()) adbParts.add("off")
+                val adbSummary = adbParts.joinToString(" ")
+
+                val summary = "$stateLabel (binder=$binderAlive, ADB: $adbSummary, v${BuildConfig.VERSION_NAME})"
+
+                val extras = Bundle().apply {
+                    putString("state", stateLabel)
+                    putBoolean("binder_alive", binderAlive)
+                    putInt("adb_tcp_port", adbTcpPort)
+                    putBoolean("adb_wifi_enabled", adbWifi != 0)
+                    putBoolean("adb_enabled", adbUsb != 0)
+                    putString("version_name", BuildConfig.VERSION_NAME)
+                    putInt("version_code", BuildConfig.VERSION_CODE)
+                }
+
+                setResult(state.ordinal, summary, extras)
             }
         }
     }
@@ -62,5 +98,6 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
     companion object {
         val ACTION_HEADLESS_START = "${BuildConfig.APPLICATION_ID}.HEADLESS_START"
         val ACTION_HEADLESS_STOP = "${BuildConfig.APPLICATION_ID}.HEADLESS_STOP"
+        val ACTION_HEADLESS_STATUS = "${BuildConfig.APPLICATION_ID}.HEADLESS_STATUS"
     }
 }

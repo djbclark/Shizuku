@@ -118,6 +118,17 @@ so only the ADB shell or system can trigger it. On Android 11+, if wireless
 ADB has dropped, the start broadcast will automatically re-enable ADB over
 WiFi via `WRITE_SECURE_SETTINGS` before connecting.
 
+To fetch structured status (state, ADB status, version) without running
+`pgrep` or `ss`:
+
+```bash
+adb shell am broadcast -a ${applicationId}.HEADLESS_STATUS ${applicationId}
+# Returns: result=<stateCode>, data="RUNNING (binder=true, ADB: USB:1, v13.7.0-thedjchi)"
+```
+
+The result extras include `state`, `binder_alive`, `adb_tcp_port`,
+`adb_wifi_enabled`, `adb_enabled`, `version_name`, and `version_code`.
+
 ### Authenticated intents (for automation apps)
 
 Third-party automation apps (Tasker, MacroDroid, etc.) use the authenticated

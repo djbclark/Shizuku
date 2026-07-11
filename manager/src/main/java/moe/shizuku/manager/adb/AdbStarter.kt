@@ -29,14 +29,23 @@ import moe.shizuku.manager.utils.ShizukuStateMachine
 object AdbStarter {
     private val directScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    fun startDirect(context: Context, port: Int) {
+    fun startDirect(context: Context, port: Int, maxRetries: Int = 3, retryDelayMs: Long = 5000) {
         directScope.launch {
-            try {
-                startAdb(context, port)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                Log.w(AppConstants.TAG, "Direct ADB start failed on port $port", e)
+            var lastError: Exception? = null
+            for (attempt in 1..maxRetries) {
+                try {
+                    startAdb(context, port)
+                    return@launch
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    lastError = e
+                    if (attempt < maxRetries) {
+                        Log.w(AppConstants.TAG, "startAdb attempt $attempt/$maxRetries failed, retrying in ${retryDelayMs}ms", e)
+                        delay(retryDelayMs)
+                    }
+                }
             }
+            Log.w(AppConstants.TAG, "Direct ADB start failed after $maxRetries attempts", lastError)
         }
     }
 

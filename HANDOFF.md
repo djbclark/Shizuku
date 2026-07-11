@@ -92,17 +92,20 @@ The existing `.github/workflows/app.yml` workflow (inherited from upstream) hand
 - Updated to install Android SDK components (`build-tools;36.0.0`, `platforms;android-36`, `cmake;3.31.0`, `ndk;29.0.14206865`) and Ninja
 - APK naming and tag extraction updated to match the `stayturgid-releaseN` convention
 
+### Already implemented (2026-07-11)
+
+- **HEADLESS_STATUS broadcast** (`HeadlessStartStopReceiver`) — Returns structured state info via `am broadcast` extras: `state` (RUNNING/STOPPED/etc.), `binder_alive`, `adb_tcp_port`, `adb_wifi_enabled`, `adb_enabled`, `version_name`, `version_code`. Replaces `pgrep -f shizuku_server` in JS watchdog and Python health probes.
+- **Retry logic in `startDirect()`** — `AdbStarter.startDirect()` now retries `startAdb` up to 3 times with 5s delays (configurable via `maxRetries`/`retryDelayMs` params). Addresses silent failures on slow boots where WiFi or ADB isn't ready yet.
+
 ### Potential improvements
 
 1. **Boot receiver reliability** — The `BootCompleteReceiver` starts Shizuku on boot, but on Android 11+ with wireless ADB, it depends on WiFi being available. When WiFi isn't available yet (e.g., device boots without WiFi), the start fails. The receiver could be enhanced to retry when WiFi connects.
 
-2. **Health/status broadcast** — Add a `HEADLESS_STATUS` broadcast intent that returns Shizuku running state (for fleet health checks without `pgrep`).
+2. **Watchdog notification channel** — The watchdog service currently stops unexpectedly when ADB disconnects (e.g., USB plug/unplug). The state machine transitions to CRASHED but recovery requires the headless start or boot receiver. Consider making the watchdog more resilient.
 
-3. **Watchdog notification channel** — The watchdog service currently stops unexpectedly when ADB disconnects (e.g., USB plug/unplug). The state machine transitions to CRASHED but recovery requires the headless start or boot receiver. Consider making the watchdog more resilient.
+3. **mDNS-free start** — The current `AdbStartWorker` (interactive path) uses mDNS to discover the wireless ADB port on Android 11+. For headless, the receiver uses the configured TCP port directly. If the port is wrong or ADB uses a different port, the connection fails. Could add fallback port discovery.
 
-4. **mDNS-free start** — The current `AdbStartWorker` (interactive path) uses mDNS to discover the wireless ADB port on Android 11+. For headless, the receiver uses the configured TCP port directly. If the port is wrong or ADB uses a different port, the connection fails. Could add fallback port discovery.
-
-5. **Auth token integration with stayturgid** — stayturgid patches `shizuku.json` directly. The `ProvisionAuthReceiver` provides an alternative path but isn't used. Could bridge these by having the receiver also patch `shizuku.json`.
+4. **Auth token integration with stayturgid** — stayturgid patches `shizuku.json` directly. The `ProvisionAuthReceiver` provides an alternative path but isn't used. Could bridge these by having the receiver also patch `shizuku.json`.
 
 ### Testing needs
 
@@ -130,4 +133,5 @@ The following should be verified on device:
 
 | Tag | APK | Notes |
 |---|---|---|
-| `v13.7.0-thedjchi-stayturgid-release5` | `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk` | Current release — fleet/headless features |
+| `v13.7.0-thedjchi-stayturgid-release7` | `shizuku-v13.7.0-thedjchi-stayturgid-release7-universal.apk` | **Current** — HEADLESS_STATUS, retry logic in startDirect |
+| `v13.7.0-thedjchi-stayturgid-release5` | `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk` | Initial fleet/headless features |
