@@ -1,137 +1,232 @@
-# HANDOFF — Shizuku fleet/headless features
+# HANDOFF — Shizuku fleet/headless fork
 
 Last updated: **2026-07-11**
 
 ---
 
-## Fork & release convention
+## Repository
 
-All work lives on **djbclark/Shizuku** (fork of thedjchi/Shizuku). Pre-built APKs and source tags follow this naming:
+- **Fork:** `djbclark/Shizuku` (fork of `thedjchi/Shizuku`, which is itself a fork of `RikkaApps/Shizuku`)
+- **Base:** `v13.7.0-thedjchi` (upstream release tag)
+- **Branch:** `master` (force-pushed regularly — single-developer workflow)
+- **Purpose:** Add fleet/headless automation primitives for the [stayturgid](https://github.com/djbclark/stayturgid) project — a fleet of Android devices (Samsung S24, Pixel 7a, Fire HD8) running AutoJs6 + Shizuku.
+
+---
+
+## Release naming convention
+
+### APK filename
 
 ```
-shizuku-v<version>-stayturgid-<buildType><N>-<abi>.apk
+shizuku-v<versionName>-<abi>.apk
+```
+
+| Part | Source | Example |
+|---|---|---|
+| **versionName** | `rootProject.ext.versionName` in `build.gradle:37` | `13.7.0-thedjchi+stayturgid-release11` |
+| **abi** | Build ABI filter, defaults to `universal` | `universal` |
+
+**Example:** `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk`
+
+### VersionName format
+
+Computed in `build.gradle:35-38`:
+
+```
+13.7.0[-beta]-thedjchi+stayturgid-release<N>
 ```
 
 | Part | Meaning | Example |
 |---|---|---|
-| `version` | Upstream base version + fork suffix | `13.7.0-thedjchi` |
-| `stayturgid` | Fork identifier | — |
-| `buildType` | `release` or `debug` | — |
-| `N` | Commits since upstream `v13.7.0-thedjchi` tag | `5` |
-| `abi` | Target ABI (`universal` when unsplit) | `universal` |
+| `13.7.0` | Upstream base version | `13.7.0` |
+| `-beta` | Optional — only when `-Pbeta` passed to Gradle | `-beta` |
+| `-thedjchi` | Fork identifier (inherited from thedjchi) | `-thedjchi` |
+| `+stayturgid-release<N>` | Build metadata (`+` separator), `N` = commits since upstream tag | `+stayturgid-release11` |
 
-**Current release:** `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk`
-**Tag:** `v13.7.0-thedjchi-stayturgid-release5`
-**Release:** https://github.com/djbclark/Shizuku/releases/tag/v13.7.0-thedjchi-stayturgid-release5
+The `+` is semver build metadata separator — version comparison ignores it, but the string is unique per release. Obtainium matches installed APK `versionName` against GitHub release tags (ignoring the `v` prefix).
 
-The counter `N` auto-increments with each commit (computed from `git rev-list --count v13.7.0-thedjchi..HEAD` in `manager/build.gradle`). The CI workflow (`.github/workflows/app.yml`) uses this naming for both artifacts and release tags.
+`N` comes from `git rev-list --count v13.7.0-thedjchi..HEAD` — auto-increments with each commit.
+
+### VersionCode
+
+```
+50000 + <total git commit count>
+```
+
+Set in `build.gradle:36`. Ensures monotonic increase > 1380. Current: `51372`.
+
+### GitHub release tag
+
+```
+v<versionName>
+```
+
+The CI workflow (`app.yml`) extracts this from the APK filename with:
+```
+sed -E 's/^shizuku-(.*[-.](debug[0-9]+|release[0-9]+))-[^.]+\.apk/\1/'
+```
+
+**Example tag:** `v13.7.0-thedjchi+stayturgid-release11`
+
+### Release history
+
+| Tag | APK | Changes |
+|---|---|---|
+| `v13.7.0-thedjchi+stayturgid-release11` | `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk` | Build metadata format (`+`). versionCode > 1380. **Current.** |
+| `v13.7.0-thedjchi-stayturgid-release10` | `shizuku-v13.7.0-thedjchi-stayturgid-release10-universal.apk` | UNKNOWN launch mode treated as ADB. |
+| `v13.7.0-thedjchi-stayturgid-release9` | `shizuku-v13.7.0-thedjchi-stayturgid-release9-universal.apk` | Same as release10 (duplicate due to build timing). |
+| `v13.7.0-thedjchi-stayturgid-release8` | `shizuku-v13.7.0-thedjchi-stayturgid-release8-universal.apk` | Obtainium compat: versionName now matches release tag. |
+| `v13.7.0-thedjchi-stayturgid-release7` | `shizuku-v13.7.0-thedjchi-stayturgid-release7-universal.apk` | HEADLESS_STATUS broadcast, retry logic in startDirect. |
+
+All releases are published (not drafts). Only the latest matters for new work.
 
 ---
 
-## Session summary
+## Implemented features
 
-Implemented fleet/headless automation features on the `thedjchi/Shizuku` fork (v13.7.0-thedjchi base). The work was driven by real fleet-deployment needs from the [stayturgid](https://github.com/djbclark/stayturgid) project, which manages a fleet of Android devices using AutoJs6 + Shizuku.
+### Headless receivers (`HeadlessStartStopReceiver.kt`)
+
+In `manager/src/main/java/moe/shizuku/manager/receiver/`. Protected by `INTERACT_ACROSS_USERS_FULL` permission — only ADB shell or system can trigger.
+
+**`HEADLESS_START`** — starts Shizuku server via ADB without UI. Flow:
+1. If `launchMode` is `ADB` or `UNKNOWN` (fresh install), calls `tryEnsureWirelessAdb()` then `AdbStarter.startDirect()` with the configured TCP port
+2. If `launchMode` is `ROOT`, falls through to `ShizukuReceiverStarter.start()`
+3. `tryEnsureWirelessAdb()` sets `adb_wifi_enabled` and `adb_enabled` via `Settings.Global` if `WRITE_SECURE_SETTINGS` is held
+4. `startDirect()` retries up to 3 times with 5s delays (configurable)
+
+**`HEADLESS_STOP`** — calls `Shizuku.exit()` to stop the server.
+
+**`HEADLESS_STATUS`** — returns structured state. Usage:
+```bash
+adb shell am broadcast -a moe.shizuku.privileged.api.HEADLESS_STATUS moe.shizuku.privileged.api
+# Result: result=<stateCode>, data="RUNNING (binder=true, ADB: USB:1, v13.7.0-thedjchi+stayturgid-release11)"
+```
+Extras: `state`, `binder_alive`, `adb_tcp_port`, `adb_wifi_enabled`, `adb_enabled`, `version_name`, `version_code`.
+
+Replaces `pgrep -f shizuku_server` and `ss -tlnp` in fleet health probes.
+
+### Provision auth receiver (`ProvisionAuthReceiver.kt`)
+
+Seeds the auth token used by authenticated start/stop intents. Usage:
+```bash
+adb shell am broadcast -a moe.shizuku.privileged.api.PROVISION_AUTH \
+    -e auth_token "YOUR_TOKEN"
+```
+
+### Fleet profile (`FleetProfileActivity.kt` + `FleetProfileApplier.kt`)
+
+JSON configuration profile for settings without UI. Following AutoJs6's `FleetProfileActivity` pattern:
+```bash
+adb shell am start -a moe.shizuku.privileged.api.APPLY_FLEET_PROFILE \
+    -e profile_path /path/to/profile.json \
+    moe.shizuku.manager.fleet.FleetProfileActivity
+```
+
+Settings supported: `mode`, `start_on_boot`, `watchdog`, `tcp_mode`, `tcp_port`, `auto_disable_usb_debugging`, `legacy_pairing`, `update_mode`. Written to `ShizukuSettings` shared prefs.
+
+Default profile bundled at `assets/fleet_profile_default.json`.
+
+### Auth bypass in `AuthenticatedReceiver.kt`
+
+Shell/root callers and apps holding `START_STOP_SERVER` permission skip the auth token check.
+
+### Direct ADB start in `AdbStarter.kt`
+
+`startDirect(context, port, maxRetries=3, retryDelayMs=5000)` — fire-and-forget coroutine that wraps `startAdb()` with retry logic. Bypasses `getAdbTcpPort()` (which returns -1 for Android 11+ wireless ADB — it reads `service.adb.tcp.port` system property, not the `adb_wifi_enabled` setting used by wireless debugging).
 
 ---
 
-## What was implemented
+## Build infrastructure
 
-### New files
+### CI workflow (`.github/workflows/app.yml`)
 
-| File | Purpose |
+Inherited from upstream, modified:
+- **Manual trigger only** (`workflow_dispatch`) — no auto-trigger on push
+- Installs Android SDK (`build-tools;36.0.0`, `platforms;android-36`, `cmake;3.31.0`, `ndk;29.0.14206865`) and Ninja
+- `debug=true` → `assembleDebug`, uploads artifact (no signing needed)
+- `debug=false` → `assembleRelease`, then creates a **published** GitHub Release (not draft)
+  - Signing requires `KEYSTORE` secrets — Not configured on the fork. Only debug builds work in CI.
+
+**To trigger a release build from CI:** Go to Actions → Build App → "Run workflow" with `debug=false`. This will fail on the fork because signing secrets aren't set.
+
+**Manual release procedure:** `./gradlew :manager:assembleRelease` locally (uses debug keystore fallback from `signing.gradle`), then:
+```bash
+gh release create v<version> out/apk/*.apk --repo djbclark/Shizuku --title "v<version>"
+```
+
+### Local build
+
+Requires JDK 21 and Android SDK with:
+- `build-tools;36.0.0`
+- `platforms;android-36`
+- `cmake;3.31.0`
+- `ndk;29.0.14206865`
+- Ninja build system
+
+Build command: `JAVA_HOME=<path-to-jdk21> ./gradlew :manager:assembleRelease`
+
+APK output: `manager/build/outputs/apk/release/` (also copied to `out/apk/` by build task).
+
+---
+
+## Build fixes applied
+
+| Issue | Fix |
 |---|---|
-| `manager/.../receiver/HeadlessStartStopReceiver.kt` | Shell-only `HEADLESS_START` / `HEADLESS_STOP` broadcasts. Protected by `INTERACT_ACROSS_USERS_FULL`. On start, auto-enables ADB over WiFi via `WRITE_SECURE_SETTINGS`, then calls startDirect on the configured TCP port (bypasses broken `getAdbTcpPort()` system-property check on Android 11+). |
-| `manager/.../receiver/ProvisionAuthReceiver.kt` | Shell-only `PROVISION_AUTH` broadcast to seed a known auth token via `ShizukuSettings.setAuthToken()` (for authenticated-intent workflow). |
-| `manager/.../fleet/FleetProfileActivity.kt` | No-UI activity (Theme.NoDisplay) that applies a JSON configuration profile. Follows the AutoJs6 `FleetProfileActivity` pattern. |
-| `manager/.../fleet/FleetProfileApplier.kt` | JSON → SharedPreferences writer. Handles type coercions (mode/update_mode string aliases, tcp_port int→string, etc.) and context-dependent setters (start_on_boot, watchdog). |
-| `manager/src/main/assets/fleet_profile_default.json` | Bundled reference profile with recommended fleet defaults (start_on_boot, watchdog, tcp_mode, etc.). |
-
-### Modified files
-
-| File | What changed |
-|---|---|
-| `AndroidManifest.xml` | Registered `HeadlessStartStopReceiver`, `ProvisionAuthReceiver`, `FleetProfileActivity`. Added `START_STOP_SERVER` permission. |
-| `AdbStarter.kt` | Added `startDirect(context, port)` — fire-and-forget coroutine wrapper around `startAdb()`, so headless start doesn't block the receiver. |
-| `AuthenticatedReceiver.kt` | Shell/root callers and `START_STOP_SERVER` holders bypass auth token check. |
-| `ShizukuReceiverStarter.kt` | Added import for `AdbStarter`. On ADB mode with TCP port available, calls `startDirect()` (the headless path). |
-| `ShizukuSettings.java` | Added `setAuthToken(String)` for provisioning. |
-| `strings.xml` | Strings for the new `START_STOP_SERVER` permission. |
-| `build.gradle` (root) | Downgraded compileSdk/targetSdk to 36. Updated NDK to 29.0.14206865 (needed for prebuilt boringssl/libcxx LLVM 18 compat). |
-| `server/build.gradle` | Added `kotlinOptions { jvmTarget = "21" }` (fixes JVM target mismatch). |
-| `manager/build.gradle` | Changed APK naming to AutoJs6 convention: `shizuku-v<version>-<abi>.apk` (was `shizuku-v<version>-<variant>.apk`). |
-| `README.md` | Restructured headless/fleet docs into three-phase lifecycle: Provisioning → Boot → Remote. |
-
-### Build fixes
-
-- **NDK version**: `29.0.14206865` (prebuilt libs needed LLVM 18, NDK 26 had LLVM 17)
-- **Kotlin JVM target**: Added `jvmTarget = "21"` to `server/build.gradle` (matched Java 21 target)
-- **Missing import**: Added `moe.shizuku.manager.adb.AdbStarter` import to `ShizukuReceiverStarter.kt`
+| NDK version mismatch | `29.0.14206865` (prebuilt boringssl/libcxx needed LLVM 18, NDK 26 had LLVM 17) |
+| Kotlin JVM target mismatch | `kotlinOptions { jvmTarget = "21" }` in `server/build.gradle` |
+| Missing import | `AdbStarter` import in `ShizukuReceiverStarter.kt` |
 
 ---
 
 ## Key design decisions
 
-1. **Headless start bypasses `getAdbTcpPort()`** — On Android 11+, wireless ADB uses the `adb_wifi_enabled` setting, not the `service.adb.tcp.port` system property. So `getAdbTcpPort()` returns -1 even when ADB is working. The headless receiver calls `startDirect(context, ShizukuSettings.getTcpPort())` directly instead of `ShizukuReceiverStarter.start()` (which checks the system property).
+1. **`getAdbTcpPort()` is wrong for Android 11+** — reads `service.adb.tcp.port` system property. Android 11+ wireless ADB uses `adb_wifi_enabled` setting, not system properties. Always returns -1. Headless start bypasses it by calling `startDirect` with the configured TCP port directly.
 
-2. **Wireless ADB recovery** — The `HeadlessStartStopReceiver.tryEnsureWirelessAdb()` sets `adb_wifi_enabled = 1` and `adb_enabled = 1` via `Settings.Global` before connecting. This eliminates the need for stayturgid's external recovery in `shizuku.js`.
+2. **Wireless ADB recovery built in** — `tryEnsureWirelessAdb()` sets `adb_wifi_enabled` and `adb_enabled` via `WRITE_SECURE_SETTINGS` before connecting. Eliminates stayturgid's separate recovery in `shizuku.js`.
 
-3. **Fleet profile not needed by stayturgid** — stayturgid configures AutoJs6 settings (not Shizuku settings) via AutoJs6's `FleetProfileActivity`. The Shizuku fleet profile is useful for initial device provisioning (one-time setup) but not for ongoing operations. It was still implemented as a parallel feature.
+3. **UNKNOWN launch mode** — Fresh Shizuku installs have launch mode = UNKNOWN. Both `HeadlessStartStopReceiver` and `ShizukuReceiverStarter` now treat UNKNOWN as ADB for headless start, so it works without opening the UI first.
 
-4. **No auth token needed** — stayturgid uses `pm grant` + `shizuku.json` patching, not auth tokens. The `ProvisionAuthReceiver` is for a different workflow (automation apps that use the authenticated intents).
+4. **Samsung process freezer** — Samsung's battery optimization freezes the broadcast receiver on first install. Requires opening the Shizuku app and tapping "Start" once. After that, `HEADLESS_*` broadcasts work and persist across reboots.
 
----
-
-## Remaining considerations
-
-### CI/CD
-
-The existing `.github/workflows/app.yml` workflow (inherited from upstream) handles builds and releases:
-- **Manual trigger only** (`workflow_dispatch`) — no auto-trigger on push
-- `debug=true` builds `assembleDebug` and uploads artifact (no signing needed)
-- `debug=false` builds `assembleRelease` → creates a draft GitHub Release with the APK (requires `KEYSTORE` secrets)
-- Updated to install Android SDK components (`build-tools;36.0.0`, `platforms;android-36`, `cmake;3.31.0`, `ndk;29.0.14206865`) and Ninja
-- APK naming and tag extraction updated to match the `stayturgid-releaseN` convention
-
-### Already implemented (2026-07-11)
-
-- **HEADLESS_STATUS broadcast** (`HeadlessStartStopReceiver`) — Returns structured state info via `am broadcast` extras: `state` (RUNNING/STOPPED/etc.), `binder_alive`, `adb_tcp_port`, `adb_wifi_enabled`, `adb_enabled`, `version_name`, `version_code`. Replaces `pgrep -f shizuku_server` in JS watchdog and Python health probes.
-- **Retry logic in `startDirect()`** — `AdbStarter.startDirect()` now retries `startAdb` up to 3 times with 5s delays (configurable via `maxRetries`/`retryDelayMs` params). Addresses silent failures on slow boots where WiFi or ADB isn't ready yet.
-
-### Potential improvements
-
-1. **Boot receiver reliability** — The `BootCompleteReceiver` starts Shizuku on boot, but on Android 11+ with wireless ADB, it depends on WiFi being available. When WiFi isn't available yet (e.g., device boots without WiFi), the start fails. The receiver could be enhanced to retry when WiFi connects.
-
-2. **Watchdog notification channel** — The watchdog service currently stops unexpectedly when ADB disconnects (e.g., USB plug/unplug). The state machine transitions to CRASHED but recovery requires the headless start or boot receiver. Consider making the watchdog more resilient.
-
-3. **mDNS-free start** — The current `AdbStartWorker` (interactive path) uses mDNS to discover the wireless ADB port on Android 11+. For headless, the receiver uses the configured TCP port directly. If the port is wrong or ADB uses a different port, the connection fails. Could add fallback port discovery.
-
-4. **Auth token integration with stayturgid** — stayturgid patches `shizuku.json` directly. The `ProvisionAuthReceiver` provides an alternative path but isn't used. Could bridge these by having the receiver also patch `shizuku.json`.
-
-### Testing needs
-
-The following should be verified on device:
-
-- `adb shell am broadcast ... HEADLESS_START` works with and without wireless ADB pre-enabled
-- `adb shell am broadcast ... HEADLESS_STOP` stops the server cleanly
-- `adb shell am broadcast ... PROVISION_AUTH -e auth_token "x"` persists the token
-- `adb shell am start ... APPLY_FLEET_PROFILE -e profile_path ...` applies settings
-- `start_on_boot` starts Shizuku after reboot
-- Build reproducibility via the CI workflow
+5. **Fleet profile vs stayturgid needs** — stayturgid configures AutoJs6 settings (not Shizuku settings) via AutoJs6's fleet profile. Shizuku's fleet profile is for initial provisioning, not ongoing operations.
 
 ---
 
-## Files that may need attention
+## Known issues & limitations
 
-| File | Why |
+| Issue | Details |
 |---|---|
-| `manager/.../adb/AdbStarter.kt` | `startDirect` uses `Dispatchers.IO` — works for fire-and-forget but error handling is just logging. Consider retry logic. |
-| `manager/.../receiver/HeadlessStartStopReceiver.kt` | `tryEnsureWirelessAdb` is best-effort. No feedback to caller if ADB recovery fails. |
-| `manager/.../fleet/FleetProfileApplier.kt` | New code, limited testing. Only covers Shizuku's 8 relevant settings. |
-| `.github/workflows/app.yml` | Fork doesn't have `KEYSTORE` secrets configured, so release builds (debug=false) will fail the signing step. Only debug builds work on the fork. |
+| Fork CI can't sign release APKs | `KEYSTORE` secrets not configured. Manual builds use debug keystore (works for sideloading). |
+| Samsung process freezer | First boot after install: broadcast receiver frozen until app is manually launched once. |
+| `tryEnsureWirelessAdb` best-effort | No feedback to caller if ADB recovery fails. Logs only. |
+| FleetProfileApplier limited | Only covers 8 Shizuku settings. No testing on real device. |
 
-## Release history (djbclark/Shizuku)
+---
 
-| Tag | APK | Notes |
-|---|---|---|
-| `v13.7.0-thedjchi-stayturgid-release7` | `shizuku-v13.7.0-thedjchi-stayturgid-release7-universal.apk` | **Current** — HEADLESS_STATUS, retry logic in startDirect |
-| `v13.7.0-thedjchi-stayturgid-release5` | `shizuku-v13.7.0-thedjchi-stayturgid-release5-universal.apk` | Initial fleet/headless features |
+## Useful commands
+
+```bash
+# Build release APK
+JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.11 ./gradlew :manager:assembleRelease
+
+# Upload to GitHub
+gh release create v13.7.0-thedjchi+stayturgid-release<N> out/apk/*.apk --repo djbclark/Shizuku
+
+# On device: start Shizuku headlessly
+adb shell am broadcast -a moe.shizuku.privileged.api.HEADLESS_START moe.shizuku.privileged.api
+
+# On device: check status
+adb shell am broadcast -a moe.shizuku.privileged.api.HEADLESS_STATUS moe.shizuku.privileged.api
+
+# On device: stop Shizuku
+adb shell am broadcast -a moe.shizuku.privileged.api.HEADLESS_STOP moe.shizuku.privileged.api
+
+# Provision auth token
+adb shell am broadcast -a moe.shizuku.privileged.api.PROVISION_AUTH -e auth_token "mytoken" moe.shizuku.privileged.api
+
+# Apply fleet profile
+adb shell am start -a moe.shizuku.privileged.api.APPLY_FLEET_PROFILE \
+    -e profile_path /sdcard/Download/fleet.json \
+    moe.shizuku.manager.fleet.FleetProfileActivity
+```
