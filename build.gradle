@@ -35,5 +35,5 @@ def isBeta = project.hasProperty("beta")
 ext {
     versionCode = 50000 + gitCommitCount
     def suffix = isBeta ? "-beta" : ""
-    versionName = "${baseVersionName}${suffix}-thedjchi-stayturgid-release${forkBuildNum}"
+    versionName = "${baseVersionName}${suffix}-thedjchi+stayturgid-release${forkBuildNum}"
 }
