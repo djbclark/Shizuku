@@ -38,11 +38,13 @@ import moe.shizuku.manager.receiver.ShizukuReceiverStarter.updateNotification
 import moe.shizuku.manager.settings.BugReportDialogActivity
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.EnvironmentUtils
+import moe.shizuku.manager.utils.HeadlessLogger
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         try {
+            HeadlessLogger.i("AdbWorker", "Start worker running")
             updateNotification(
                 applicationContext,
                 WorkerState.RUNNING
@@ -52,13 +54,20 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
             Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
             Settings.Global.putLong(cr, "adb_allowed_connection_time", 0L)
+            HeadlessLogger.i("AdbWorker", "ADB enabled (USB + cleared connection time)")
 
             val tcpPort = EnvironmentUtils.getAdbTcpPort()
             if (tcpPort > 0 && !ShizukuSettings.getTcpMode()) {
                 AdbStarter.stopTcp(applicationContext, tcpPort)
             }
 
-            val port = tcpPort.takeIf { !EnvironmentUtils.isWifiRequired() } ?: callbackFlow {
+            val port = tcpPort.takeIf { !EnvironmentUtils.isWifiRequired() }
+            if (port != null) {
+                HeadlessLogger.i("AdbWorker", "TCP port available: $port")
+            } else {
+                HeadlessLogger.i("AdbWorker", "No TCP port, starting mDNS discovery")
+            }
+            val discoveredPort = port ?: callbackFlow {
                 val adbMdns = AdbMdns(applicationContext, AdbMdns.TLS_CONNECT) { p ->
                     if (p.second > 0) trySend(p.second)
                 }
@@ -128,14 +137,18 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 }
             }.first()
             
-            AdbStarter.startAdb(applicationContext, port)
+            HeadlessLogger.i("AdbWorker", "Port discovered: $discoveredPort, starting ADB")
+            AdbStarter.startAdb(applicationContext, discoveredPort)
+            HeadlessLogger.i("AdbWorker", "ADB started, waiting for binder")
             Starter.waitForBinder()
+            HeadlessLogger.i("AdbWorker", "Shizuku server running")
 
             val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.cancel(ShizukuReceiverStarter.NOTIFICATION_ID)
 
             return Result.success()
         } catch (e: CancellationException) {
+            HeadlessLogger.w("AdbWorker", "Worker cancelled: ${e.message}")
             val state = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 WorkerState.AWAITING_RETRY
             } else {
@@ -149,6 +162,7 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
             throw e
         } catch (e: Exception) {
+            HeadlessLogger.e("AdbWorker", "Worker failed: ${e.message}", e)
             val ignored = listOf(
                 EOFException::class,
                 SecurityException::class,

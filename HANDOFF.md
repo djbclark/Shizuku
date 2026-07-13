@@ -72,7 +72,8 @@ sed -E 's/^shizuku-(.*[-.](debug[0-9]+|release[0-9]+))-[^.]+\.apk/\1/'
 
 | Tag | APK | Changes |
 |---|---|---|
-| `v13.7.0-thedjchi+stayturgid-release11` | `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk` | Build metadata format (`+`). versionCode > 1380. **Current.** |
+| `v13.7.0-thedjchi+stayturgid-release13` | `shizuku-v13.7.0-thedjchi+stayturgid-release13-universal.apk` | **Current.** HeadlessLogger, setResult feedback, boot retry, API docs. |
+| `v13.7.0-thedjchi+stayturgid-release11` | `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk` | Build metadata format (`+`). versionCode > 1380. |
 | `v13.7.0-thedjchi-stayturgid-release10` | `shizuku-v13.7.0-thedjchi-stayturgid-release10-universal.apk` | UNKNOWN launch mode treated as ADB. |
 | `v13.7.0-thedjchi-stayturgid-release9` | `shizuku-v13.7.0-thedjchi-stayturgid-release9-universal.apk` | Same as release10 (duplicate due to build timing). |
 | `v13.7.0-thedjchi-stayturgid-release8` | `shizuku-v13.7.0-thedjchi-stayturgid-release8-universal.apk` | Obtainium compat: versionName now matches release tag. |

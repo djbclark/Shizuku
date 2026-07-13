@@ -8,23 +8,18 @@ import android.os.Process
 import android.widget.Toast
 import moe.shizuku.manager.R
 import moe.shizuku.manager.ShizukuSettings
+import moe.shizuku.manager.utils.HeadlessLogger
 
-/**
- * Allows ADB shell (or root) to seed the auth token so that fleet provisioning
- * scripts can set a known token once, then drive Shizuku start/stop via the
- * existing [ManualStartReceiver]/[ManualStopReceiver] without opening the UI.
- *
- * Example:
- *   adb shell am broadcast -a moe.shizuku.manager.PROVISION_AUTH \
- *       -e auth_token "YOUR_TOKEN"
- */
 class ProvisionAuthReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "${context.packageName}.PROVISION_AUTH") return
 
+        HeadlessLogger.i("ProvisionAuth", "Auth token provisioning requested")
+
         val callingUid = Binder.getCallingUid()
         if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+            HeadlessLogger.w("ProvisionAuth", "Caller not shell/root (uid=$callingUid), rejected")
             Toast.makeText(
                 context,
                 R.string.notification_auth_invalid_title,
@@ -35,6 +30,7 @@ class ProvisionAuthReceiver : BroadcastReceiver() {
 
         val token = intent.getStringExtra("auth_token")
         if (token.isNullOrEmpty()) {
+            HeadlessLogger.w("ProvisionAuth", "Missing auth token")
             Toast.makeText(
                 context,
                 R.string.notification_auth_missing_title,
@@ -44,6 +40,7 @@ class ProvisionAuthReceiver : BroadcastReceiver() {
         }
 
         ShizukuSettings.setAuthToken(token)
+        HeadlessLogger.i("ProvisionAuth", "Auth token set (len=${token.length})")
         Toast.makeText(
             context,
             context.getString(R.string.home_automation_regenerate_token),
