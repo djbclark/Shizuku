@@ -1,6 +1,7 @@
 # HANDOFF — Shizuku fleet/headless fork
 
-Last updated: **2026-07-11**
+Last updated: **2026-07-11** (final session)
+Current release: **v13.7.0-thedjchi+stayturgid-release15**
 
 ---
 
@@ -72,12 +73,12 @@ sed -E 's/^shizuku-(.*[-.](debug[0-9]+|release[0-9]+))-[^.]+\.apk/\1/'
 
 | Tag | APK | Changes |
 |---|---|---|
-| `v13.7.0-thedjchi+stayturgid-release13` | `shizuku-v13.7.0-thedjchi+stayturgid-release13-universal.apk` | **Current.** HeadlessLogger, setResult feedback, boot retry, API docs. |
+| `v13.7.0-thedjchi+stayturgid-release15` | `shizuku-v13.7.0-thedjchi+stayturgid-release15-universal.apk` | **Current.** HeadlessLogger everywhere (AdbStartWorker, state machine, ProvisionAuth). Complete boot→running traceability. |
+| `v13.7.0-thedjchi+stayturgid-release13` | `shizuku-v13.7.0-thedjchi+stayturgid-release13-universal.apk` | HeadlessLogger, setResult feedback, boot retry, API docs. |
 | `v13.7.0-thedjchi+stayturgid-release11` | `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk` | Build metadata format (`+`). versionCode > 1380. |
 | `v13.7.0-thedjchi-stayturgid-release10` | `shizuku-v13.7.0-thedjchi-stayturgid-release10-universal.apk` | UNKNOWN launch mode treated as ADB. |
-| `v13.7.0-thedjchi-stayturgid-release9` | `shizuku-v13.7.0-thedjchi-stayturgid-release9-universal.apk` | Same as release10 (duplicate due to build timing). |
-| `v13.7.0-thedjchi-stayturgid-release8` | `shizuku-v13.7.0-thedjchi-stayturgid-release8-universal.apk` | Obtainium compat: versionName now matches release tag. |
-| `v13.7.0-thedjchi-stayturgid-release7` | `shizuku-v13.7.0-thedjchi-stayturgid-release7-universal.apk` | HEADLESS_STATUS broadcast, retry logic in startDirect. |
+| `v13.7.0-thedjchi-stayturgid-release8` | `shizuku-v13.7.0-thedjchi-stayturgid-release8-universal.apk` | Obtainium compat: versionName matches tag. |
+| `v13.7.0-thedjchi-stayturgid-release7` | `shizuku-v13.7.0-thedjchi-stayturgid-release7-universal.apk` | HEADLESS_STATUS, startDirect retry. |
 
 All releases are published (not drafts). Only the latest matters for new work.
 
