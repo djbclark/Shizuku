@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.content.Context
 import android.provider.Settings
 import android.util.Log
+import moe.shizuku.manager.utils.HeadlessLogger
 import android.widget.Toast
 import java.io.EOFException
 import java.net.SocketException

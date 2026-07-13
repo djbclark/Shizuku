@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import moe.shizuku.manager.utils.HeadlessLogger
 import androidx.core.app.NotificationCompat
 import com.topjohnwu.superuser.Shell
 import moe.shizuku.manager.R

@@ -130,6 +130,19 @@ Default profile bundled at `assets/fleet_profile_default.json`.
 
 Shell/root callers and apps holding `START_STOP_SERVER` permission skip the auth token check.
 
+### HeadlessLogger (`HeadlessLogger.kt`)
+
+File + logcat logger for all headless operations. Writes to
+`/sdcard/Android/data/moe.shizuku.privileged.api/files/headless.log`
+in Unix-style format (`YYYY-MM-DD HH:MM:SS LEVEL component: message`).
+Also logged to `logcat -s ShizukuHeadless`.
+
+### Boot retry (`BootRetryWorker.kt`)
+
+WorkManager worker scheduled by `BootCompleteReceiver` with 30s delay and
+`NOT_ROAMING` network constraint. Addresses slow WiFi startups where Shizuku
+fails at boot but WiFi comes up seconds later.
+
 ### Direct ADB start in `AdbStarter.kt`
 
 `startDirect(context, port, maxRetries=3, retryDelayMs=5000)` — fire-and-forget coroutine that wraps `startAdb()` with retry logic. Bypasses `getAdbTcpPort()` (which returns -1 for Android 11+ wireless ADB — it reads `service.adb.tcp.port` system property, not the `adb_wifi_enabled` setting used by wireless debugging).
@@ -141,31 +154,35 @@ Shell/root callers and apps holding `START_STOP_SERVER` permission skip the auth
 ### CI workflow (`.github/workflows/app.yml`)
 
 Inherited from upstream, modified:
-- **Manual trigger only** (`workflow_dispatch`) — no auto-trigger on push
-- Installs Android SDK (`build-tools;36.0.0`, `platforms;android-36`, `cmake;3.31.0`, `ndk;29.0.14206865`) and Ninja
+- **Manual trigger** (`workflow_dispatch`) — no auto-trigger on push
+- Installs Android SDK + CMake 3.31.0 + NDK 29 + Ninja
 - `debug=true` → `assembleDebug`, uploads artifact (no signing needed)
-- `debug=false` → `assembleRelease`, then creates a **published** GitHub Release (not draft)
-  - Signing requires `KEYSTORE` secrets — Not configured on the fork. Only debug builds work in CI.
+- `debug=false` → `assembleRelease`, creates published GitHub Release (requires `KEYSTORE` secrets)
 
-**To trigger a release build from CI:** Go to Actions → Build App → "Run workflow" with `debug=false`. This will fail on the fork because signing secrets aren't set.
+**Fork limitation:** `KEYSTORE` secrets not configured → CI release builds fail.
+Manual builds use debug keystore fallback. To enable CI releases:
+Settings → Secrets → Actions: `KEYSTORE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD`
 
-**Manual release procedure:** `./gradlew :manager:assembleRelease` locally (uses debug keystore fallback from `signing.gradle`), then:
+### HeadlessLogger
+
+Writes to `headless.log` at `context.getExternalFilesDir(null)` (typically
+`/sdcard/Android/data/moe.shizuku.privileged.api/files/headless.log`) AND
+logcat tag `ShizukuHeadless`. Initialized in `ShizukuApplication.onCreate()`.
+
+Format: `YYYY-MM-DD HH:MM:SS LEVEL Component: message`
+
+### Boot retry
+
+`BootCompleteReceiver` schedules a `BootRetryWorker` (WorkManager, 30s delay,
+`NOT_ROAMING` constraint). If WiFi wasn't ready at boot, retries `ShizukuReceiverStarter.start()`.
+
+### Build
+
 ```bash
-gh release create v<version> out/apk/*.apk --repo djbclark/Shizuku --title "v<version>"
+JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.11 ./gradlew :manager:assembleRelease
+ls manager/build/outputs/apk/release/
+# Requires: JDK 21, build-tools;36.0.0, platforms;android-36, cmake;3.31.0, ndk;29.0.14206865, ninja
 ```
-
-### Local build
-
-Requires JDK 21 and Android SDK with:
-- `build-tools;36.0.0`
-- `platforms;android-36`
-- `cmake;3.31.0`
-- `ndk;29.0.14206865`
-- Ninja build system
-
-Build command: `JAVA_HOME=<path-to-jdk21> ./gradlew :manager:assembleRelease`
-
-APK output: `manager/build/outputs/apk/release/` (also copied to `out/apk/` by build task).
 
 ---
 
@@ -197,10 +214,12 @@ APK output: `manager/build/outputs/apk/release/` (also copied to `out/apk/` by b
 
 | Issue | Details |
 |---|---|
-| Fork CI can't sign release APKs | `KEYSTORE` secrets not configured. Manual builds use debug keystore (works for sideloading). |
-| Samsung process freezer | First boot after install: broadcast receiver frozen until app is manually launched once. |
-| `tryEnsureWirelessAdb` best-effort | No feedback to caller if ADB recovery fails. Logs only. |
-| FleetProfileApplier limited | Only covers 8 Shizuku settings. No testing on real device. |
+| Fork CI can't sign release APKs | `KEYSTORE` secrets not configured (requires human). Manual builds use debug keystore. |
+| Samsung process freezer | First boot after install: broadcast receiver frozen until app launched once. Device issue, no code fix. |
+| FleetProfileApplier limited | Only covers 8 Shizuku settings. Not tested on real device. |
+| mDNS port discovery | Headless start uses configured TCP port directly; if ADB picked a different port, connection fails silently. |
+| PROVISION_AUTH ↔ shizuku.json | Two parallel auth mechanisms. stayturgid patches `/data/local/tmp/shizuku/shizuku.json`; PROVISION_AUTH writes to SharedPreferences. Unbridgeable from app process (different privilege levels). |
+| No upstream sync strategy | If `thedjchi/Shizuku` releases v13.8.0, this fork needs manual rebase. No automation. |
 
 ---
 

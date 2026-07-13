@@ -118,16 +118,41 @@ so only the ADB shell or system can trigger it. On Android 11+, if wireless
 ADB has dropped, the start broadcast will automatically re-enable ADB over
 WiFi via `WRITE_SECURE_SETTINGS` before connecting.
 
-To fetch structured status (state, ADB status, version) without running
-`pgrep` or `ss`:
+To fetch structured status without running `pgrep` or `ss`:
 
 ```bash
 adb shell am broadcast -a ${applicationId}.HEADLESS_STATUS ${applicationId}
-# Returns: result=<stateCode>, data="RUNNING (binder=true, ADB: USB:1, v13.7.0-thedjchi)"
 ```
 
-The result extras include `state`, `binder_alive`, `adb_tcp_port`,
-`adb_wifi_enabled`, `adb_enabled`, `version_name`, and `version_code`.
+Result extras:
+
+| Key | Type | Example |
+|-----|------|---------|
+| `state` | string | `RUNNING`, `STOPPED`, `STARTING`, `STOPPING`, `CRASHED` |
+| `binder_alive` | boolean | `true` if binder connection is active |
+| `adb_tcp_port` | int | TCP port number, `-1` if not available |
+| `adb_wifi_enabled` | int | `1` if wireless ADB enabled, `0` otherwise |
+| `adb_enabled` | int | `1` if USB ADB enabled, `0` otherwise |
+| `version_name` | string | e.g. `13.7.0-thedjchi+stayturgid-release11` |
+| `version_code` | int | Android versionCode |
+| `log_path` | string | Path to `headless.log` on device |
+
+The result code maps to `ShizukuStateMachine.State.ordinal` (0=RUNNING,
+1=STARTING, 2=STOPPING, 3=STOPPED, 4=CRASHED).
+
+All headless operations write to a log file at
+`/sdcard/Android/data/moe.shizuku.privileged.api/files/headless.log`
+(also logged to `logcat` under the tag `ShizukuHeadless`). The format is:
+
+```
+2026-07-11 22:45:01 INFO  Start: Headless start requested (version 13.7.0-thedjchi+stayturgid-release11)
+2026-07-11 22:45:01 INFO  Start: ADB WiFi enabled, port=5555
+2026-07-11 22:45:01 INFO  AdbStarter: Attempt 1/3 on port 5555
+2026-07-11 22:45:06 INFO  AdbStarter: Server started successfully
+```
+
+Read with: `adb logcat -s ShizukuHeadless` or
+`adb shell cat /sdcard/Android/data/moe.shizuku.privileged.api/files/headless.log`
 
 ### Authenticated intents (for automation apps)
 

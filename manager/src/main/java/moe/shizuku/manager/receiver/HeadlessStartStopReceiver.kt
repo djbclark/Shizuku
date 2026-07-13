@@ -5,15 +5,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
-import moe.shizuku.manager.AppConstants
 import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.adb.AdbStarter
 import moe.shizuku.manager.utils.EnvironmentUtils
+import moe.shizuku.manager.utils.HeadlessLogger
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import rikka.shizuku.Shizuku
 
@@ -22,20 +20,36 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_HEADLESS_START -> {
-                Log.i(AppConstants.TAG, "Headless start requested")
+                HeadlessLogger.i("Start", "Headless start requested (version ${BuildConfig.VERSION_NAME})")
                 val launchMode = ShizukuSettings.getLastLaunchMode()
                 if (launchMode == ShizukuSettings.LaunchMethod.ADB || launchMode == ShizukuSettings.LaunchMethod.UNKNOWN) {
+                    HeadlessLogger.i("Start", "Launch mode=${launchMode}, attempting ADB start")
                     tryEnsureWirelessAdb(context)
-                    AdbStarter.startDirect(context, ShizukuSettings.getTcpPort())
+                    val port = ShizukuSettings.getTcpPort()
+                    HeadlessLogger.i("Start", "Starting via ADB on port $port")
+                    AdbStarter.startDirect(context, port)
+                    setResult(0, "STARTING", null)
                 } else {
+                    HeadlessLogger.i("Start", "Launch mode=${launchMode}, delegating to ShizukuReceiverStarter")
                     ShizukuReceiverStarter.start(context, forceStart = true)
+                    setResult(0, "STARTING", null)
                 }
             }
             ACTION_HEADLESS_STOP -> {
-                Log.i(AppConstants.TAG, "Headless stop requested")
-                if (!ShizukuStateMachine.isRunning()) return
+                HeadlessLogger.i("Stop", "Headless stop requested")
+                if (!ShizukuStateMachine.isRunning()) {
+                    HeadlessLogger.w("Stop", "Server not running, nothing to stop")
+                    setResult(2, "NOT_RUNNING", null)
+                    return
+                }
                 ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
-                runCatching { Shizuku.exit() }
+                runCatching {
+                    Shizuku.exit()
+                    HeadlessLogger.i("Stop", "Server stop command sent")
+                }.onFailure { e ->
+                    HeadlessLogger.e("Stop", "Failed to send stop command", e)
+                }
+                setResult(0, "STOPPING", null)
             }
             ACTION_HEADLESS_STATUS -> {
                 val state = ShizukuStateMachine.get()
@@ -51,23 +65,26 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
                 }.getOrDefault(0)
 
                 val adbParts = mutableListOf<String>()
-                if (adbUsb != 0) adbParts.add("USB:1")
-                if (adbWifi != 0) adbParts.add("WiFi:${adbTcpPort.let { if (it > 0) it.toString() else "?" }}")
+                if (adbUsb != 0) adbParts.add("USB:on")
+                if (adbWifi != 0) adbParts.add("WiFi:${if (adbTcpPort > 0) adbTcpPort else "?"}")
                 if (adbParts.isEmpty()) adbParts.add("off")
                 val adbSummary = adbParts.joinToString(" ")
 
                 val summary = "$stateLabel (binder=$binderAlive, ADB: $adbSummary, v${BuildConfig.VERSION_NAME})"
+                val logPath = HeadlessLogger.getLogPath() ?: "unavailable"
 
                 val extras = Bundle().apply {
                     putString("state", stateLabel)
                     putBoolean("binder_alive", binderAlive)
                     putInt("adb_tcp_port", adbTcpPort)
-                    putBoolean("adb_wifi_enabled", adbWifi != 0)
-                    putBoolean("adb_enabled", adbUsb != 0)
+                    putInt("adb_wifi_enabled", adbWifi)
+                    putInt("adb_enabled", adbUsb)
                     putString("version_name", BuildConfig.VERSION_NAME)
                     putInt("version_code", BuildConfig.VERSION_CODE)
+                    putString("log_path", logPath)
                 }
 
+                HeadlessLogger.i("Status", summary)
                 setResult(state.ordinal, summary, extras)
             }
         }
@@ -75,23 +92,23 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
 
     private fun tryEnsureWirelessAdb(context: Context) {
         if (context.checkSelfPermission(WRITE_SECURE_SETTINGS) != PackageManager.PERMISSION_GRANTED) {
-            Log.w(AppConstants.TAG, "Cannot enable wireless ADB: WRITE_SECURE_SETTINGS not granted")
+            HeadlessLogger.w("Start", "WRITE_SECURE_SETTINGS not granted, cannot enable wireless ADB")
             return
         }
         try {
             val cr = context.contentResolver
             if (Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) == 0) {
                 Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1)
-                Log.i(AppConstants.TAG, "Enabled ADB")
+                HeadlessLogger.i("Start", "Enabled USB ADB")
             }
             if (Settings.Global.getInt(cr, "adb_wifi_enabled", 0) == 0) {
                 Settings.Global.putInt(cr, "adb_wifi_enabled", 1)
-                Log.i(AppConstants.TAG, "Enabled wireless ADB")
+                HeadlessLogger.i("Start", "Enabled wireless ADB")
             }
         } catch (e: SecurityException) {
-            Log.w(AppConstants.TAG, "WRITE_SECURE_SETTINGS permission denied", e)
+            HeadlessLogger.w("Start", "WRITE_SECURE_SETTINGS denied")
         } catch (e: Exception) {
-            Log.w(AppConstants.TAG, "Failed to ensure wireless ADB", e)
+            HeadlessLogger.e("Start", "Failed to enable wireless ADB", e)
         }
     }
 
