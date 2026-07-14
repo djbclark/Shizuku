@@ -41,6 +41,40 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
                 runCatching { Shizuku.exit() }
                 setResult(0, "STOPPING", null)
             }
+            ACTION_HEADLESS_STATUS -> {
+                val state = ShizukuStateMachine.get()
+                val stateLabel = state.name
+                val binderAlive = runCatching { Shizuku.pingBinder() }.getOrDefault(false)
+
+                val adbTcpPort = EnvironmentUtils.getAdbTcpPort()
+                val adbWifi = runCatching {
+                    Settings.Global.getInt(context.contentResolver, "adb_wifi_enabled", 0)
+                }.getOrDefault(0)
+                val adbUsb = runCatching {
+                    Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0)
+                }.getOrDefault(0)
+
+                val adbParts = mutableListOf<String>()
+                if (adbUsb != 0) adbParts.add("USB:on")
+                if (adbWifi != 0) adbParts.add("WiFi:${if (adbTcpPort > 0) adbTcpPort else "?"}")
+                if (adbParts.isEmpty()) adbParts.add("off")
+                val adbSummary = adbParts.joinToString(" ")
+
+                val summary = "$stateLabel (binder=$binderAlive, ADB: $adbSummary, v${BuildConfig.VERSION_NAME})"
+
+                val extras = android.os.Bundle().apply {
+                    putString("state", stateLabel)
+                    putBoolean("binder_alive", binderAlive)
+                    putInt("adb_tcp_port", adbTcpPort)
+                    putInt("adb_wifi_enabled", adbWifi)
+                    putInt("adb_enabled", adbUsb)
+                    putString("version_name", BuildConfig.VERSION_NAME)
+                    putInt("version_code", BuildConfig.VERSION_CODE)
+                    putString("log_path", HeadlessLogger.getLogPath() ?: "unavailable")
+                }
+
+                setResult(state.ordinal, summary, extras)
+            }
         }
     }
 
@@ -67,5 +101,6 @@ class HeadlessStartStopReceiver : BroadcastReceiver() {
     companion object {
         val ACTION_HEADLESS_START = "${BuildConfig.APPLICATION_ID}.HEADLESS_START"
         val ACTION_HEADLESS_STOP = "${BuildConfig.APPLICATION_ID}.HEADLESS_STOP"
+        val ACTION_HEADLESS_STATUS = "${BuildConfig.APPLICATION_ID}.HEADLESS_STATUS"
     }
 }
