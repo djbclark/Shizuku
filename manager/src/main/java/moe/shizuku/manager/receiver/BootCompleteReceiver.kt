@@ -27,13 +27,17 @@ class BootCompleteReceiver : BroadcastReceiver() {
 
         val retry = OneTimeWorkRequestBuilder<BootRetryWorker>()
             .setConstraints(constraints)
-            .setInitialDelay(30, TimeUnit.SECONDS)
+            .setInitialDelay(10, TimeUnit.SECONDS)
+            .setBackoffCriteria(
+                androidx.work.BackoffPolicy.EXPONENTIAL,
+                10, TimeUnit.SECONDS
+            )
             .addTag("boot_retry")
             .build()
 
         WorkManager.getInstance(context)
             .enqueueUniqueWork("boot_retry", ExistingWorkPolicy.REPLACE, retry)
 
-        HeadlessLogger.i("Boot", "Boot retry scheduled (30s delay, network required)")
+        HeadlessLogger.i("Boot", "Boot retry scheduled (10s initial, EXP backoff, max 5 attempts)")
     }
 }
