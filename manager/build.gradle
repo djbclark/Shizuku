@@ -54,7 +54,9 @@ android {
     }
     packagingOptions {
         jniLibs {
-            useLegacyPackaging = true
+            // Load native libraries directly from the APK. Fire OS 8 did not
+            // extract compressed libraries during an in-place upgrade.
+            useLegacyPackaging = false
         }
         resources {
             excludes += ["**"]
