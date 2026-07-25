@@ -1,13 +1,13 @@
 # OPTIONS — Open work items
 
-Last updated: **2026-07-11**
+Last updated: **2026-07-25**
 
 ---
 
 ## High priority
 
 ### H1 — CI signing secrets
-Configure `KEYSTORE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD` in `djbclark/Shizuku` → Settings → Secrets → Actions. Without these, CI release builds fail silently. Currently only manual debug-keystore builds work.
+Configure `KEYSTORE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD` in `djbclark/Shizuku` → Settings → Secrets → Actions. Without these, CI release builds fail silently. Currently only manual debug-keystore builds work. Still open as of 2026-07-25 — not a blocker for fleet installs since the ansible `bootstrap_apks` role resigns downloaded APKs with the local debug keystore before install regardless of upstream signing.
 
 ### H2 — Samsung process freezer workaround
 On first install, Samsung's battery optimization freezes the broadcast receiver. Requires opening Shizuku app once and tapping "Start". After that, `HEADLESS_*` broadcasts work across reboots. No known code fix — this is an OEM behavior.
@@ -51,6 +51,14 @@ Currently returns human-readable summary + extras Bundle. Could add a structured
 README documents the API but doesn't explain how to add this fork as a source in Obtainium. Could add a step-by-step guide with the release URL.
 
 ---
+
+## Resolved (2026-07-25)
+
+| Issue | Resolution |
+|---|---|
+| Fire OS 8 in-place upgrade drops native libs | `useLegacyPackaging = false` in `manager/build.gradle` (commit `cf6d2092`, PR #1) — libs now stored uncompressed (STORED) instead of extracted-on-first-install, which Fire OS 8 skipped during in-place upgrades |
+| Fire OS notification icon lookup | `drawable/ic_system_icon#no_obfuscate` added to `manager/aapt2-resources.cfg` (same commit) |
+| H3 boot receiver retry (partial) | `BootRetryWorker` moved to exponential backoff (10s base, max 5 attempts, ~2.5min window), each attempt re-verifies `isRunning()` after a 3s delay |
 
 ## Resolved (2026-07-11)
 
