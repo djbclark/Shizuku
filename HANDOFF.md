@@ -1,7 +1,13 @@
 # HANDOFF — Shizuku fleet/headless fork
 
-Last updated: **2026-07-11** (final session)
-Current release: **v13.7.0-thedjchi+stayturgid-release15**
+Last updated: **2026-07-25**
+Current release: **v13.7.0-thedjchi+stayturgid-release17** published; native-lib packaging fix (below) queued for the next release cut.
+
+## 2026-07-25 update
+
+- PR #1 merged to `fork/master`: `useLegacyPackaging = false` in `manager/build.gradle` — fixes native libraries not surviving Fire OS 8 in-place upgrades (they were extracted-on-install rather than stored uncompressed in the APK, and Fire OS 8 skipped re-extraction on upgrade). Also fixes a Fire OS notification icon resource lookup.
+- This was hotfixed as a manually side-loaded debug build directly on the hd8 fleet device ahead of a proper release cut, so hd8's installed `versionCode` briefly ran ahead of the last published GitHub release — the normal ansible `bootstrap_apks` pinned-release install path saw that as `INSTALL_FAILED_VERSION_DOWNGRADE` and skipped it.
+- `BootRetryWorker` (H3) also improved: exponential backoff (10s base, max 5 attempts, ~2.5min window), each attempt re-verifies `isRunning()` after a 3s delay.
 
 ---
 
