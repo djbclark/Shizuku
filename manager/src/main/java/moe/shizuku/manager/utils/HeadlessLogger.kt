@@ -45,7 +45,11 @@ object HeadlessLogger {
         val ts = dateFormat.format(Date())
         val line = "$ts ${level.name.padEnd(5)} $component: $message"
 
-        Log.println(level.toLogPriority(), TAG, "$component: $message")
+        when (level) {
+            Level.INFO -> Log.i(TAG, "$component: $message")
+            Level.WARN -> Log.w(TAG, "$component: $message")
+            Level.ERROR -> Log.e(TAG, "$component: $message")
+        }
 
         val file = logFile ?: return
         try {
@@ -59,10 +63,4 @@ object HeadlessLogger {
     }
 
     fun getLogPath(): String? = logFile?.absolutePath
-
-    private fun Level.toLogPriority(): Int = when (this) {
-        Level.INFO -> Log.INFO
-        Level.WARN -> Log.WARN
-        Level.ERROR -> Log.ERROR
-    }
 }
