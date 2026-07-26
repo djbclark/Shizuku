@@ -31,6 +31,10 @@ object AdbStarter {
     private val directScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun startDirect(context: Context, port: Int, maxRetries: Int = 3, retryDelayMs: Long = 5000) {
+        if (ShizukuStateMachine.get() == ShizukuStateMachine.State.STARTING) {
+            Log.w(AppConstants.TAG, "startDirect: already starting, ignoring duplicate request")
+            return
+        }
         directScope.launch {
             var lastError: Exception? = null
             for (attempt in 1..maxRetries) {
@@ -47,6 +51,12 @@ object AdbStarter {
                 }
             }
             Log.w(AppConstants.TAG, "Direct ADB start failed after $maxRetries attempts", lastError)
+            // startAdb() sets STARTING on entry but never resets on total failure,
+            // wedging every future start attempt behind the "already starting"
+            // guard above until something else (e.g. force-stop) clears it.
+            // update() reconciles against the real binder state (STOPPED unless
+            // a retry happened to succeed underneath us).
+            ShizukuStateMachine.update()
         }
     }
 
