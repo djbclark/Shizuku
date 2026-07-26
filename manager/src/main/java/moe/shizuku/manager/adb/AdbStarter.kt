@@ -24,11 +24,17 @@ import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.EnvironmentUtils
 import moe.shizuku.manager.utils.HeadlessLogger
 import moe.shizuku.manager.utils.ShizukuStateMachine
+import android.util.Log
+import moe.shizuku.manager.AppConstants
 
 object AdbStarter {
     private val directScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun startDirect(context: Context, port: Int, maxRetries: Int = 5, baseRetryDelayMs: Long = 10000) {
+        if (ShizukuStateMachine.get() == ShizukuStateMachine.State.STARTING) {
+            Log.w(AppConstants.TAG, "startDirect: already starting, ignoring duplicate request")
+            return
+        }
         directScope.launch {
             var retryDelay = 0L
             var lastError: Exception? = null
@@ -49,6 +55,12 @@ object AdbStarter {
                 }
             }
             HeadlessLogger.e("AdbStarter", "Failed after $maxRetries attempts", lastError)
+            // startAdb() sets STARTING on entry but never resets on total failure,
+            // wedging every future start attempt behind the "already starting"
+            // guard above until something else (e.g. force-stop) clears it.
+            // update() reconciles against the real binder state (STOPPED unless
+            // a retry happened to succeed underneath us).
+            ShizukuStateMachine.update()
         }
     }
 
