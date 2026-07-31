@@ -14,3 +14,6 @@ open class AdbException : Exception {
 class AdbInvalidPairingCodeException : AdbException()
 
 class AdbKeyException(cause: Throwable) : AdbException(cause)
+
+/** Reconnect failed right after switching adbd into TCP mode — likely just needs more time. */
+class PostTcpipReconnectException(cause: Throwable) : AdbException(cause)

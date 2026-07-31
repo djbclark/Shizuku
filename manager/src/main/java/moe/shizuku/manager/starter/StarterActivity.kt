@@ -22,10 +22,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import moe.shizuku.manager.AppConstants
 import moe.shizuku.manager.AppConstants.EXTRA
 import moe.shizuku.manager.R
 import moe.shizuku.manager.adb.AdbKeyException
 import moe.shizuku.manager.adb.AdbStarter
+import moe.shizuku.manager.adb.PostTcpipReconnectException
 import moe.shizuku.manager.app.AppBarActivity
 import moe.shizuku.manager.utils.ShizukuStateMachine
 import moe.shizuku.manager.databinding.StarterActivityBinding
@@ -69,6 +71,15 @@ class StarterActivity : AppBarActivity() {
                     }
                     is SSLProtocolException -> {
                         message = R.string.adb_pair_required
+                    }
+                    is PostTcpipReconnectException -> {
+                        // Expected transiently when adbd is still restarting into TCP mode after
+                        // the tcpip: command — not a real error, just slower than the reconnect
+                        // window on some devices. Friendly message beats a raw stack trace for
+                        // what is, from the human's perspective, "try again in a moment." A plain
+                        // EOFException elsewhere (no preceding tcpip: switch) is a genuine,
+                        // unrelated connection failure and intentionally isn't matched here.
+                        message = R.string.adb_restart_in_progress
                     }
                 }
 
@@ -132,7 +143,15 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun log(line: String? = null, error: Throwable? = null) {
         line?.let { sb.appendLine(it) }
-        error?.let { sb.appendLine().appendLine(Log.getStackTraceString(it)) }
+        // Full detail always goes to logcat for diagnostics; the visible log only gets a
+        // one-line summary. A raw Java stack trace in the on-screen "Starter" log reads as a
+        // crash even for expected/transient conditions the UI already explains via a dialog
+        // (see StarterActivity's exception-to-message mapping above).
+        error?.let {
+            Log.e(AppConstants.TAG, "Starter failed", it)
+            val errorLabel = appContext.getString(R.string.error)
+            sb.appendLine().appendLine("$errorLabel: ${it.message ?: it.javaClass.simpleName}")
+        }
 
         if (error == null) _output.postValue(Resource.success(sb))
         else _output.postValue(Resource.error(error, sb))
