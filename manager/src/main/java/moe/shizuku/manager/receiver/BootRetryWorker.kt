@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.delay
+import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.utils.HeadlessLogger
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
@@ -23,6 +24,16 @@ class BootRetryWorker(context: Context, params: WorkerParameters) : CoroutineWor
     // (EXPONENTIAL from BootCompleteReceiver's 10s base, capped at its ~5h internal maximum), so
     // this keeps trying indefinitely at a reasonable cadence rather than hammering the device.
     override suspend fun doWork(): Result {
+        // Re-check on every attempt, not just at schedule time: a human (or FleetProfileApplier)
+        // may turn start-on-boot off *while* this indefinite retry loop is already in flight —
+        // without this check it would keep calling ShizukuReceiverStarter.start() forever despite
+        // the human's explicit "stop trying" signal, which is exactly the kind of not-respecting-
+        // human-intent bug removing the attempt cap must not introduce.
+        if (!ShizukuSettings.getStartOnBoot(applicationContext)) {
+            HeadlessLogger.i("BootRetry", "start-on-boot disabled, stopping retry")
+            return Result.success()
+        }
+
         if (ShizukuStateMachine.isRunning()) {
             HeadlessLogger.i("BootRetry", "Shizuku already running (attempt $runAttemptCount)")
             return Result.success()

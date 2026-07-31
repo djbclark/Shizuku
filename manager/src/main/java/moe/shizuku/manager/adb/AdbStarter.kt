@@ -79,6 +79,7 @@ object AdbStarter {
                 var activePort = port
                 val tcpMode = ShizukuSettings.getTcpMode()
                 val tcpPort = ShizukuSettings.getTcpPort()
+                var justSwitchedToTcpMode = false
                 if (tcpMode && activePort != tcpPort) {
                     log?.invoke("Connecting on port $activePort...")
 
@@ -93,12 +94,22 @@ object AdbStarter {
                             client.command("tcpip:$activePort")
                         }.onFailure { if (it !is EOFException && it !is SocketException) throw it } // Expected when ADB restarts in TCP mode
                     }
+                    justSwitchedToTcpMode = true
                 }
-        
+
                 log?.invoke("Connecting on port $activePort...")
 
                 AdbClient("127.0.0.1", activePort, key).use { client ->
-                    connectWithRetry(client)
+                    try {
+                        connectWithRetry(client, maxAttempts = RECONNECT_MAX_ATTEMPTS)
+                    } catch (e: EOFException) {
+                        // Only the reconnect immediately after switching to TCP mode is expected
+                        // to need this wider, friendlier-messaged retry window (adbd restarting
+                        // takes a moment) — an EOF on an ordinary connect (no preceding tcpip:
+                        // switch) is a genuine, unrelated connection failure and should surface as
+                        // the normal connection-error path instead of claiming "still restarting."
+                        if (justSwitchedToTcpMode) throw PostTcpipReconnectException(e) else throw e
+                    }
                     log?.invoke("Successfully connected on port $activePort...\n")
                     client.runCommand("shell:${Starter.internalCommand}")
                 }
@@ -143,13 +154,17 @@ object AdbStarter {
         }
     }
 
-    private suspend fun connectWithRetry(client: AdbClient) {
+    // 5 attempts (0+1+2+3+4=10s total) wasn't enough window on some devices for adbd to finish
+    // restarting into TCP mode before the reconnect gave up with a raw EOFException (confirmed
+    // live against issue #43 on hd8 — a device that's generally slow). Widen only the post-tcpip
+    // reconnect in startAdb() to 10 attempts (~45s); leave stopTcp()'s connect at the original
+    // budget via the default so "stop wireless debugging" doesn't hang longer waiting on a
+    // genuinely-unreachable client.
+    private const val RECONNECT_MAX_ATTEMPTS = 10
+    private const val DEFAULT_MAX_ATTEMPTS = 5
+
+    private suspend fun connectWithRetry(client: AdbClient, maxAttempts: Int = DEFAULT_MAX_ATTEMPTS) {
         var delayTime = 0L
-        // 5 attempts (0+1+2+3+4=10s total) wasn't enough window on some devices for adbd to
-        // finish restarting into TCP mode before the reconnect gave up with a raw EOFException
-        // (confirmed live against issue #43 on hd8 — a device that's generally slow). 10 attempts
-        // (0..9s increments, ~45s total) gives it realistic room without retrying forever.
-        val maxAttempts = 10
         for (attempt in 1..maxAttempts) {
             try {
                 delay(delayTime)

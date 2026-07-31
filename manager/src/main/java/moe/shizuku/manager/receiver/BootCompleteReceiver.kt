@@ -38,6 +38,6 @@ class BootCompleteReceiver : BroadcastReceiver() {
         WorkManager.getInstance(context)
             .enqueueUniqueWork("boot_retry", ExistingWorkPolicy.REPLACE, retry)
 
-        HeadlessLogger.i("Boot", "Boot retry scheduled (10s initial, EXP backoff, max 5 attempts)")
+        HeadlessLogger.i("Boot", "Boot retry scheduled (10s initial, EXP backoff, no attempt cap)")
     }
 }
