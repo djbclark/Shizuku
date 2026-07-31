@@ -6,14 +6,8 @@ Last updated: **2026-07-25**
 
 ## High priority
 
-### H1 — CI signing secrets
-Configure `KEYSTORE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD` in `djbclark/Shizuku` → Settings → Secrets → Actions. Without these, CI release builds fail silently. Currently only manual debug-keystore builds work. Still open as of 2026-07-25 — not a blocker for fleet installs since the ansible `bootstrap_apks` role resigns downloaded APKs with the local debug keystore before install regardless of upstream signing.
-
 ### H2 — Samsung process freezer workaround
 On first install, Samsung's battery optimization freezes the broadcast receiver. Requires opening Shizuku app once and tapping "Start". After that, `HEADLESS_*` broadcasts work across reboots. No known code fix — this is an OEM behavior.
-
-### H3 — Boot receiver with WiFi readiness
-`BootCompleteReceiver` + `BootRetryWorker` covers most cases, but on some devices WiFi takes 30+ seconds after boot. The current retry has a single 30s delay. If WiFi still isn't up, no further retries. Could add exponential backoff or a connectivity change listener.
 
 ---
 
@@ -21,9 +15,6 @@ On first install, Samsung's battery optimization freezes the broadcast receiver.
 
 ### M1 — mDNS port discovery fallback for headless
 `AdbStartWorker` (interactive path) uses mDNS to discover wireless ADB ports on Android 11+. The headless `startDirect()` path uses the configured TCP port (default 5555) directly. If ADB picked a different port, the connection fails. Could integrate `AdbMdns` into the headless flow.
-
-### M2 — PROVISION_AUTH ↔ shizuku.json bridge
-stayturgid patches `/data/local/tmp/shizuku/shizuku.json` directly; `ProvisionAuthReceiver` writes to SharedPreferences. Two parallel auth mechanisms. Unbridgeable from the app process (different privilege levels) — would need the Shizuku server to proxy writes to `/data/local/tmp/`.
 
 ### M3 — FleetProfileApplier testing
 New code, 8 settings supported, never tested on a real device. Need to verify JSON parsing, type coercions, and context-dependent setters (start_on_boot, watchdog) work end-to-end.
@@ -60,7 +51,13 @@ README documents the API but doesn't explain how to add this fork as a source in
 | Fire OS notification icon lookup | `drawable/ic_system_icon#no_obfuscate` added to `manager/aapt2-resources.cfg` (same commit) |
 | H3 boot receiver retry (partial) | `BootRetryWorker` moved to exponential backoff (10s base, max 5 attempts, ~2.5min window), each attempt re-verifies `isRunning()` after a 3s delay |
 
-## Resolved (2026-07-11)
+## Resolved (2026-07-31)
+
+| Issue | Resolution |
+|---|---|
+| H3 boot receiver retry — was marked "partial" above, verified fully resolved | Re-read `BootRetryWorker.kt`/`BootCompleteReceiver.kt` directly: `MAX_ATTEMPTS = 5`, `VERIFY_DELAY_MS = 3000L`, and `setBackoffCriteria(EXPONENTIAL, 10, SECONDS)` all confirmed present and matching this table's own description exactly — the "High priority" H3 open item above (describing a stale "single 30s delay, no further retries" behavior) was removed; it described the pre-fix state and was never updated after the fix landed |
+| H1 — CI signing secrets | Generated a dedicated release keystore (RSA 4096, 30yr validity) independent of stayturgid-agent's own key, configured `KEYSTORE`/`KEYSTORE_PASSWORD`/`KEYSTORE_ALIAS`/`KEYSTORE_ALIAS_PASSWORD` as GitHub Actions secrets on `djbclark/Shizuku`. Verified via a real (non-debug) `workflow_dispatch` run — the `build` job compiled and signed successfully with the new keystore. Secrets backed up in two independent places (round-trip verified against the actual keystore file/password, not just trusted): a dedicated 1Password "Service" vault via a scoped service account (see `secretspec.toml`), and secretspec's own `onepassword://` provider pointed at that same vault. |
+| M2 — PROVISION_AUTH ↔ shizuku.json bridge, description was based on a wrong premise | The "two parallel auth mechanisms" framing assumed shizuku.json patching was a real, working control lever that just needed bridging to `ProvisionAuthReceiver`'s SharedPreferences path. It never was: `ShizukuConfigManager`'s constructor unconditionally re-syncs every known app's config flags from the real Android `pm grant`/`pm revoke` state at every server startup, so shizuku.json is purely a cache of that state, not an independent lever — there was nothing to bridge. Confirmed via a live 4-step test on a real device (stayturgid#163) and fixed stayturgid-side in stayturgid PR #164: headless grants now go through `pm grant`/`pm revoke` + a conditional server restart, never shizuku.json. No fork-side code change needed here. |
 
 | Issue | Resolution |
 |---|---|
