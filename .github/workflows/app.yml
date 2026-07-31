@@ -138,8 +138,18 @@ jobs:
           VERSION="${{ needs.build.outputs.versionName }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "$VERSION" -m "Release version $VERSION"
-          git push origin "$VERSION"
+          # versionName is derived from git commit count, so a manual
+          # workflow_dispatch re-run with no new commits since the last run
+          # (or since a tag was pushed out-of-band) recomputes the same
+          # version — `git tag` hard-fails on an existing tag, which
+          # otherwise kills the whole workflow. Idempotent: skip rather
+          # than fail when it's already there.
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists on origin — skipping."
+          else
+            git tag "$VERSION" -m "Release version $VERSION"
+            git push origin "$VERSION"
+          fi
 
       - name: Download Artifact
         uses: actions/download-artifact@v7
@@ -154,4 +164,8 @@ jobs:
         run: |
           FLAGS="--draft"
           [ "${{ inputs.prerelease }}" = "true" ] && FLAGS="$FLAGS --prerelease"
-          gh release create "$RELEASE_VERSION" files/*.apk $FLAGS
+          if gh release view "$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "Release $RELEASE_VERSION already exists — skipping."
+          else
+            gh release create "$RELEASE_VERSION" files/*.apk $FLAGS
+          fi
