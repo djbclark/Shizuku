@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.topjohnwu.superuser.CallbackList
 import com.topjohnwu.superuser.Shell
+import java.io.EOFException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLProtocolException
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import moe.shizuku.manager.AppConstants
 import moe.shizuku.manager.AppConstants.EXTRA
 import moe.shizuku.manager.R
 import moe.shizuku.manager.adb.AdbKeyException
@@ -69,6 +71,13 @@ class StarterActivity : AppBarActivity() {
                     }
                     is SSLProtocolException -> {
                         message = R.string.adb_pair_required
+                    }
+                    is EOFException -> {
+                        // Expected transiently when adbd is still restarting into TCP mode after
+                        // the tcpip: command — not a real error, just slower than the reconnect
+                        // window on some devices. Friendly message beats a raw stack trace for
+                        // what is, from the human's perspective, "try again in a moment."
+                        message = R.string.adb_restart_in_progress
                     }
                 }
 
@@ -132,7 +141,14 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun log(line: String? = null, error: Throwable? = null) {
         line?.let { sb.appendLine(it) }
-        error?.let { sb.appendLine().appendLine(Log.getStackTraceString(it)) }
+        // Full detail always goes to logcat for diagnostics; the visible log only gets a
+        // one-line summary. A raw Java stack trace in the on-screen "Starter" log reads as a
+        // crash even for expected/transient conditions the UI already explains via a dialog
+        // (see StarterActivity's exception-to-message mapping above).
+        error?.let {
+            Log.e(AppConstants.TAG, "startAdb failed", it)
+            sb.appendLine().appendLine("Error: ${it.message ?: it.javaClass.simpleName}")
+        }
 
         if (error == null) _output.postValue(Resource.success(sb))
         else _output.postValue(Resource.error(error, sb))

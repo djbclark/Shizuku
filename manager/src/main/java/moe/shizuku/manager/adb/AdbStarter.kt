@@ -145,7 +145,11 @@ object AdbStarter {
 
     private suspend fun connectWithRetry(client: AdbClient) {
         var delayTime = 0L
-        val maxAttempts = 5
+        // 5 attempts (0+1+2+3+4=10s total) wasn't enough window on some devices for adbd to
+        // finish restarting into TCP mode before the reconnect gave up with a raw EOFException
+        // (confirmed live against issue #43 on hd8 — a device that's generally slow). 10 attempts
+        // (0..9s increments, ~45s total) gives it realistic room without retrying forever.
+        val maxAttempts = 10
         for (attempt in 1..maxAttempts) {
             try {
                 delay(delayTime)
