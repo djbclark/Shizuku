@@ -12,3 +12,5 @@
 /out
 /signing.properties
 /.kotlin
+*.jks
+*.keystore
