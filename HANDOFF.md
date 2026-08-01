@@ -1,7 +1,14 @@
 # HANDOFF — Shizuku fleet/headless fork
 
-Last updated: **2026-07-25**
-Current release: **v13.7.0-thedjchi+stayturgid-release17** published; native-lib packaging fix (below) queued for the next release cut.
+Last updated: **2026-07-31**
+Current release: **v13.7.0-thedjchi+stayturgid-release25** published. Since release17 (below), releases 21–25 landed: native-lib packaging fix, BootRetryWorker/AdbStarter hardening (H3, now retries indefinitely instead of capping at 5 attempts), a signing-certificate trust allowlist for the silent-grant-loss bug (#4), CI release signing secrets (H1, #5), and idempotent tag/release creation in `app.yml` (#9).
+
+## 2026-07-31 update
+
+- PR #4 merged: signing-certificate trust allowlist in `ShizukuConfigManager.find(uid)` — works around `org.stayturgid.agent`'s Shizuku grant silently resetting (even from a plain `shizuku_server` restart, no reboot/reinstall). See `docs/trusted-signer-allowlist.md`.
+- PR #5 merged: H1 (CI signing secrets) resolved — a dedicated release keystore is now configured as GitHub Actions secrets on this repo; CI release builds are properly signed instead of silently falling back to the shared Android debug keystore. The "Fork limitation" note further down about missing `KEYSTORE` secrets is now stale/resolved.
+- PR #7 merged: `BootRetryWorker`'s 5-attempt cap was removed — it now retries indefinitely (WorkManager's own exponential backoff, capped ~5h/attempt), re-checking the start-on-boot setting on every attempt. The 2026-07-25 entry below describing "max 5 attempts" reflects that update's state at the time, not current behavior.
+- PR #6 reconciled H3/M2 as resolved based on the state as of 2026-07-31 17:10 UTC; PR #7 (2026-07-31 22:18 UTC) changed H3's behavior again afterward (see above) — noting here so this doesn't go stale a second time.
 
 ## 2026-07-25 update
 
@@ -16,7 +23,7 @@ Current release: **v13.7.0-thedjchi+stayturgid-release17** published; native-lib
 - **Fork:** `djbclark/Shizuku` (fork of `thedjchi/Shizuku`, which is itself a fork of `RikkaApps/Shizuku`)
 - **Base:** `v13.7.0-thedjchi` (upstream release tag)
 - **Branch:** `master` (force-pushed regularly — single-developer workflow)
-- **Purpose:** Add fleet/headless automation primitives for the [stayturgid](https://github.com/djbclark/stayturgid) project — a fleet of Android devices (Samsung S24, Pixel 7a, Fire HD8) running AutoJs6 + Shizuku.
+- **Purpose:** Add fleet/headless automation primitives for the [stayturgid](https://github.com/djbclark/stayturgid) project — a fleet of Android devices (Samsung S24, Pixel 7a, Fire HD8) running stayturgid's native Kotlin agent (`device/native-agent/`) + Shizuku. (Earlier in this fork's history the fleet ran AutoJs6 + Shizuku; AutoJs6 was retired fleet-wide in favor of the native agent.)
 
 ---
 
@@ -79,7 +86,8 @@ sed -E 's/^shizuku-(.*[-.](debug[0-9]+|release[0-9]+))-[^.]+\.apk/\1/'
 
 | Tag | APK | Changes |
 |---|---|---|
-| `v13.7.0-thedjchi+stayturgid-release15` | `shizuku-v13.7.0-thedjchi+stayturgid-release15-universal.apk` | **Current.** HeadlessLogger everywhere (AdbStartWorker, state machine, ProvisionAuth). Complete boot→running traceability. |
+| `v13.7.0-thedjchi+stayturgid-release25` | `shizuku-v13.7.0-thedjchi+stayturgid-release25-universal.apk` | **Current.** BootRetryWorker retries indefinitely instead of capping at 5 attempts (#7); widened post-tcpip reconnect window; signing-cert trust allowlist for silent grant loss (#4); CI release signing secrets configured, H1 resolved (#5); idempotent tag/release creation in CI (#9). |
+| `v13.7.0-thedjchi+stayturgid-release15` | `shizuku-v13.7.0-thedjchi+stayturgid-release15-universal.apk` | HeadlessLogger everywhere (AdbStartWorker, state machine, ProvisionAuth). Complete boot→running traceability. |
 | `v13.7.0-thedjchi+stayturgid-release13` | `shizuku-v13.7.0-thedjchi+stayturgid-release13-universal.apk` | HeadlessLogger, setResult feedback, boot retry, API docs. |
 | `v13.7.0-thedjchi+stayturgid-release11` | `shizuku-v13.7.0-thedjchi+stayturgid-release11-universal.apk` | Build metadata format (`+`). versionCode > 1380. |
 | `v13.7.0-thedjchi-stayturgid-release10` | `shizuku-v13.7.0-thedjchi-stayturgid-release10-universal.apk` | UNKNOWN launch mode treated as ADB. |
@@ -138,6 +146,18 @@ Default profile bundled at `assets/fleet_profile_default.json`.
 
 Shell/root callers and apps holding `START_STOP_SERVER` permission skip the auth token check.
 
+### Trusted signer allowlist (`ShizukuConfigManager.java`)
+
+Added 2026-07-31 (PR #4) to work around a silent-grant-loss bug: `ShizukuConfigManager`'s
+constructor reconciles persisted per-app grants against currently-installed packages on
+every server start, and can silently drop a UID's grant on a transient package-set read
+mismatch — hit in production against `org.stayturgid.agent` (grant reset to "Authorized 0
+applications" from nothing more than a local `shizuku_server` restart). `find(uid)` now
+checks a hardcoded allowlist of trusted APK signing-certificate SHA-256 fingerprints
+before consulting the persisted config, returning a synthetic always-allowed entry on a
+match. Full rationale (including why "trust whoever signed the running Shizuku build" was
+rejected) in `docs/trusted-signer-allowlist.md`.
+
 ### HeadlessLogger (`HeadlessLogger.kt`)
 
 File + logcat logger for all headless operations. Writes to
@@ -149,7 +169,12 @@ Also logged to `logcat -s ShizukuHeadless`.
 
 WorkManager worker scheduled by `BootCompleteReceiver` with 30s delay and
 `NOT_ROAMING` network constraint. Addresses slow WiFi startups where Shizuku
-fails at boot but WiFi comes up seconds later.
+fails at boot but WiFi comes up seconds later. Retries indefinitely (no
+attempt cap since PR #7, 2026-07-31) via WorkManager's own exponential
+backoff (capped ~5h/attempt) — a device blocked on a human action at boot
+(FBE unlock, new-network authorization) may not get attention for hours or
+days, so giving up permanently after a handful of quick retries meant
+Shizuku would never try again until the next full reboot.
 
 ### Direct ADB start in `AdbStarter.kt`
 
@@ -167,9 +192,11 @@ Inherited from upstream, modified:
 - `debug=true` → `assembleDebug`, uploads artifact (no signing needed)
 - `debug=false` → `assembleRelease`, creates published GitHub Release (requires `KEYSTORE` secrets)
 
-**Fork limitation:** `KEYSTORE` secrets not configured → CI release builds fail.
-Manual builds use debug keystore fallback. To enable CI releases:
-Settings → Secrets → Actions: `KEYSTORE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD`
+**Resolved 2026-07-31 (H1, PR #5):** `KEYSTORE`/`KEYSTORE_PASSWORD`/`KEYSTORE_ALIAS`/`KEYSTORE_ALIAS_PASSWORD`
+are now configured as GitHub Actions secrets on this repo (dedicated release keystore,
+independent of stayturgid-agent's own signing key; backed up in 1Password + secretspec,
+see `secretspec.toml`). CI release builds are signed properly instead of falling back to
+the shared Android debug keystore. Verified via a real `workflow_dispatch` run.
 
 ### HeadlessLogger
 
@@ -214,7 +241,7 @@ ls manager/build/outputs/apk/release/
 
 4. **Samsung process freezer** — Samsung's battery optimization freezes the broadcast receiver on first install. Requires opening the Shizuku app and tapping "Start" once. After that, `HEADLESS_*` broadcasts work and persist across reboots.
 
-5. **Fleet profile vs stayturgid needs** — stayturgid configures AutoJs6 settings (not Shizuku settings) via AutoJs6's fleet profile. Shizuku's fleet profile is for initial provisioning, not ongoing operations.
+5. **Fleet profile vs stayturgid needs** — historically stayturgid configured AutoJs6 settings (not Shizuku settings) via AutoJs6's fleet profile; AutoJs6 has since been retired fleet-wide in favor of the native agent (`device/native-agent/`), which now owns ongoing operational configuration directly rather than through a fleet-profile JSON. Shizuku's own fleet profile remains for initial provisioning only, not ongoing operations.
 
 ---
 
@@ -222,12 +249,16 @@ ls manager/build/outputs/apk/release/
 
 | Issue | Details |
 |---|---|
-| Fork CI can't sign release APKs | `KEYSTORE` secrets not configured (requires human). Manual builds use debug keystore. |
 | Samsung process freezer | First boot after install: broadcast receiver frozen until app launched once. Device issue, no code fix. |
 | FleetProfileApplier limited | Only covers 8 Shizuku settings. Not tested on real device. |
 | mDNS port discovery | Headless start uses configured TCP port directly; if ADB picked a different port, connection fails silently. |
-| PROVISION_AUTH ↔ shizuku.json | Two parallel auth mechanisms. stayturgid patches `/data/local/tmp/shizuku/shizuku.json`; PROVISION_AUTH writes to SharedPreferences. Unbridgeable from app process (different privilege levels). |
 | No upstream sync strategy | If `thedjchi/Shizuku` releases v13.8.0, this fork needs manual rebase. No automation. |
+
+Resolved since this table was last pruned: "Fork CI can't sign release APKs" (H1, PR #5,
+2026-07-31 — CI signing secrets now configured) and "PROVISION_AUTH ↔ shizuku.json two
+parallel auth mechanisms" (M2, resolved 2026-07-31 — the premise was wrong; see
+`OPTIONS.md`'s Resolved table for the full explanation, fixed stayturgid-side in
+stayturgid PR #164, no fork-side code change needed).
 
 ---
 
