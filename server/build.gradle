@@ -1,6 +1,6 @@
 plugins {
     id "com.android.library"
-    id "org.jetbrains.kotlin.android"
+    // AGP 9 built-in Kotlin — do not apply org.jetbrains.kotlin.android
     id "dev.rikka.tools.refine"
 }
 
@@ -12,8 +12,12 @@ android {
     defaultConfig {
         buildConfigField "String", "MANAGER_APPLICATION_ID", "\"${project(':manager').android.defaultConfig.applicationId}\""
     }
-    kotlinOptions {
-        jvmTarget = "21"
+}
+
+// AGP 9 built-in Kotlin: android.kotlinOptions moved to kotlin.compilerOptions
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
     }
 }
 

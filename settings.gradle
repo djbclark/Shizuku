@@ -8,10 +8,11 @@ pluginManagement {
         }
     }
     plugins {
-        id "com.android.application" version "8.11.1"
-        id "com.android.library" version "8.11.1"
-        id "org.jetbrains.kotlin.android" version "2.2.20"
-        id "org.jetbrains.kotlin.plugin.serialization" version "2.2.20"
+        id "com.android.application" version "9.2.1"
+        id "com.android.library" version "9.2.1"
+        // Kotlin Android plugin removed: AGP 9 has built-in Kotlin (embeds KGP ~2.2.10).
+        // Keep the serialization compiler plugin (still applied on :manager).
+        id "org.jetbrains.kotlin.plugin.serialization" version "2.2.10"
         id "dev.rikka.tools.autoresconfig" version "1.2.2"
         id "dev.rikka.tools.materialthemebuilder" version "1.5.1"
         id "dev.rikka.tools.refine" version "4.4.0"
@@ -33,14 +34,27 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         libs {
+            // Match api/gradle/libs.versions.toml so submodule modules that use
+            // alias(libs.plugins.*) / libs.androidx.* resolve against this root catalog.
+            version("agp", "9.2.1")
+            version("androidx-annotation", "1.10.0")
+            version("androidx-core", "1.18.0")
             version("hidden-api", "4.4.0")
+            version("refine", "4.4.0")
+
+            library("androidx-annotation", "androidx.annotation", "annotation").versionRef("androidx-annotation")
+            library("androidx-core", "androidx.core", "core").versionRef("androidx-core")
+
             library("hidden-compat", "dev.rikka.hidden", "compat").versionRef("hidden-api")
             library("hidden-stub", "dev.rikka.hidden", "stub").versionRef("hidden-api")
 
-            version("refine", "4.4.0")
             library("refine-runtime", "dev.rikka.tools.refine", "runtime").versionRef("refine")
             library("refine-annotation", "dev.rikka.tools.refine", "annotation").versionRef("refine")
             library("refine-annotation-processor", "dev.rikka.tools.refine", "annotation-processor").versionRef("refine")
+
+            plugin("android-library", "com.android.library").versionRef("agp")
+            plugin("android-application", "com.android.application").versionRef("agp")
+            plugin("rikka-refine", "dev.rikka.tools.refine").versionRef("refine")
         }
     }
 }
