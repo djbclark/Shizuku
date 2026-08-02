@@ -61,6 +61,15 @@
 -keep public interface android.content.res.XmlResourceParser { *; }
 -keep public interface org.xmlpull.v1.** { *; }
 
+# WorkManager's Room-generated WorkDatabase_Impl is only reached via reflection
+# (Class.getDeclaredConstructor()), so R8 has no direct-call evidence it's needed
+# and strips its no-arg constructor -- crashes every release-build launch with
+# NoSuchMethodException: androidx.work.impl.WorkDatabase_Impl.<init> [].
+# Surfaced by the AGP 9 migration (release build had never actually been
+# launched on-device post-migration until now, only build-verified). Standard
+# fix for this well-known Room+R8 class of bug: keep all RoomDatabase subclasses.
+-keep class * extends androidx.room.RoomDatabase { *; }
+
 -allowaccessmodification
 -repackageclasses rikka.shizuku
 -keepattributes SourceFile,LineNumberTable
