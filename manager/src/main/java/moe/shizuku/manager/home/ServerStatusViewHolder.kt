@@ -50,7 +50,7 @@ class ServerStatusViewHolder(private val binding: HomeServerStatusBinding, root:
             context.getString(R.string.home_status_service_not_running, context.getString(R.string.app_name))
         }
         val summary = if (ok) {
-            if (apiVersion != Shizuku.getLatestServiceVersion() || status.patchVersion != ShizukuApiConstants.SERVER_PATCH_VERSION) {
+            val protocolLine = if (apiVersion != Shizuku.getLatestServiceVersion() || status.patchVersion != ShizukuApiConstants.SERVER_PATCH_VERSION) {
                 context.getString(
                     R.string.home_status_service_version_update, user,
                     "${apiVersion}.${patchVersion}",
@@ -58,6 +58,21 @@ class ServerStatusViewHolder(private val binding: HomeServerStatusBinding, root:
                 )
             } else {
                 context.getString(R.string.home_status_service_version, user, "${apiVersion}.${patchVersion}")
+            }
+            // The protocol version above identifies the client<->server wire
+            // protocol and rarely changes; it's not this app's own build, which
+            // is easy to conflate since both are just version-looking numbers.
+            // Surface the real package versionName alongside it so "which build
+            // is this" doesn't require a trip to Android's App Info screen.
+            val buildVersion = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                null
+            }
+            if (!buildVersion.isNullOrEmpty()) {
+                "$protocolLine<br>" + context.getString(R.string.home_status_build_version, buildVersion)
+            } else {
+                protocolLine
             }
         } else {
             ""
