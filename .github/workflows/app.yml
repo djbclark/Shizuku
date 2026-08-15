@@ -30,6 +30,7 @@ jobs:
     outputs:
       versionName: ${{ steps.buildWithGradle.outputs.versionName }}
       artifactName: ${{ steps.buildWithGradle.outputs.artifactName }}
+      builtSha: ${{ steps.builtSha.outputs.sha }}
 
     steps:
       - name: Checkout
@@ -38,6 +39,16 @@ jobs:
           ref: ${{ inputs.prerelease && 'beta' || 'master' }}
           submodules: 'recursive'
           fetch-depth: 0
+
+      # This job checks out a BRANCH, which is a moving pointer resolved at
+      # checkout time — not github.sha, which is frozen when the run is queued.
+      # A commit landing in that window makes the two disagree, so record what
+      # was actually built and let the release job tag exactly that. Without
+      # this the tag names one commit while the APK inside it came from
+      # another, and every check still passes.
+      - name: Record built commit
+        id: builtSha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -131,11 +142,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          # Check out the exact commit the build job built, not this run's
+          # frozen github.sha. versionName is derived from that tree's commit
+          # count, so the tag has to land on the same tree or the version
+          # number and the tagged commit describe different things.
+          ref: ${{ needs.build.outputs.builtSha }}
           fetch-depth: 0
 
       - name: Create Release Tag
+        env:
+          VERSION: ${{ needs.build.outputs.versionName }}
+          BUILT_SHA_IN: ${{ needs.build.outputs.builtSha }}
         run: |
-          VERSION="${{ needs.build.outputs.versionName }}"
+          BUILT_SHA="$BUILT_SHA_IN"
+          # An empty ref: silently falls back to github.sha -- the original
+          # bug -- so refuse rather than tag a commit that may not be ours.
+          if [ -z "$BUILT_SHA" ]; then
+            echo "::error::build job did not report builtSha; refusing to tag a commit that may not be the built one."
+            exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # versionName is derived from git commit count, so a manual
@@ -145,7 +170,23 @@ jobs:
           # otherwise kills the whole workflow. Idempotent: skip rather
           # than fail when it's already there.
           if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists on origin — skipping."
+            # Skipping is only safe if the existing tag already names the tree
+            # we just built. versionName is a commit COUNT, so a re-dispatch
+            # after a revert -- or after an earlier run mis-tagged -- can
+            # recompute a name that exists on a DIFFERENT commit. Silently
+            # skipping there would attach this run's APK to that tag and
+            # reproduce exactly the mismatch this job exists to prevent.
+            git fetch --quiet origin "refs/tags/$VERSION:refs/tags/$VERSION" 2>/dev/null || true
+            EXISTING="$(git rev-parse -q --verify "refs/tags/$VERSION^{commit}" || true)"
+            if [ -z "$EXISTING" ]; then
+              echo "::error::tag $VERSION exists on origin but could not be resolved locally; refusing to continue."
+              exit 1
+            fi
+            if [ "$EXISTING" != "$BUILT_SHA" ]; then
+              echo "::error::tag $VERSION already exists on $EXISTING but this run built $BUILT_SHA. Refusing to attach these artifacts to a tag naming a different commit."
+              exit 1
+            fi
+            echo "Tag $VERSION already exists on origin at the built commit — skipping."
           else
             git tag "$VERSION" -m "Release version $VERSION"
             git push origin "$VERSION"
@@ -161,11 +202,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ needs.build.outputs.versionName }}
+          BUILT_SHA: ${{ needs.build.outputs.builtSha }}
         run: |
           FLAGS="--draft"
           [ "${{ inputs.prerelease }}" = "true" ] && FLAGS="$FLAGS --prerelease"
           if gh release view "$RELEASE_VERSION" >/dev/null 2>&1; then
             echo "Release $RELEASE_VERSION already exists — skipping."
           else
-            gh release create "$RELEASE_VERSION" files/*.apk $FLAGS
+            # --target pins the Release object to the built commit. Without it
+            # the object records target_commitish "master", and because a DRAFT
+            # does not create its tag until publication, deleting the git tag
+            # before publishing would make GitHub create it at master's tip at
+            # publish time -- the same mismatch one layer up.
+            gh release create "$RELEASE_VERSION" files/*.apk $FLAGS --target "$BUILT_SHA"
           fi
