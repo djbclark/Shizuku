@@ -230,7 +230,7 @@ This Shizuku fork and all of its features will always be free, and there will ne
 ## 📱 Developer Guide
 
 ### API & Demo Project
-The API guide and a demo project are available in the [Shizuku-API](https://github.com/thedjchi/Shizuku-API) repository
+The API guide and a demo project are available in the [Shizuku-API](https://github.com/frdminc/Shizuku-API) repository
 
 ### Notes
 
