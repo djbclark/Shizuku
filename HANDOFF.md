@@ -20,7 +20,7 @@ Current release: **v13.7.0-thedjchi+stayturgid-release25** published. Since rele
 
 ## Repository
 
-- **Fork:** `djbclark/Shizuku` (fork of `thedjchi/Shizuku`, which is itself a fork of `RikkaApps/Shizuku`)
+- **Fork:** `frdminc/Shizuku` (fork of `thedjchi/Shizuku`, which is itself a fork of `RikkaApps/Shizuku`)
 - **Base:** `v13.7.0-thedjchi` (upstream release tag)
 - **Branch:** `master` (force-pushed regularly — single-developer workflow)
 - **Purpose:** Add fleet/headless automation primitives for the [stayturgid](https://github.com/djbclark/stayturgid) project — a fleet of Android devices (Samsung S24, Pixel 7a, Fire HD8) running stayturgid's native Kotlin agent (`device/native-agent/`) + Shizuku. (Earlier in this fork's history the fleet ran AutoJs6 + Shizuku; AutoJs6 was retired fleet-wide in favor of the native agent.)
@@ -269,7 +269,7 @@ stayturgid PR #164, no fork-side code change needed).
 JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.11 ./gradlew :manager:assembleRelease
 
 # Upload to GitHub
-gh release create v13.7.0-thedjchi+stayturgid-release<N> out/apk/*.apk --repo djbclark/Shizuku
+gh release create v13.7.0-thedjchi+stayturgid-release<N> out/apk/*.apk --repo frdminc/Shizuku
 
 # On device: start Shizuku headlessly
 adb shell am broadcast -a moe.shizuku.privileged.api.HEADLESS_START moe.shizuku.privileged.api

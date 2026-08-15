@@ -22,7 +22,7 @@ An Android app that allows other apps to use system-level APIs that require ADB/
 
 ## ⚠️ Disclaimer
 
-This is a **FORK** of Shizuku maintained at [djbclark/Shizuku](https://github.com/djbclark/Shizuku). If you are looking for the original version, please visit the [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku) repository. The fork is developed as part of the author's [stayturgid](https://github.com/djbclark/stayturgid) Android fleet tooling, while remaining a separately released Shizuku distribution.
+This is a **FORK** of Shizuku maintained at [frdminc/Shizuku](https://github.com/frdminc/Shizuku). If you are looking for the original version, please visit the [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku) repository. The fork is developed as part of the author's [stayturgid](https://github.com/djbclark/stayturgid) Android fleet tooling, while remaining a separately released Shizuku distribution.
 
 ## 🔧 Fork-specific changes
 
@@ -34,7 +34,7 @@ Compared with the upstream base, this fork adds and maintains:
 * **Device and release support:** Fire OS notification/native-library fixes, reproducible fork APK naming, dedicated CI release-signing configuration, and an AGP 9.2.1/Gradle 9.4.1 migration that keeps the API submodule buildable.
 * **Operator documentation:** [`HANDOFF.md`](HANDOFF.md) and [`OPTIONS.md`](OPTIONS.md) record the fork's release, fleet, compatibility, and unresolved-work state.
 
-The fork's changes are intentionally separate from upstream Shizuku's release cadence. See the merged [fork pull requests](https://github.com/djbclark/Shizuku/pulls?q=is%3Apr+is%3Amerged) and the [stayturgid project](https://github.com/djbclark/stayturgid) for implementation and deployment context.
+The fork's changes are intentionally separate from upstream Shizuku's release cadence. See the merged [fork pull requests](https://github.com/frdminc/Shizuku/pulls?q=is%3Apr+is%3Amerged) and the [stayturgid project](https://github.com/djbclark/stayturgid) for implementation and deployment context.
 
 ## ⬇️ Download
 
